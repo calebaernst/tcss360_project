@@ -443,6 +443,7 @@ parameters/Idle/blend_position = Vector2(0, 0.960159)
 parameters/Walk/blend_position = Vector2(0.0047847, 0.746575)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+show_behind_parent = true
 position = Vector2(0, 4)
 scale = Vector2(0.7, 0.7)
 shape = SubResource("CircleShape2D_qlg0r")

@@ -504,25 +504,37 @@ tile_set = SubResource("TileSet_nlxyl")
 [node name="NorthDoor" type="Area2D" parent="Doors"]
 
 [node name="NorthDoorHitbox" type="CollisionShape2D" parent="Doors/NorthDoor"]
-position = Vector2(0, -61)
+position = Vector2(0, -65)
 shape = SubResource("RectangleShape2D_mym6t")
 
 [node name="SouthDoor" type="Area2D" parent="Doors"]
 
 [node name="SouthDoorHitbox" type="CollisionShape2D" parent="Doors/SouthDoor"]
-position = Vector2(0, 60)
+position = Vector2(0, 65)
 shape = SubResource("RectangleShape2D_mym6t")
 
 [node name="EastDoor" type="Area2D" parent="Doors"]
 
 [node name="EastDoorHitbox" type="CollisionShape2D" parent="Doors/EastDoor"]
-position = Vector2(109, 0)
+position = Vector2(113, 0)
 shape = SubResource("RectangleShape2D_mym6t")
 
 [node name="WestDoor" type="Area2D" parent="Doors"]
 
 [node name="WestDoorHitbox" type="CollisionShape2D" parent="Doors/WestDoor"]
-position = Vector2(-109, 0)
+position = Vector2(-113, 0)
 shape = SubResource("RectangleShape2D_mym6t")
 
 [node name="EntryPoints" type="Node2D" parent="."]
+
+[node name="FromNorth" type="Marker2D" parent="EntryPoints"]
+position = Vector2(0, -38)
+
+[node name="FromSouth" type="Marker2D" parent="EntryPoints"]
+position = Vector2(0, 38)
+
+[node name="FromEast" type="Marker2D" parent="EntryPoints"]
+position = Vector2(86, 0)
+
+[node name="FromWest" type="Marker2D" parent="EntryPoints"]
+position = Vector2(-86, 0)
