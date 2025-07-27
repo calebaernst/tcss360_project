@@ -17,6 +17,7 @@ var mazeRooms: Array = []
 # keep track of the current room coordinates of the player
 var currentRoomX: int = 0
 var currentRoomY: int = 0
+var doorCooldown: bool = true
  
 func _ready():
 	prepareMazeArray()
@@ -30,7 +31,7 @@ func prepareMazeArray():
 		var column: Array = [] # reinitialize the column array on each loop to prevent cells from pointing at the same array
 		for y in range(mazeHeight):
 			var thisRoom = prepareRoom(x,y)
-			print("prepared room at ", x, ",", y, " with tiles: ", thisRoom["tileData"].size())
+			print("prepared room at ", x, ",", y)
 			column.append(thisRoom)
 		mazeRooms.append(column)
 
@@ -84,8 +85,21 @@ func loadRoom():
 		var door = doors.get_node(doorName)
 		door.connect("body_entered", Callable(self, "doorTouched").bind(doorName))
 
-func doorTouched(doorName: String, body: Node):
+# so apparently collision detection works a lot like that propertychangeevent stuff but it's much less flexible so we need a helper method to even catch it
+func doorTouched(body: Node, doorName: String):
+	# is it the player or is it a rock?
+	if body != playerNode:
+		return
+	# prevent pingpong effect
+	if not doorCooldown:
+		return
+	
+	doorCooldown = false
 	moveRooms(doorName)
+	get_tree().create_timer(0.5).timeout.connect(enableDoors)
+# just resets the door cooldown
+func enableDoors():
+	doorCooldown = true
 
 # move the player to another room when they go through a door
 func moveRooms(doorName: String):
@@ -93,10 +107,10 @@ func moveRooms(doorName: String):
 	# match is literally just a switch statement
 	match doorName:
 		"NorthDoor":
-			currentRoomY -= 1
+			currentRoomY += 1
 			enteringFrom = "FromSouth"
 		"SouthDoor":
-			currentRoomY += 1
+			currentRoomY -= 1
 			enteringFrom = "FromNorth"
 		"EastDoor":
 			currentRoomX += 1

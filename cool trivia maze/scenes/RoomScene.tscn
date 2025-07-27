@@ -525,16 +525,16 @@ shape = SubResource("RectangleShape2D_mym6t")
 position = Vector2(-113, 0)
 shape = SubResource("RectangleShape2D_mym6t")
 
-[node name="EntryPoints" type="Node2D" parent="."]
+[node name="EntryPoint" type="Node2D" parent="."]
 
-[node name="FromNorth" type="Marker2D" parent="EntryPoints"]
+[node name="FromNorth" type="Marker2D" parent="EntryPoint"]
 position = Vector2(0, -38)
 
-[node name="FromSouth" type="Marker2D" parent="EntryPoints"]
+[node name="FromSouth" type="Marker2D" parent="EntryPoint"]
 position = Vector2(0, 38)
 
-[node name="FromEast" type="Marker2D" parent="EntryPoints"]
+[node name="FromEast" type="Marker2D" parent="EntryPoint"]
 position = Vector2(86, 0)
 
-[node name="FromWest" type="Marker2D" parent="EntryPoints"]
+[node name="FromWest" type="Marker2D" parent="EntryPoint"]
 position = Vector2(-86, 0)
