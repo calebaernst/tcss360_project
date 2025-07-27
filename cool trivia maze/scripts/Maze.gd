@@ -96,7 +96,7 @@ func doorTouched(body: Node, doorName: String):
 	
 	doorCooldown = false
 	moveRooms(doorName)
-	get_tree().create_timer(0.5).timeout.connect(enableDoors)
+	get_tree().create_timer(0.25).timeout.connect(enableDoors)
 # just resets the door cooldown
 func enableDoors():
 	doorCooldown = true
