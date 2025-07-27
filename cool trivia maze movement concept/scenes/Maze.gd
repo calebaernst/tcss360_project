@@ -10,6 +10,11 @@ var currentRoomX: int = 0
 var currentRoomY: int = 0
 # TODO: if able, add a timer here (only to be active in hard mode)
  
+func _ready():
+	prepareMazeArray()
+	startingRoom()
+	roomCoordsDebug()
+
 func prepareMazeArray():
 	for x in range(mazeWidth):
 		var column: Array = [] # reinitialize the column array on each loop to prevent cells from pointing at the same array
@@ -24,6 +29,15 @@ func prepareRoom(x: int, y: int):
 		"northDoor": y < mazeHeight - 1,
 		"southDoor": y > 0,
 		"eastDoor": x < mazeWidth - 1,
-		"westDoor": x > 0
+		"westDoor": x > 0,
+		"tilemap": "Room1"
 	}
 	return room
+
+func startingRoom(): 
+	currentRoomX = mazeWidth / 2 + 1
+	currentRoomY = mazeHeight / 2 + 1
+
+func roomCoordsDebug():
+	print(currentRoomX, ",", currentRoomY)
+	
