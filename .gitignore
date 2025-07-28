@@ -3,3 +3,8 @@
 /android/
 .vscode/settings.json
 tcss360_project/
+*.so
+*.a
+*.dylib
+addons/godot-sqlite/bin/
+temp-assets/
