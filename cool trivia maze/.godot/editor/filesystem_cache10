@@ -1,0 +1,45 @@
+ea4bc82a6ad023ab7ee23ee620429895
+::res://::1753745193
+icon.svg::CompressedTexture2D::449890088685364612::1753745147::1753745195::1::::<><><>0<>0<>20fc984b37ae6ab686d0764b2f03a7f8<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
+::res://addons/::1753745147
+::res://addons/godot-sqlite/::1753745147
+gdsqlite.gdextension::GDExtension::4837341577405836572::1753745147::0::1::::<><><>0<>0<><>::
+godot-sqlite.gd::GDScript::6354497535622739150::1753745147::0::1::::<>EditorPlugin<><>0<>1<><>::
+LICENSE.md::TextFile::-1::1753745147::0::1::::<><><>0<>0<><>::
+plugin.cfg::TextFile::-1::1753745147::0::1::::<><><>0<>0<><>::
+::res://addons/godot-sqlite/bin/::1753745194
+::res://addons/godot-sqlite/bin/libgdsqlite.ios.template_debug.xcframework/::1753745147
+::res://addons/godot-sqlite/bin/libgdsqlite.ios.template_debug.xcframework/ios-arm64/::1753745147
+::res://addons/godot-sqlite/bin/libgdsqlite.ios.template_debug.xcframework/ios-arm64_x86_64-simulator/::1753745147
+::res://addons/godot-sqlite/bin/libgdsqlite.ios.template_release.xcframework/::1753745147
+::res://addons/godot-sqlite/bin/libgdsqlite.ios.template_release.xcframework/ios-arm64/::1753745147
+::res://addons/godot-sqlite/bin/libgdsqlite.ios.template_release.xcframework/ios-arm64_x86_64-simulator/::1753745147
+::res://addons/godot-sqlite/bin/libgdsqlite.macos.template_debug.framework/::1753745147
+::res://addons/godot-sqlite/bin/libgdsqlite.macos.template_debug.framework/Resources/::1753745147
+::res://addons/godot-sqlite/bin/libgdsqlite.macos.template_release.framework/::1753745147
+::res://addons/godot-sqlite/bin/libgdsqlite.macos.template_release.framework/Resources/::1753745147
+::res://addons/godot-sqlite/bin/libgodot-cpp.ios.template_debug.xcframework/::1753745147
+::res://addons/godot-sqlite/bin/libgodot-cpp.ios.template_debug.xcframework/ios-arm64/::1753745147
+::res://addons/godot-sqlite/bin/libgodot-cpp.ios.template_release.xcframework/::1753745147
+::res://addons/godot-sqlite/bin/libgodot-cpp.ios.template_release.xcframework/ios-arm64/::1753745147
+::res://scenes/::1753745147
+cool_trivia_maze.tscn::PackedScene::861903811887575636::1753745147::0::1::::<><><>0<>0<><>::uid://gjg50ur87hop::::res://scripts/Maze.gd<>uid://cgd3tfgbf8qsk::::res://scenes/player.tscn
+player.tscn::PackedScene::5201901840297240230::1753745147::0::1::::<><><>0<>0<><>::uid://b3hsgljubhyqx::::res://scripts/player.gd<>uid://f85jc8l8rk37::::res://temp-assets/Small-8-Direction-Characters_by_AxulArt/Small-8-Direction-Characters_by_AxulArt.png
+RoomScene.tscn::PackedScene::5825654205119487346::1753745147::0::1::::<><><>0<>0<><>::uid://chf1baqwe0ywc::::res://temp-assets/temp-tilemap.tres<>uid://buvd3jsgnqdtp::::res://temp-assets/cave_/cave_.png<>uid://bk5817d4pucgb::::res://temp-assets/cave_/cave_ [resources].png
+::res://scripts/::1753745147
+Maze.gd::GDScript::440131682186087479::1753745147::0::1::::<>Node2D<><>0<>0<><>::
+player.gd::GDScript::4367263163040091551::1753745147::0::1::::Player<>CharacterBody2D<><>0<>0<><>::
+::res://temp-assets/::1753745147
+temp-tilemap.tres::TileSet::5276065614951367062::1753745147::0::1::::<><><>0<>0<><>::uid://buvd3jsgnqdtp::::res://temp-assets/cave_/cave_.png
+::res://temp-assets/cave_/::1753745147
+cave_ [bridgeAnimatedTiles].png::CompressedTexture2D::4982437569011356110::1753745147::1753745195::1::::<><><>0<>0<>40132b4e4e1f5b00247774cb9a8c8fb3<>res://.godot/imported/cave_ [bridgeAnimatedTiles].png-edcb970a18d8d11a765eb53fc1e2b60c.ctex::
+cave_ [bridgeHorizontal].png::CompressedTexture2D::5253133902748158955::1753745147::1753745195::1::::<><><>0<>0<>88e56ab084dd20740c50553eb17170a7<>res://.godot/imported/cave_ [bridgeHorizontal].png-d444fd2544cad4391ce189744ba45b94.ctex::
+cave_ [bridgeVertical].png::CompressedTexture2D::3653067907753624729::1753745147::1753745195::1::::<><><>0<>0<>3324a91dfd508be7742d52da7845e6f8<>res://.godot/imported/cave_ [bridgeVertical].png-5b2b09a6c24d295cbd81a7806c4e857f.ctex::
+cave_ [fencesAndWalls].png::CompressedTexture2D::6974780968274775584::1753745147::1753745195::1::::<><><>0<>0<>995877991ebe774196c17613516efdaa<>res://.godot/imported/cave_ [fencesAndWalls].png-280f9972fef3abcedd4adf865e5977bf.ctex::
+cave_ [fountain].png::CompressedTexture2D::1288918006036085395::1753745147::1753745195::1::::<><><>0<>0<>40c3167938d9dad7f54854c8d4ba1b8a<>res://.godot/imported/cave_ [fountain].png-368bd30ac1c6ca8c9d083844ba750096.ctex::
+cave_ [resources].png::CompressedTexture2D::3152292230818117573::1753745147::1753745195::1::::<><><>0<>0<>d4377bd26d396f1a4204fc717e97d88b<>res://.godot/imported/cave_ [resources].png-e632c4ecc3695d676851115b992e7d1b.ctex::
+cave_.png::CompressedTexture2D::3833782143303889201::1753745147::1753745195::1::::<><><>0<>0<>f59e0477d0fdc203b13b8171a2efe8ed<>res://.godot/imported/cave_.png-1899662c0dcb54fab8a990a531bc5b90.ctex::
+railway_.png::CompressedTexture2D::4087548858356098156::1753745147::1753745195::1::::<><><>0<>0<>3e2b4e1c0acd0a7eb5ef2f8b941cb503<>res://.godot/imported/railway_.png-b1ed6b455ccea66386f70f03bd49220b.ctex::
+::res://temp-assets/Small-8-Direction-Characters_by_AxulArt/::1753745147
+license.txt::TextFile::-1::1753745147::0::1::::<><><>0<>0<><>::
+Small-8-Direction-Characters_by_AxulArt.png::CompressedTexture2D::420906422572087992::1753745147::1753745195::1::::<><><>0<>0<>985411b94fe7ed4bcbdeb1abe32dbe75<>res://.godot/imported/Small-8-Direction-Characters_by_AxulArt.png-69aac36a6530fe40a888fe8cbcd36063.ctex::
