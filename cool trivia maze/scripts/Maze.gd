@@ -18,13 +18,56 @@ var mazeRooms: Array = []
 var currentRoomX: int = 0
 var currentRoomY: int = 0
 var doorCooldown: bool = true
- 
+
+# Simple question system - make sure these are declared at class level
+var pendingDoor: String = ""
+var awaitingAnswer: bool = false
+
 func _ready():
 	prepareMazeArray()
 	setStartingRoom()
 	loadRoom()
 	roomCoordsDebug()
+	print(" CONTROLS ")
+	print("Press U to UNLOCK all doors in current room")
+	print("Press L to LOCK all doors in current room") 
+	print("Press SPACE to show current door lock states")
+	print("Press U to UNLOCK all doors in current room")
+	print("Press L to LOCK all doors in current room") 
+	print("Press SPACE to show current door lock states")
 
+func _input(event):
+	if event is InputEventKey and event.pressed:
+		match event.keycode:
+			KEY_U:
+				unlockAllDoors()
+			KEY_L:
+				lockAllDoors()
+			KEY_SPACE:
+				showDoorStates()
+
+func unlockAllDoors():
+	var room = mazeRooms[currentRoomX][currentRoomY]
+	for doorName in room["doorLocks"].keys():
+		room["doorLocks"][doorName] = false
+	print("ALL DOORS UNLOCKED in room (", currentRoomX, ",", currentRoomY, ")")
+	showDoorStates()
+
+func lockAllDoors():
+	var room = mazeRooms[currentRoomX][currentRoomY]
+	for doorName in room["doorLocks"].keys():
+		room["doorLocks"][doorName] = true
+	print("ALL DOORS LOCKED in room (", currentRoomX, ",", currentRoomY, ")")
+	showDoorStates()
+
+func showDoorStates():
+	var room = mazeRooms[currentRoomX][currentRoomY]
+	print("=== DOOR STATES ===")
+	for doorName in room["doorLocks"].keys():
+		var status = "LOCKED" if room["doorLocks"][doorName] else "UNLOCKED"
+		print(doorName, ": ", status)
+	print("===================")
+	
 # generate tiles and store their data in an array
 func prepareMazeArray():
 	for x in range(mazeWidth):
@@ -48,14 +91,35 @@ func prepareRoom(x: int, y: int):
 		"southDoor": y > 0,
 		"eastDoor": x < mazeWidth - 1,
 		"westDoor": x > 0,
-		"tileData": tileData
+		"tileData": tileData,
+		# Door lock states - all doors start locked except starting room
+		"doorLocks": {
+			"NorthDoor": true,
+			"SouthDoor": true,
+			"EastDoor": true,
+			"WestDoor": true
+		},
+		# Simple questions for each door
+		"doorQuestions": {
+			"NorthDoor": {"question": "What is 2 + 2?", "correct": 2, "options": ["1) 3", "2) 4", "3) 5", "4) 6"]},
+			"SouthDoor": {"question": "How many sides does a triangle have?", "correct": 1, "options": ["1) 3", "2) 4", "3) 5", "4) 6"]},
+			"EastDoor": {"question": "What is 3 x 3?", "correct": 3, "options": ["1) 6", "2) 8", "3) 9", "4) 12"]},
+			"WestDoor": {"question": "How many legs does a cat have?", "correct": 2, "options": ["1) 2", "2) 4", "3) 6", "4) 8"]}
+		}
 	}
 	return room
-
-# start the player in the middle-most room
+	
+# start the player in the middle-most room and unlock the starting doors
 func setStartingRoom(): 
-	currentRoomX = int(mazeWidth / 2) + 1
-	currentRoomY = int(mazeHeight / 2) + 1
+	currentRoomX = int(mazeWidth / 2)
+	currentRoomY = int(mazeHeight / 2)
+	
+	# Unlock doors in starting room
+	if currentRoomX < mazeRooms.size() and currentRoomY < mazeRooms[currentRoomX].size():
+		var startingRoom = mazeRooms[currentRoomX][currentRoomY]
+		for doorName in startingRoom["doorLocks"].keys():
+			startingRoom["doorLocks"][doorName] = false
+
 
 func getTileData(thisTileMap: TileMap):
 	var data: Array = []
@@ -79,6 +143,10 @@ func loadRoom():
 	var data = room["tileData"]
 	for cell in data:
 		tilemap.set_cell(0, cell["position"], cell["tileID"])
+	if currentRoomX == int(mazeWidth / 2) and currentRoomY == int(mazeHeight / 2):
+		print("UNLOCKING STARTING ROOM DOORS")
+		for doorName in room["doorLocks"].keys():
+			room["doorLocks"][doorName] = false
 	# add door hitbox detection
 	var doors = currentRoomInstance.get_node("Doors")
 	for doorName in ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]:
@@ -86,17 +154,86 @@ func loadRoom():
 		door.connect("body_entered", Callable(self, "doorTouched").bind(doorName))
 
 # so apparently collision detection works a lot like that propertychangeevent stuff but it's much less flexible so we need a helper method to even catch it
+# Door interaction - test version with lots of debug
 func doorTouched(body: Node, doorName: String):
-	# is it the player or is it a rock?
+	print(">>> DOOR TOUCHED: ", doorName, " by: ", body.name)
+	
+	# is it the player?
 	if body != playerNode:
-		return
-	# prevent pingpong effect
-	if not doorCooldown:
+		print(">>> Not the player, ignoring")
 		return
 	
-	doorCooldown = false
-	moveRooms(doorName)
-	get_tree().create_timer(0.25).timeout.connect(enableDoors)
+	# prevent pingpong effect
+	if not doorCooldown:
+		print(">>> Door cooldown active, ignoring")
+		return
+	
+	var room = mazeRooms[currentRoomX][currentRoomY]
+	var isLocked = room["doorLocks"][doorName]
+	
+	print(">>> Door ", doorName, " is: ", "LOCKED" if isLocked else "UNLOCKED")
+	
+	if isLocked:
+		print(">>> BLOCKED! Door is locked. Press U to unlock doors.")
+	else:
+		print(">>> SUCCESS! Going through door...")
+		
+		# Check if we can actually move in this direction
+		var canMove = false
+		match doorName:
+			"NorthDoor":
+				canMove = currentRoomY < mazeHeight - 1
+			"SouthDoor":
+				canMove = currentRoomY > 0
+			"EastDoor":
+				canMove = currentRoomX < mazeWidth - 1
+			"WestDoor":
+				canMove = currentRoomX > 0
+		
+		if canMove:
+			print(">>> Moving to new room...")
+			doorCooldown = false
+			moveRooms(doorName)
+			get_tree().create_timer(0.25).timeout.connect(enableDoors)
+		else:
+			print(">>> Can't move - at maze boundary!")
+
+
+## Show question in console (simple implementation)
+#func showQuestion(doorName: String, questionData: Dictionary):
+	#pendingDoor = doorName
+	#awaitingAnswer = true
+	#
+	#print("\n=== DOOR LOCKED ===")
+	#print("Question: " + questionData["question"])
+	#for option in questionData["options"]:
+		#print(option)
+	#print("Press the number key (1-4) for your answer")
+	#print("==================")
+
+# Check if answer is correct
+#func checkAnswer(answerNum: int):
+	#if not awaitingAnswer:
+		#return
+		#
+	#var room = mazeRooms[currentRoomX][currentRoomY]
+	#var questionData = room["doorQuestions"][pendingDoor]
+	#
+	#if answerNum == questionData["correct"]:
+		#print("✓ CORRECT! Door unlocked.")
+		## Unlock the door permanently
+		#room["doorLocks"][pendingDoor] = false
+		## Now go through the door
+		#doorCooldown = false
+		#moveRooms(pendingDoor)
+		#get_tree().create_timer(0.25).timeout.connect(enableDoors)
+	#else:
+		#print("✗ INCORRECT! Door remains locked.")
+	#
+	## Reset question state
+	#awaitingAnswer = false
+	#pendingDoor = ""
+
 # just resets the door cooldown
 func enableDoors():
 	doorCooldown = true
