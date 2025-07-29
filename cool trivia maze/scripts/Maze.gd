@@ -23,11 +23,16 @@ var doorCooldown: bool = true
 var pendingDoor: String = ""
 var awaitingAnswer: bool = false
 
+# On start
 func _ready():
 	prepareMazeArray()
 	setStartingRoom()
 	loadRoom()
 	roomCoordsDebug()
+	debugPrints()
+
+# Debug mode messages
+func debugPrints():
 	print(" CONTROLS ")
 	print("Press U to UNLOCK all doors in current room")
 	print("Press L to LOCK all doors in current room") 
@@ -36,6 +41,7 @@ func _ready():
 	print("Press L to LOCK all doors in current room") 
 	print("Press SPACE to show current door lock states")
 
+# Takes input from user
 func _input(event):
 	if event is InputEventKey and event.pressed:
 		match event.keycode:
@@ -46,6 +52,7 @@ func _input(event):
 			KEY_SPACE:
 				showDoorStates()
 
+# unlocks all doors in map
 func unlockAllDoors():
 	var room = mazeRooms[currentRoomX][currentRoomY]
 	for doorName in room["doorLocks"].keys():
@@ -53,6 +60,7 @@ func unlockAllDoors():
 	print("ALL DOORS UNLOCKED in room (", currentRoomX, ",", currentRoomY, ")")
 	showDoorStates()
 
+# 
 func lockAllDoors():
 	var room = mazeRooms[currentRoomX][currentRoomY]
 	for doorName in room["doorLocks"].keys():
@@ -60,6 +68,7 @@ func lockAllDoors():
 	print("ALL DOORS LOCKED in room (", currentRoomX, ",", currentRoomY, ")")
 	showDoorStates()
 
+# 
 func showDoorStates():
 	var room = mazeRooms[currentRoomX][currentRoomY]
 	print("=== DOOR STATES ===")
@@ -138,6 +147,7 @@ func loadRoom():
 	add_child(currentRoomInstance)
 	tilemap = currentRoomInstance.get_node("Room1")
 	tilemap.clear()
+	
 	# actually generate the room
 	var room = mazeRooms[currentRoomX][currentRoomY]
 	var data = room["tileData"]
