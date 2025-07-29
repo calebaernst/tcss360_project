@@ -1,0 +1,5 @@
+res://scenes/cool_trivia_maze.tscn
+res://temp-assets/temp-tilemap.tres
+res://scenes/RoomScene.tscn
+res://scenes/player.tscn
+res://scripts/Maze.gd
