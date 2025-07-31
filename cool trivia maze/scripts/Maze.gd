@@ -1,5 +1,8 @@
 extends Node2D
 
+@export var debugMode: bool = true
+@onready var debugConsole = get_parent().get_node("ConsoleDebug")
+
 # prepare assets to go (also makes debugging a little easier via inspector panel)
 @export var roomScene: PackedScene = preload("res://scenes/RoomScene.tscn")
 @export var player: NodePath
@@ -23,62 +26,18 @@ var pendingDoor: String = ""
 var awaitingAnswer: bool = false
 
 # On start
-func _ready():
+func _ready() -> void:
 	prepareMazeArray()
 	setStartingRoom()
 	loadRoom()
-	showPlayer()
-	roomCoordsDebug()
-	debugPrints()
-
-# Debug mode messages
-func debugPrints():
-	print(" CONTROLS ")
-	print("Press U to UNLOCK all doors in current room")
-	print("Press L to LOCK all doors in current room") 
-	print("Press SPACE to show current door lock states")
-	print("Press U to UNLOCK all doors in current room")
-	print("Press L to LOCK all doors in current room") 
-	print("Press SPACE to show current door lock states")
-
-# Takes input from user
-func _input(event):
-	if event is InputEventKey and event.pressed:
-		match event.keycode:
-			KEY_U:
-				unlockAllDoors()
-			KEY_L:
-				lockAllDoors()
-			KEY_SPACE:
-				showDoorStates()
-
-# unlocks all doors in map
-func unlockAllDoors():
-	var room = mazeRooms[currentRoomX][currentRoomY]
-	for doorName in room["doorLocks"].keys():
-		room["doorLocks"][doorName] = false
-	print("ALL DOORS UNLOCKED in room (", currentRoomX, ",", currentRoomY, ")")
-	showDoorStates()
-
-# 
-func lockAllDoors():
-	var room = mazeRooms[currentRoomX][currentRoomY]
-	for doorName in room["doorLocks"].keys():
-		room["doorLocks"][doorName] = true
-	print("ALL DOORS LOCKED in room (", currentRoomX, ",", currentRoomY, ")")
-	showDoorStates()
-
-# 
-func showDoorStates():
-	var room = mazeRooms[currentRoomX][currentRoomY]
-	print("=== DOOR STATES ===")
-	for doorName in room["doorLocks"].keys():
-		var status = "LOCKED" if room["doorLocks"][doorName] else "UNLOCKED"
-		print(doorName, ": ", status)
-	print("===================")
+	fixPlayerZ()
+	
+	debugConsole.roomCoordsDebug()
+	if debugMode:
+		debugConsole.debugPrints()
 
 ## generate maze rooms and store their data in an array
-func prepareMazeArray():
+func prepareMazeArray() -> void:
 	for x in range(mazeWidth):
 		var column: Array = [] # reinitialize the column array on each loop to prevent cells from pointing at the same array
 		for y in range(mazeHeight):
@@ -88,12 +47,9 @@ func prepareMazeArray():
 		mazeRooms.append(column)
 
 ## generates data for a single room (used in conjunction with prepareMazeArray)
-func prepareRoom(x: int, y: int):
-	var roomInstance = roomScene.instantiate()
+func prepareRoom(x: int, y: int) -> Dictionary:
 	# choose a layout for this room at random
-	var roomLayoutsNode = roomInstance.get_node("RoomLayouts")
-	var numLayouts = roomLayoutsNode.get_child_count()
-	var chosenRoom = randi_range(1, numLayouts)
+	var chosenRoom = randi_range(1, 4) # the second number should be the number of room layouts available 
 	
 	var room = {
 		"x": x, # X coordinate
@@ -126,7 +82,7 @@ func prepareRoom(x: int, y: int):
 	return room
 	
 ## start the player in a certain room and unlock the starting doors
-func setStartingRoom(): 
+func setStartingRoom() -> void: 
 	currentRoomX = int(mazeWidth / 2)
 	currentRoomY = int(mazeHeight / 2)
 	
@@ -136,8 +92,8 @@ func setStartingRoom():
 		for doorName in startingRoom["doorLocks"].keys():
 			startingRoom["doorLocks"][doorName] = false
 
-## load the current room
-func loadRoom():
+## load the current/new room
+func loadRoom() -> void:
 	# clear previously loaded room to make way for new one
 	if currentRoomInstance:
 		currentRoomInstance.queue_free()
@@ -146,7 +102,7 @@ func loadRoom():
 	add_child(currentRoomInstance)
 	
 	# actually show the room
-	var room = mazeRooms[currentRoomX][currentRoomY]
+	var room = currentRoom()
 	var chosenRoomLayout = room["chosenLayout"]
 	
 	# hide all room layouts first
@@ -169,7 +125,7 @@ func loadRoom():
 
 # so apparently collision detection works a lot like that propertychangeevent stuff but it's much less flexible so we need a helper method to even catch it
 ## Door interaction - test version with lots of debug
-func doorTouched(body: Node, doorName: String):
+func doorTouched(body: Node, doorName: String) -> void:
 	# print(">>> DOOR TOUCHED: ", doorName, " by: ", body.name)
 	
 	# is it the player?
@@ -179,38 +135,82 @@ func doorTouched(body: Node, doorName: String):
 	
 	# prevent pingpong effect
 	if not doorCooldown:
-		print(">>> Door cooldown active, ignoring")
 		return
 	
-	var room = mazeRooms[currentRoomX][currentRoomY]
-	var isLocked = room["doorLocks"][doorName]
+	var room = currentRoom()
 	
-	print(">>> Door ", doorName, " is: ", "LOCKED" if isLocked else "UNLOCKED")
+	var canMove = false
+	# check if the target direction goes out of bounds, and deny movement if it is
+	match doorName:
+		"NorthDoor":
+			canMove = room["northExists"]
+		"SouthDoor":
+			canMove = room["southExists"]
+		"EastDoor":
+			canMove = room["eastExists"]
+		"WestDoor":
+			canMove = room["westExists"]
 	
-	if isLocked:
-		print(">>> BLOCKED! Door is locked. Press U to unlock doors.")
-	else:
-		print(">>> SUCCESS! Going through door...")
-		
-		# Check if we can actually move in this direction
-		var canMove = false
-		match doorName:
-			"NorthDoor":
-				canMove = currentRoomY < mazeHeight - 1
-			"SouthDoor":
-				canMove = currentRoomY > 0
-			"EastDoor":
-				canMove = currentRoomX < mazeWidth - 1
-			"WestDoor":
-				canMove = currentRoomX > 0
-		
-		if canMove:
+	if canMove:
+		# check if the door is locked
+		var isLocked = room["doorLocks"][doorName]
+		if isLocked:
+			print(">>> BLOCKED! Door ", doorName, currentRoomString(), " is LOCKED.")
+		else:
+			print(">>> SUCCESS! Door ", doorName, currentRoomString(), " is UNLOCKED. Going through door...")
 			print(">>> Moving to new room...")
 			doorCooldown = false
 			moveRooms(doorName)
 			get_tree().create_timer(0.25).timeout.connect(enableDoors)
-		else:
-			print(">>> Can't move - at maze boundary!")
+	else:
+		print(">>> Can't move - at maze boundary!")
+
+# just resets the door cooldown
+func enableDoors() -> void:
+	doorCooldown = true
+
+## move the player to another room when they go through a door
+func moveRooms(doorName: String) -> void:
+	var enteringFrom = ""
+	var entryDoor = ""
+	# match is literally just a switch statement
+	match doorName:
+		"NorthDoor":
+			currentRoomY += 1
+			enteringFrom = "FromSouth"
+			entryDoor = "SouthDoor"
+		"SouthDoor":
+			currentRoomY -= 1
+			enteringFrom = "FromNorth"
+			entryDoor = "NorthDoor"
+		"EastDoor":
+			currentRoomX += 1
+			enteringFrom = "FromWest"
+			entryDoor = "WestDoor"
+		"WestDoor":
+			currentRoomX -= 1
+			enteringFrom = "FromEast"
+			entryDoor = "EastDoor"
+	
+	loadRoom()
+	currentRoom()["doorLocks"][entryDoor] = false
+	
+	var markers = currentRoomInstance.get_node("EntryPoint")
+	var entryPoint = markers.get_node(enteringFrom)
+	playerNode.global_position = entryPoint.global_position
+	
+	debugConsole.roomCoordsDebug()
+
+## sets the player to the highest z-index so that they are always visible
+func fixPlayerZ() -> void:
+	playerNode.z_index = 1000
+
+# gets the current room of the player
+func currentRoom() -> Dictionary:
+	return mazeRooms[currentRoomX][currentRoomY]
+
+func currentRoomString() -> String:
+	return "(" + str(currentRoomX) + "," + str(currentRoomY) + ")"
 
 
 ## Show question in console (simple implementation)
@@ -247,41 +247,3 @@ func doorTouched(body: Node, doorName: String):
 	## Reset question state
 	#awaitingAnswer = false
 	#pendingDoor = ""
-
-# just resets the door cooldown
-func enableDoors():
-	doorCooldown = true
-
-# move the player to another room when they go through a door
-func moveRooms(doorName: String):
-	var enteringFrom = ""
-	# match is literally just a switch statement
-	match doorName:
-		"NorthDoor":
-			currentRoomY += 1
-			enteringFrom = "FromSouth"
-			
-		"SouthDoor":
-			currentRoomY -= 1
-			enteringFrom = "FromNorth"
-		"EastDoor":
-			currentRoomX += 1
-			enteringFrom = "FromWest"
-		"WestDoor":
-			currentRoomX -= 1
-			enteringFrom = "FromEast"
-	
-	loadRoom()
-	var markers = currentRoomInstance.get_node("EntryPoint")
-	var entryPoint = markers.get_node(enteringFrom)
-	playerNode.global_position = entryPoint.global_position
-	
-	roomCoordsDebug()
-
-# show current room coordinates for debug
-func roomCoordsDebug():
-	print("room coordinates: ", currentRoomX, ",", currentRoomY)
-
-# renders the player at the highest z-index
-func showPlayer():
-	playerNode.z_index = 10
