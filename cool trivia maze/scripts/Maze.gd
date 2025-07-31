@@ -96,10 +96,10 @@ func prepareRoom(x: int, y: int):
 	var room = {
 		"x": x,
 		"y": y, 
-		"northDoor": y < mazeHeight - 1,
-		"southDoor": y > 0,
-		"eastDoor": x < mazeWidth - 1,
-		"westDoor": x > 0,
+		"northExists": y < mazeHeight - 1,
+		"southExists": y > 0,
+		"eastExists": x < mazeWidth - 1,
+		"westExists": x > 0,
 		"tileData": tileData,
 		# Door lock states - all doors start locked except starting room
 		"doorLocks": {
