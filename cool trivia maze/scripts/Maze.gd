@@ -63,12 +63,22 @@ func prepareRoom(x: int, y: int) -> Dictionary:
 		"chosenLayout": chosenRoom, # the layout of this room
 		
 		# tell whether the room should have a door in a given direction (edge detection)
-		"northExists": y < mazeHeight - 1,
-		"southExists": y > 0,
-		"eastExists": x < mazeWidth - 1,
-		"westExists": x > 0,
+		"doorExists": {
+			"NorthDoor": y < mazeHeight - 1,
+			"SouthDoor": y > 0,
+			"EastDoor": x < mazeWidth - 1,
+			"WestDoor": x > 0,
+		},
 		
-		# Door lock states - all doors start locked except starting room
+		# tell whether doors can be interacted with (only set to false if the player answers wrong)
+		"doorInteractable": {
+			"NorthDoor": true,
+			"SouthDoor": true,
+			"EastDoor": true,
+			"WestDoor": true
+		},
+		
+		# tell whether doors are locked or not (default to true)
 		"doorLocks": {
 			"NorthDoor": true,
 			"SouthDoor": true,
