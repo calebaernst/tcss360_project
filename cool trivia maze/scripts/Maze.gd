@@ -70,7 +70,8 @@ func prepareRoom(x: int, y: int) -> Dictionary:
 			"WestDoor": x > 0,
 		},
 		
-		# tell whether doors can be interacted with (only set to false if the player answers wrong)
+		# tell whether doors can be interacted with 
+		# set to false after the player answers the question, regardless of if it was correct or not
 		"doorInteractable": {
 			"NorthDoor": true,
 			"SouthDoor": true,
@@ -78,7 +79,8 @@ func prepareRoom(x: int, y: int) -> Dictionary:
 			"WestDoor": true
 		},
 		
-		# tell whether doors are locked or not (default to true)
+		# tell whether doors are locked or not (default to true, set to false upon correct answer)
+		# locked doors cannot be passed; unlocked doors enable movement to adjacent rooms
 		"doorLocks": {
 			"NorthDoor": true,
 			"SouthDoor": true,
@@ -86,7 +88,7 @@ func prepareRoom(x: int, y: int) -> Dictionary:
 			"WestDoor": true
 		},
 		
-		# Simple questions for each door
+		# placeholder questions for each door
 		"doorQuestions": {
 			"NorthDoor": {"question": "What is 2 + 2?", "correct": 2, "options": ["1) 3", "2) 4", "3) 5", "4) 6"]},
 			"SouthDoor": {"question": "How many sides does a triangle have?", "correct": 1, "options": ["1) 3", "2) 4", "3) 5", "4) 6"]},
@@ -153,19 +155,8 @@ func doorTouched(body: Node, doorName: String) -> void:
 		return
 	
 	var room = currentRoom()
-	
-	var canMove = false
 	# check if the target direction goes out of bounds, and deny movement if it is
-	match doorName:
-		"NorthDoor":
-			canMove = room["northExists"]
-		"SouthDoor":
-			canMove = room["southExists"]
-		"EastDoor":
-			canMove = room["eastExists"]
-		"WestDoor":
-			canMove = room["westExists"]
-	
+	var canMove = room["doorExists"].get(doorName, false)
 	if canMove:
 		# check if the door is locked
 		var isLocked = room["doorLocks"][doorName]
@@ -173,7 +164,6 @@ func doorTouched(body: Node, doorName: String) -> void:
 			print(">>> BLOCKED! Door ", doorName, currentRoomString(), " is LOCKED.")
 		else:
 			print(">>> SUCCESS! Door ", doorName, currentRoomString(), " is UNLOCKED. Going through door...")
-			print(">>> Moving to new room...")
 			doorCooldown = false
 			moveRooms(doorName)
 			get_tree().create_timer(0.25).timeout.connect(enableDoors)
