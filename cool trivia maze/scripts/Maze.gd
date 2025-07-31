@@ -7,7 +7,6 @@ extends Node2D
 
 # room assets (instantiated later)
 var currentRoomInstance: Node = null
-var tilemap: TileMap = null
 
 # rooms are arranged in an array which also represents their actual arrangement
 var mazeRooms: Array = []
@@ -28,6 +27,7 @@ func _ready():
 	prepareMazeArray()
 	setStartingRoom()
 	loadRoom()
+	showPlayer()
 	roomCoordsDebug()
 	debugPrints()
 
@@ -76,8 +76,8 @@ func showDoorStates():
 		var status = "LOCKED" if room["doorLocks"][doorName] else "UNLOCKED"
 		print(doorName, ": ", status)
 	print("===================")
-	
-# generate tiles and store their data in an array
+
+## generate maze rooms and store their data in an array
 func prepareMazeArray():
 	for x in range(mazeWidth):
 		var column: Array = [] # reinitialize the column array on each loop to prevent cells from pointing at the same array
@@ -87,21 +87,26 @@ func prepareMazeArray():
 			column.append(thisRoom)
 		mazeRooms.append(column)
 
-# generates data for a single room
+## generates data for a single room (used in conjunction with prepareMazeArray)
 func prepareRoom(x: int, y: int):
 	var roomInstance = roomScene.instantiate()
-	var sceneTilemap = roomInstance.get_node("RoomLayouts/Room1")
-	var tileData = getTileData(sceneTilemap)
+	# choose a layout for this room at random
+	var roomLayoutsNode = roomInstance.get_node("RoomLayouts")
+	var numLayouts = roomLayoutsNode.get_child_count()
+	var chosenRoom = randi_range(1, numLayouts)
 	
 	var room = {
-		"x": x,
-		"y": y, 
+		"x": x, # X coordinate
+		"y": y, # Y coordinate
+		
+		"chosenLayout": chosenRoom, # the layout of this room
+		
 		# tell whether the room should have a door in a given direction (edge detection)
 		"northExists": y < mazeHeight - 1,
 		"southExists": y > 0,
 		"eastExists": x < mazeWidth - 1,
 		"westExists": x > 0,
-		"tileData": tileData,
+		
 		# Door lock states - all doors start locked except starting room
 		"doorLocks": {
 			"NorthDoor": true,
@@ -109,6 +114,7 @@ func prepareRoom(x: int, y: int):
 			"EastDoor": true,
 			"WestDoor": true
 		},
+		
 		# Simple questions for each door
 		"doorQuestions": {
 			"NorthDoor": {"question": "What is 2 + 2?", "correct": 2, "options": ["1) 3", "2) 4", "3) 5", "4) 6"]},
@@ -119,7 +125,7 @@ func prepareRoom(x: int, y: int):
 	}
 	return room
 	
-# start the player in the middle-most room and unlock the starting doors
+## start the player in a certain room and unlock the starting doors
 func setStartingRoom(): 
 	currentRoomX = int(mazeWidth / 2)
 	currentRoomY = int(mazeHeight / 2)
@@ -130,15 +136,7 @@ func setStartingRoom():
 		for doorName in startingRoom["doorLocks"].keys():
 			startingRoom["doorLocks"][doorName] = false
 
-
-func getTileData(thisTileMap: TileMap):
-	var data: Array = []
-	for cell in thisTileMap.get_used_cells(0):
-		var tileID = thisTileMap.get_cell_source_id(0, cell)
-		data.append({"position": cell, "tileID": tileID})
-	return data
-
-# load the current room
+## load the current room
 func loadRoom():
 	# clear previously loaded room to make way for new one
 	if currentRoomInstance:
@@ -146,14 +144,19 @@ func loadRoom():
 	# new room instance
 	currentRoomInstance = roomScene.instantiate()
 	add_child(currentRoomInstance)
-	tilemap = currentRoomInstance.get_node("RoomLayouts/Room1")
-	tilemap.clear()
 	
-	# actually generate the room
+	# actually show the room
 	var room = mazeRooms[currentRoomX][currentRoomY]
-	var data = room["tileData"]
-	for cell in data:
-		tilemap.set_cell(0, cell["position"], cell["tileID"])
+	var chosenRoomLayout = room["chosenLayout"]
+	
+	# hide all room layouts first
+	var roomLayouts = currentRoomInstance.get_node("RoomLayouts")
+	for child in roomLayouts.get_children():
+		child.visible = false
+	# show only the chosen room
+	var chosenRoom = roomLayouts.get_node("Room" + str(chosenRoomLayout))
+	chosenRoom.visible = true
+	
 	if currentRoomX == int(mazeWidth / 2) and currentRoomY == int(mazeHeight / 2):
 		print("UNLOCKING STARTING ROOM DOORS")
 		for doorName in room["doorLocks"].keys():
@@ -165,13 +168,13 @@ func loadRoom():
 		door.connect("body_entered", Callable(self, "doorTouched").bind(doorName))
 
 # so apparently collision detection works a lot like that propertychangeevent stuff but it's much less flexible so we need a helper method to even catch it
-# Door interaction - test version with lots of debug
+## Door interaction - test version with lots of debug
 func doorTouched(body: Node, doorName: String):
-	print(">>> DOOR TOUCHED: ", doorName, " by: ", body.name)
+	# print(">>> DOOR TOUCHED: ", doorName, " by: ", body.name)
 	
 	# is it the player?
 	if body != playerNode:
-		print(">>> Not the player, ignoring")
+		# print(">>> Not the player, ignoring")
 		return
 	
 	# prevent pingpong effect
@@ -257,6 +260,7 @@ func moveRooms(doorName: String):
 		"NorthDoor":
 			currentRoomY += 1
 			enteringFrom = "FromSouth"
+			
 		"SouthDoor":
 			currentRoomY -= 1
 			enteringFrom = "FromNorth"
@@ -277,3 +281,7 @@ func moveRooms(doorName: String):
 # show current room coordinates for debug
 func roomCoordsDebug():
 	print("room coordinates: ", currentRoomX, ",", currentRoomY)
+
+# renders the player at the highest z-index
+func showPlayer():
+	playerNode.z_index = 10
