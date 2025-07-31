@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://byiblkmscjcq3"
-path="res://.godot/imported/railway_.png-b1ed6b455ccea66386f70f03bd49220b.ctex"
+uid="uid://buvd3jsgnqdtp"
+path="res://.godot/imported/cave_.png-9a9d8e193b90f0965900a54da31d015f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://temp-assets/cave_/railway_.png"
-dest_files=["res://.godot/imported/railway_.png-b1ed6b455ccea66386f70f03bd49220b.ctex"]
+source_file="res://assets/cave_/cave_.png"
+dest_files=["res://.godot/imported/cave_.png-9a9d8e193b90f0965900a54da31d015f.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6mvvg12gyrr1"
-path="res://.godot/imported/cave_ [fencesAndWalls].png-280f9972fef3abcedd4adf865e5977bf.ctex"
+uid="uid://bk5817d4pucgb"
+path="res://.godot/imported/cave_ [resources].png-983b2f18d48dd569af3f2139177fc356.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://temp-assets/cave_/cave_ [fencesAndWalls].png"
-dest_files=["res://.godot/imported/cave_ [fencesAndWalls].png-280f9972fef3abcedd4adf865e5977bf.ctex"]
+source_file="res://assets/cave_/cave_ [resources].png"
+dest_files=["res://.godot/imported/cave_ [resources].png-983b2f18d48dd569af3f2139177fc356.ctex"]
 
 [params]
 

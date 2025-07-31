@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bsbtq25rhmv34"
-path="res://.godot/imported/cave_ [bridgeVertical].png-5b2b09a6c24d295cbd81a7806c4e857f.ctex"
+uid="uid://c6mvvg12gyrr1"
+path="res://.godot/imported/cave_ [fencesAndWalls].png-af4cd135ee026716f26eb0c6ccb3f3d1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://temp-assets/cave_/cave_ [bridgeVertical].png"
-dest_files=["res://.godot/imported/cave_ [bridgeVertical].png-5b2b09a6c24d295cbd81a7806c4e857f.ctex"]
+source_file="res://assets/cave_/cave_ [fencesAndWalls].png"
+dest_files=["res://.godot/imported/cave_ [fencesAndWalls].png-af4cd135ee026716f26eb0c6ccb3f3d1.ctex"]
 
 [params]
 

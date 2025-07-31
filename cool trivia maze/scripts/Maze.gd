@@ -3,19 +3,18 @@ extends Node2D
 @export var debugMode: bool = true
 @onready var debugConsole = get_parent().get_node("ConsoleDebug")
 
-# prepare assets to go (also makes debugging a little easier via inspector panel)
-@export var roomScene: PackedScene = preload("res://scenes/RoomScene.tscn")
+# prepare assets
+var roomScene: PackedScene = preload("res://scenes/RoomScene.tscn")
 @export var player: NodePath
 @onready var playerNode = get_node(player)
+@onready var BGM = $BGMPlayer
 
 # room assets (instantiated later)
 var currentRoomInstance: Node = null
-
 # rooms are arranged in an array which also represents their actual arrangement
 var mazeRooms: Array = []
 @export var mazeWidth: int = 7
 @export var mazeHeight: int = 7
-
 # keep track of the current room coordinates of the player
 var currentRoomX: int = 0
 var currentRoomY: int = 0
@@ -32,9 +31,15 @@ func _ready() -> void:
 	loadRoom()
 	fixPlayerZ()
 	
+	BGM.play()
+	BGM.finished.connect(loopBGM)
+	
 	debugConsole.roomCoordsDebug()
 	if debugMode:
 		debugConsole.debugPrints()
+
+func loopBGM() -> void:
+	BGM.play()
 
 ## generate maze rooms and store their data in an array
 func prepareMazeArray() -> void:
