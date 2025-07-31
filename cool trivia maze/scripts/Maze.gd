@@ -80,7 +80,7 @@ func prepareRoom(x: int, y: int) -> Dictionary:
 		},
 		
 		# tell whether doors are locked or not (default to true, set to false upon correct answer)
-		# locked doors cannot be passed; unlocked doors enable movement to adjacent rooms
+		# true = locked; locked doors cannot be passed; unlocked doors enable movement to adjacent rooms
 		"doorLocks": {
 			"NorthDoor": true,
 			"SouthDoor": true,
@@ -134,11 +134,37 @@ func loadRoom() -> void:
 		print("UNLOCKING STARTING ROOM DOORS")
 		for doorName in room["doorLocks"].keys():
 			room["doorLocks"][doorName] = false
-	# add door hitbox detection
-	var doors = currentRoomInstance.get_node("Doors")
+	
+	# let doors detect the player
+	var currentRoomDoors = currentRoomInstance.get_node("Doors")
 	for doorName in ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]:
-		var door = doors.get_node(doorName)
-		door.connect("body_entered", Callable(self, "doorTouched").bind(doorName))
+		var thisDoor = currentRoomDoors.get_node(doorName)
+		thisDoor.connect("body_entered", Callable(self, "doorTouched").bind(doorName))
+	
+	updateDoors(room, currentRoomDoors)
+
+## update the visual state and collidable state of doors
+func updateDoors(room: Dictionary, currentRoomDoors: Node) -> void:
+	for doorName in ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]:
+		var thisDoor = currentRoomDoors.get_node(doorName)
+		var doorVisual = thisDoor.get_node("DoorVisual")
+		var doorBody = thisDoor.get_node("DoorBody")
+		
+		if not room["doorExists"].get(doorName, false):
+			doorVisual.modulate = Color(0, 0, 0)
+			doorBody.set_deferred("disabled", false)
+		elif not room["doorInteractable"].get(doorName, false) and room["doorLocks"].get(doorName, true):
+			doorVisual.modulate = Color(1, 0, 0)
+			doorBody.set_deferred("disabled", false)
+		elif room["doorLocks"].get(doorName, true):
+			doorVisual.modulate = Color(1, 0, 1)
+			doorBody.set_deferred("disabled", false)
+		else:
+			doorVisual.modulate = Color(0, 1, 0)
+			doorBody.set_deferred("disabled", true)
+			if room["doorInteractable"].get(doorName, false) and room["doorLocks"].get(doorName, false):
+				print("Error: A door is both interactable and unlocked.")
+				# the case for Interactable AND NOT locked should NEVER happen
 
 # so apparently collision detection works a lot like that propertychangeevent stuff but it's much less flexible so we need a helper method to even catch it
 ## Door interaction - test version with lots of debug
@@ -197,8 +223,8 @@ func moveRooms(doorName: String) -> void:
 			enteringFrom = "FromEast"
 			entryDoor = "EastDoor"
 	
-	loadRoom()
 	currentRoom()["doorLocks"][entryDoor] = false
+	loadRoom()
 	
 	var markers = currentRoomInstance.get_node("EntryPoint")
 	var entryPoint = markers.get_node(enteringFrom)
