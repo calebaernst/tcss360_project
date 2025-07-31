@@ -90,12 +90,13 @@ func prepareMazeArray():
 # generates data for a single room
 func prepareRoom(x: int, y: int):
 	var roomInstance = roomScene.instantiate()
-	var sceneTilemap = roomInstance.get_node("Room1")
+	var sceneTilemap = roomInstance.get_node("RoomLayouts/Room1")
 	var tileData = getTileData(sceneTilemap)
 	
 	var room = {
 		"x": x,
 		"y": y, 
+		# tell whether the room should have a door in a given direction (edge detection)
 		"northExists": y < mazeHeight - 1,
 		"southExists": y > 0,
 		"eastExists": x < mazeWidth - 1,
@@ -145,7 +146,7 @@ func loadRoom():
 	# new room instance
 	currentRoomInstance = roomScene.instantiate()
 	add_child(currentRoomInstance)
-	tilemap = currentRoomInstance.get_node("Room1")
+	tilemap = currentRoomInstance.get_node("RoomLayouts/Room1")
 	tilemap.clear()
 	
 	# actually generate the room
