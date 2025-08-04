@@ -143,7 +143,7 @@ func loadRoom() -> void:
 	
 	updateDoors(room, currentRoomDoors)
 
-## update the visual state and collidable state of doors
+## update the visual state of doors
 func updateDoors(room: Dictionary, currentRoomDoors: Node) -> void:
 	for doorName in ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]:
 		var thisDoor = currentRoomDoors.get_node(doorName)
@@ -151,17 +151,17 @@ func updateDoors(room: Dictionary, currentRoomDoors: Node) -> void:
 		var doorBody = thisDoor.get_node("DoorBody")
 		
 		if not room["doorExists"].get(doorName, false):
+			# corresponds to the maze edge - uninteractable, unpassable
 			doorVisual.modulate = Color(0, 0, 0)
-			doorBody.set_deferred("disabled", false)
 		elif not room["doorInteractable"].get(doorName, false) and room["doorLocks"].get(doorName, true):
+			# corresponds to a broken door - no longer interactable and remains locked
 			doorVisual.modulate = Color(1, 0, 0)
-			doorBody.set_deferred("disabled", false)
 		elif room["doorLocks"].get(doorName, true):
+			# corresponds to a locked door - player must answer a question to unlock
 			doorVisual.modulate = Color(1, 0, 1)
-			doorBody.set_deferred("disabled", false)
 		else:
+			# corresponds to an open door - uninteractable, passable
 			doorVisual.modulate = Color(0, 1, 0)
-			doorBody.set_deferred("disabled", true)
 			if room["doorInteractable"].get(doorName, false) and room["doorLocks"].get(doorName, false):
 				print("Error: A door is both interactable and unlocked.")
 				# the case for Interactable AND NOT locked should NEVER happen
