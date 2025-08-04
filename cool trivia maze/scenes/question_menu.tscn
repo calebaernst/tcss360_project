@@ -1,0 +1,86 @@
+[gd_scene load_steps=2 format=3 uid="uid://c1mqmim8nnytx"]
+
+[ext_resource type="Script" uid="uid://dfmgrwdb7etus" path="res://scripts/question_menu.gd" id="1_cd274"]
+
+[node name="MultipleChoice" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_cd274")
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 256.0
+offset_right = 384.0
+offset_bottom = 384.0
+autowrap_mode = 3
+
+[node name="Button2" type="Button" parent="."]
+layout_mode = 0
+offset_left = 768.0
+offset_top = 256.0
+offset_right = 1088.0
+offset_bottom = 384.0
+autowrap_mode = 3
+
+[node name="Button3" type="Button" parent="."]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 448.0
+offset_right = 384.0
+offset_bottom = 576.0
+autowrap_mode = 3
+
+[node name="Button4" type="Button" parent="."]
+layout_mode = 0
+offset_left = 768.0
+offset_top = 448.0
+offset_right = 1088.0
+offset_bottom = 576.0
+autowrap_mode = 3
+
+[node name="Submit" type="Button" parent="."]
+layout_mode = 0
+offset_left = 448.0
+offset_top = 256.0
+offset_right = 704.0
+offset_bottom = 383.0
+text = "Submit"
+
+[node name="Exit" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1088.0
+offset_right = 1152.0
+offset_bottom = 64.0
+text = "Exit"
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 64.0
+offset_right = 1088.0
+offset_bottom = 192.0
+theme_type_variation = &"HeaderLarge"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Response" type="TextEdit" parent="."]
+layout_mode = 0
+offset_left = 448.0
+offset_top = 448.0
+offset_right = 704.0
+offset_bottom = 576.0
+placeholder_text = "type here..."
+wrap_mode = 1
+
+[connection signal="button_down" from="Button" to="." method="_on_button_button_down"]
+[connection signal="button_down" from="Button2" to="." method="_on_button_2_button_down"]
+[connection signal="button_down" from="Button3" to="." method="_on_button_3_button_down"]
+[connection signal="button_down" from="Button4" to="." method="_on_button_4_button_down"]
+[connection signal="button_down" from="Submit" to="." method="_on_submit_button_down"]
+[connection signal="button_down" from="Exit" to="." method="_on_exit_button_down"]

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://boer6h4perfw5" path="res://scripts/Maze.gd" id="1_7skvd"]
 [ext_resource type="AudioStream" uid="uid://cxkpdauib4n8j" path="res://assets/BGM.ogg" id="2_kb82o"]
-[ext_resource type="Script" uid="uid://g3s5a4acqj1q" path="res://scenes/console_debug.gd" id="3_83ke4"]
+[ext_resource type="Script" uid="uid://g3s5a4acqj1q" path="res://scripts/console_debug.gd" id="4_kb82o"]
 [ext_resource type="PackedScene" uid="uid://cgd3tfgbf8qsk" path="res://scenes/player.tscn" id="5_11w8b"]
 
 [node name="Game" type="Node2D"]
@@ -20,4 +20,4 @@ stream = ExtResource("2_kb82o")
 [node name="Player" parent="Entities" instance=ExtResource("5_11w8b")]
 
 [node name="ConsoleDebug" type="Node" parent="."]
-script = ExtResource("3_83ke4")
+script = ExtResource("4_kb82o")
