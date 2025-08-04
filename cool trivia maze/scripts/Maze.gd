@@ -1,10 +1,23 @@
+# This is Essientally our Game Manager
 extends Node2D
 
+# Signals to decouple our Door logic 
+signal door_locked(door_name: String, question_data: Dictionary)
+signal door_unlocked(door_name: String)
+signal room_loaded(room_x: int, room_y: int)
+signal player_moved(from_room: Vector2i, to_room: Vector2i)
+#Question system signals
+signal question_answered_correctly(door_name: String)
+signal question_answered_incorrectly(door_name: String)
+
+#debug code 
 @export var debugMode: bool = true
 @onready var debugConsole = get_parent().get_node("ConsoleDebug")
 
 # prepare assets
 var roomScene: PackedScene = preload("res://scenes/RoomScene.tscn")
+# reference the question menu
+var questionMenuScene: PackedScene = preload("res://scenes/question_menu.tscn")
 @export var player: NodePath
 @onready var playerNode = get_node(player)
 @onready var BGM = $BGMPlayer
@@ -15,6 +28,8 @@ var currentRoomInstance: Node = null
 var mazeRooms: Array = []
 @export var mazeWidth: int = 7
 @export var mazeHeight: int = 7
+
+
 # keep track of the current room coordinates of the player
 var currentRoomX: int = 0
 var currentRoomY: int = 0
@@ -23,6 +38,7 @@ var doorCooldown: bool = true
 # Simple question system - make sure these are declared at class level
 var pendingDoor: String = ""
 var awaitingAnswer: bool = false
+var questionMenuInstance: Node = null
 
 # On start
 func _ready() -> void:
@@ -30,14 +46,25 @@ func _ready() -> void:
 	setStartingRoom()
 	loadRoom()
 	fixPlayerZ()
-	
+
 	BGM.play()
 	BGM.finished.connect(loopBGM)
 	
 	debugConsole.roomCoordsDebug()
 	if debugMode:
 		debugConsole.debugPrints()
+		#Connect signals
+	_connect_internal_signals()
 
+#  ************************************************************
+func _connect_internal_signals():
+	door_locked.connect(_on_door_locked)
+	door_unlocked.connect(_on_door_unlocked)
+	room_loaded.connect(_on_room_loaded)
+	player_moved.connect(_on_player_moved)
+
+	question_answered_correctly.connect(_on_question_answered_correctly)
+	question_answered_incorrectly.connect(_on_question_answered_incorrectly)
 func loopBGM() -> void:
 	BGM.play()
 
@@ -88,12 +115,12 @@ func prepareRoom(x: int, y: int) -> Dictionary:
 			"WestDoor": true
 		},
 		
-		# placeholder questions for each door
+		# MODIFIED: Remove hardcoded questions - will use database questions instead
 		"doorQuestions": {
-			"NorthDoor": {"question": "What is 2 + 2?", "correct": 2, "options": ["1) 3", "2) 4", "3) 5", "4) 6"]},
-			"SouthDoor": {"question": "How many sides does a triangle have?", "correct": 1, "options": ["1) 3", "2) 4", "3) 5", "4) 6"]},
-			"EastDoor": {"question": "What is 3 x 3?", "correct": 3, "options": ["1) 6", "2) 8", "3) 9", "4) 12"]},
-			"WestDoor": {"question": "How many legs does a cat have?", "correct": 2, "options": ["1) 2", "2) 4", "3) 6", "4) 8"]}
+			"NorthDoor": null,
+			"SouthDoor": null,
+			"EastDoor": null,
+			"WestDoor": null
 		}
 	}
 	return room
@@ -142,6 +169,8 @@ func loadRoom() -> void:
 		thisDoor.connect("body_entered", Callable(self, "doorTouched").bind(doorName))
 	
 	updateDoors(room, currentRoomDoors)
+	#signal when room is loaded
+	room_loaded.emit(currentRoomX, currentRoomY)
 
 ## update the visual state of doors
 func updateDoors(room: Dictionary, currentRoomDoors: Node) -> void:
@@ -180,28 +209,109 @@ func doorTouched(body: Node, doorName: String) -> void:
 	if not doorCooldown:
 		return
 	
+	# Don't allow interaction if already waiting for answer
+	if awaitingAnswer:
+		return
+		
 	var room = currentRoom()
 	# check if the target direction goes out of bounds, and deny movement if it is
 	var canMove = room["doorExists"].get(doorName, false)
 	if canMove:
 		# check if the door is locked
 		var isLocked = room["doorLocks"][doorName]
-		if isLocked:
-			print(">>> BLOCKED! Door ", doorName, currentRoomString(), " is LOCKED.")
-		else:
+		var isInteractable = room["doorInteractable"][doorName]
+		if isLocked and isInteractable:
+			print(">>> BLOCKED! Door ", doorName, currentRoomString(), " is LOCKED. Showing question...")
+			# Show question interface instead of simple print
+			showQuestionForDoor(doorName)
+		elif not isLocked:
 			print(">>> SUCCESS! Door ", doorName, currentRoomString(), " is UNLOCKED. Going through door...")
+			door_unlocked.emit(doorName)
 			doorCooldown = false
 			moveRooms(doorName)
 			get_tree().create_timer(0.25).timeout.connect(enableDoors)
+		else:
+			print(">>> Door ", doorName, " has already been attempted.")
 	else:
 		print(">>> Can't move - at maze boundary!")
 
-# just resets the door cooldown
+func showQuestionForDoor(doorName: String) -> void:
+	if awaitingAnswer:
+		return
+		
+	# Set pending door and awaiting state
+	pendingDoor = doorName
+	awaitingAnswer = true
+	
+	# Create question menu instance
+	questionMenuInstance = questionMenuScene.instantiate()
+	get_tree().current_scene.add_child(questionMenuInstance)
+	
+	# Connect to the question menu's completion signal
+	# WE NEED TO DO THIS IN QUESTION MENU TSCN TOO!
+	if questionMenuInstance.has_signal("question_completed"):
+		questionMenuInstance.connect("question_completed", _on_question_completed)
+	
+	# Pause the game while question is showing
+	get_tree().paused = true
+
+## Handle question completion from the question menu
+func _on_question_completed(is_correct: bool) -> void:
+	if not awaitingAnswer:
+		return
+		
+	# Clean up question menu
+	if questionMenuInstance:
+		questionMenuInstance.queue_free()
+		questionMenuInstance = null
+	
+	# Resume game
+	get_tree().paused = false
+	
+	var room = currentRoom()
+	
+	if is_correct:
+		print("✓ CORRECT! Door unlocked.")
+		# Emit signal for correct answer
+		question_answered_correctly.emit(pendingDoor)
+		
+		# Unlock the door permanently
+		room["doorLocks"][pendingDoor] = false
+		# Mark door as non-interactable (question answered)
+		room["doorInteractable"][pendingDoor] = false
+		
+		# Update door visuals
+		var currentRoomDoors = currentRoomInstance.get_node("Doors")
+		updateDoors(room, currentRoomDoors)
+		
+		# Now go through the door
+		doorCooldown = false
+		moveRooms(pendingDoor)
+		get_tree().create_timer(0.25).timeout.connect(enableDoors)
+	else:
+		print("✗ INCORRECT! Door remains locked.")
+		# Emit signal for incorrect answer
+		question_answered_incorrectly.emit(pendingDoor)
+		
+		# Mark door as non-interactable (question answered, but still locked)
+		room["doorInteractable"][pendingDoor] = false
+		
+		# Update door visuals to show red (attempted but failed)
+		var currentRoomDoors = currentRoomInstance.get_node("Doors")
+		updateDoors(room, currentRoomDoors)
+	
+	# Reset question state
+	awaitingAnswer = false
+	pendingDoor = ""
+	
+## just resets the door cooldown
 func enableDoors() -> void:
 	doorCooldown = true
 
 ## move the player to another room when they go through a door
 func moveRooms(doorName: String) -> void:
+	#Store old position for signal
+	var old_position = Vector2i(currentRoomX, currentRoomY)
 	var enteringFrom = ""
 	var entryDoor = ""
 	# match is literally just a switch statement
@@ -232,6 +342,10 @@ func moveRooms(doorName: String) -> void:
 	
 	debugConsole.roomCoordsDebug()
 
+	var new_position = Vector2i(currentRoomX, currentRoomY)
+	#Emit signal for movement between rooms
+	player_moved.emit(old_position, new_position)
+	
 ## sets the player to the highest z-index so that they are always visible
 func fixPlayerZ() -> void:
 	playerNode.z_index = 1000
@@ -243,38 +357,21 @@ func currentRoom() -> Dictionary:
 func currentRoomString() -> String:
 	return "(" + str(currentRoomX) + "," + str(currentRoomY) + ")"
 
+func _on_door_locked(door_name: String, question_data: Dictionary):
+	print("Question needed for ", door_name, ": ", question_data.question)
 
-## Show question in console (simple implementation)
-#func showQuestion(doorName: String, questionData: Dictionary):
-	#pendingDoor = doorName
-	#awaitingAnswer = true
-	#
-	#print("\n=== DOOR LOCKED ===")
-	#print("Question: " + questionData["question"])
-	#for option in questionData["options"]:
-		#print(option)
-	#print("Press the number key (1-4) for your answer")
-	#print("==================")
+func _on_door_unlocked(door_name: String):
+	print("Player used unlocked door: ", door_name)
 
-# Check if answer is correct
-#func checkAnswer(answerNum: int):
-	#if not awaitingAnswer:
-		#return
-		#
-	#var room = mazeRooms[currentRoomX][currentRoomY]
-	#var questionData = room["doorQuestions"][pendingDoor]
-	#
-	#if answerNum == questionData["correct"]:
-		#print("✓ CORRECT! Door unlocked.")
-		## Unlock the door permanently
-		#room["doorLocks"][pendingDoor] = false
-		## Now go through the door
-		#doorCooldown = false
-		#moveRooms(pendingDoor)
-		#get_tree().create_timer(0.25).timeout.connect(enableDoors)
-	#else:
-		#print("✗ INCORRECT! Door remains locked.")
-	#
-	## Reset question state
-	#awaitingAnswer = false
-	#pendingDoor = ""
+func _on_room_loaded(room_x: int, room_y: int):
+	print("Loaded room: (", room_x, ",", room_y, ")")
+
+func _on_player_moved(from_room: Vector2i, to_room: Vector2i):
+	print("Player moved from ", from_room, " to ", to_room)
+
+func _on_question_answered_correctly(door_name: String):
+	print("Player answered correctly for door: ", door_name)
+
+func _on_question_answered_incorrectly(door_name: String):
+	print("Player answered incorrectly for door: ", door_name)
+	
