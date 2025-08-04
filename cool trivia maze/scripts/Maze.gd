@@ -38,6 +38,7 @@ var doorCooldown: bool = true
 # Simple question system - make sure these are declared at class level
 var pendingDoor: String = ""
 var awaitingAnswer: bool = false
+var questionMenuInstance: Node = null
 
 # On start
 func _ready() -> void:
@@ -222,7 +223,7 @@ func doorTouched(body: Node, doorName: String) -> void:
 		if isLocked and isInteractable:
 			print(">>> BLOCKED! Door ", doorName, currentRoomString(), " is LOCKED. Showing question...")
 			# Show question interface instead of simple print
-			#showQuestionForDoor(doorName)
+			showQuestionForDoor(doorName)
 		elif not isLocked:
 			print(">>> SUCCESS! Door ", doorName, currentRoomString(), " is UNLOCKED. Going through door...")
 			door_unlocked.emit(doorName)
@@ -234,69 +235,75 @@ func doorTouched(body: Node, doorName: String) -> void:
 	else:
 		print(">>> Can't move - at maze boundary!")
 
+func showQuestionForDoor(doorName: String) -> void:
+	if awaitingAnswer:
+		return
+		
+	# Set pending door and awaiting state
+	pendingDoor = doorName
+	awaitingAnswer = true
+	
+	# Create question menu instance
+	questionMenuInstance = questionMenuScene.instantiate()
+	get_tree().current_scene.add_child(questionMenuInstance)
+	
+	# Connect to the question menu's completion signal
+	# WE NEED TO DO THIS IN QUESTION MENU TSCN TOO!
+	if questionMenuInstance.has_signal("question_completed"):
+		questionMenuInstance.connect("question_completed", _on_question_completed)
+	
+	# Pause the game while question is showing
+	get_tree().paused = true
 
-#Show question interface for a specific door
-#func showQuestionForDoor(doorName: String) -> void:
-	#pendingDoor = doorName
-	#awaitingAnswer = true
-	#
-	## Instantiate question menu
-	#questionMenuInstance = questionMenuScene.instantiate()
-	#get_parent().add_child(questionMenuInstance)  # Add to parent so it overlays everything
-	#
-	## Connect to question menu signals
-	#questionMenuInstance.connect("question_answered", _on_question_menu_answered)
-	#questionMenuInstance.connect("question_closed", _on_question_menu_closed)
-	#
-	## Pause game while question is shown
-	#get_tree().paused = true
-	#questionMenuInstance.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-#
-## NEW: Handle answer from question menu
-#func _on_question_menu_answered(is_correct: bool) -> void:
-	#if not awaitingAnswer:
-		#return
-		#
-	#var room = currentRoom()
-	#
-	#if is_correct:
-		#print("✓ CORRECT! Door unlocked.")
-		## Unlock the door permanently
-		#room["doorLocks"][pendingDoor] = false
-		## Make door non-interactable since it's been answered
-		#room["doorInteractable"][pendingDoor] = false
-		#
-		## Emit success signal
-		#question_answered_correctly.emit(pendingDoor)
-		#
-		## Update door visuals
-		#updateDoors(room, currentRoomInstance.get_node("Doors"))
-		#
-		## Now go through the door
-		#doorCooldown = false
-		#moveRooms(pendingDoor)
-		#get_tree().create_timer(0.25).timeout.connect(enableDoors)
-	#else:
-		#print("✗ INCORRECT! Door remains locked.")
-		## Make door non-interactable so they can't try again
-		#room["doorInteractable"][pendingDoor] = false
-		#
-		## Emit failure signal
-		#question_answered_incorrectly.emit(pendingDoor)
-		#
-		## Update door visuals
-		#updateDoors(room, currentRoomInstance.get_node("Doors"))
-#
-## Handle question menu being closed
-#func _on_question_menu_closed() -> void:
-	## Clean up question state
-	#awaitingAnswer = false
-	#pendingDoor = ""
-	#
-	## Remove question menu
-	#if questionMenuInstance:
-		#questionMenuInstance.queue_free()
-		#questionMenuInstance = null
+## Handle question completion from the question menu
+func _on_question_completed(is_correct: bool) -> void:
+	if not awaitingAnswer:
+		return
+		
+	# Clean up question menu
+	if questionMenuInstance:
+		questionMenuInstance.queue_free()
+		questionMenuInstance = null
+	
+	# Resume game
+	get_tree().paused = false
+	
+	var room = currentRoom()
+	
+	if is_correct:
+		print("✓ CORRECT! Door unlocked.")
+		# Emit signal for correct answer
+		question_answered_correctly.emit(pendingDoor)
+		
+		# Unlock the door permanently
+		room["doorLocks"][pendingDoor] = false
+		# Mark door as non-interactable (question answered)
+		room["doorInteractable"][pendingDoor] = false
+		
+		# Update door visuals
+		var currentRoomDoors = currentRoomInstance.get_node("Doors")
+		updateDoors(room, currentRoomDoors)
+		
+		# Now go through the door
+		doorCooldown = false
+		moveRooms(pendingDoor)
+		get_tree().create_timer(0.25).timeout.connect(enableDoors)
+	else:
+		print("✗ INCORRECT! Door remains locked.")
+		# Emit signal for incorrect answer
+		question_answered_incorrectly.emit(pendingDoor)
+		
+		# Mark door as non-interactable (question answered, but still locked)
+		room["doorInteractable"][pendingDoor] = false
+		
+		# Update door visuals to show red (attempted but failed)
+		var currentRoomDoors = currentRoomInstance.get_node("Doors")
+		updateDoors(room, currentRoomDoors)
+	
+	# Reset question state
+	awaitingAnswer = false
+	pendingDoor = ""
+	
 ## just resets the door cooldown
 func enableDoors() -> void:
 	doorCooldown = true
