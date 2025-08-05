@@ -1,9 +1,9 @@
 extends Control
 
 # instance fields
-var db : SQLite # initialize SQLite database field
-var question_choices : Array # randomly chosen question field
-var answer_buttons : Array # array of buttons for answers field
+var myDatabase : SQLite # initialize SQLite database field
+var myQuestionChoices : Array # randomly chosen question field
+var myAnswerButtons : Array # array of buttons for answers field
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -16,25 +16,25 @@ func _process(_delta: float) -> void:
 
 # "constructor": opens the database
 func open_database():
-	db = SQLite.new()
-	db.path="res://TriviaQuestions.db"
-	db.open_db()
+	myDatabase = SQLite.new()
+	myDatabase.path="res://TriviaQuestions.db"
+	myDatabase.open_db()
 
 # constructor: puts the menu together
 func build_menu():
-	answer_buttons = [$Button, $Button2, $Button3, $Button4] # array of buttons
-	question_choices = get_question()
-	$Label.text = question_choices[0]["question"] 
+	myAnswerButtons = [$Button, $Button2, $Button3, $Button4] # array of buttons
+	myQuestionChoices = get_question()
+	$Label.text = myQuestionChoices[0]["question"] 
 	set_default()
 	var question_type = get_type()
 	if (question_type != "open response"):
-		var choices = get_answers(question_choices)
+		var choices = get_answers(myQuestionChoices)
 		choices.shuffle()
 		set_buttons(choices, question_type)
 
 # getter: gets the type of the question
 func get_type() -> String:
-	var type : String = question_choices[0]["question type"] 
+	var type : String = myQuestionChoices[0]["question type"] 
 	match type:
 		"multiple choice":
 			$Button3.visible = true
@@ -60,14 +60,14 @@ func get_question() -> Array:
 	var rng = RandomNumberGenerator.new() # declare rng
 	var randNum = rng.randi_range(1, max_count) # get random integer
 	# select all rows random id
-	var array = db.select_rows("Questions", "id ='" + str(randNum) + "'", ["*"])
+	var array = myDatabase.select_rows("Questions", "id ='" + str(randNum) + "'", ["*"])
 	return array
 
 # getter: gets total amount of rows in a table
 func get_table_count() -> int:
 	var output = 0
-	db.query("select * from Questions")
-	for i in db.query_result:
+	myDatabase.query("select * from Questions")
+	for i in myDatabase.query_result:
 		output += 1
 	return output
 
@@ -83,20 +83,20 @@ func set_default():
 	$Exit.visible = false
 	
 	# default active
-	for i in range(answer_buttons.size()):
-		answer_buttons[i].disabled = false
+	for i in range(myAnswerButtons.size()):
+		myAnswerButtons[i].disabled = false
 	$Submit.disabled = false
 	$Response.text = "" # clear the input box
 
 # setter: deactivates buttons
 func set_inactive() -> void:
-	for i in range(answer_buttons.size()):
-		answer_buttons[i].disabled = true
+	for i in range(myAnswerButtons.size()):
+		myAnswerButtons[i].disabled = true
 	$Submit.disabled = true
 
 # setter: sets the buttons
 func set_buttons(theChoices : Array, theType : String) -> void:
-	var button_amount : int = answer_buttons.size()
+	var button_amount : int = myAnswerButtons.size()
 	
 	if (theType == "true/false"):
 		button_amount = 2
@@ -104,28 +104,30 @@ func set_buttons(theChoices : Array, theType : String) -> void:
 	button_amount = min(button_amount, theChoices.size()) # ensure button amount does not exceed choices
 	
 	for i in range(button_amount):
-		answer_buttons[i].text = theChoices[i] # set button text to answer
+		myAnswerButtons[i].text = theChoices[i] # set button text to answer
 
 # verifier: checks if answer is correct and prints correct/incorrect message
 func check_answer(theInput : int) -> void:
 	var is_correct : bool = false
 	if (theInput == 0): # if the user submitted an open response
-		is_correct = $Response.text == question_choices[0]["correct answer"]
+		is_correct = $Response.text == myQuestionChoices[0]["correct answer"]
 	else:
-		var selected_button = answer_buttons[theInput - 1]
-		is_correct = selected_button.text == question_choices[0]["correct answer"]
+		var selected_button = myAnswerButtons[theInput - 1]
+		is_correct = selected_button.text == myQuestionChoices[0]["correct answer"]
 	
 	if (is_correct):
-		$Label.text = question_choices[0]["correct message"]
+		$Label.text = myQuestionChoices[0]["correct message"]
+		print("The answer is correct!")
 	else:
-		$Label.text = question_choices[0]["incorrect message"]
+		$Label.text = myQuestionChoices[0]["incorrect message"]
+		print("The answer is INCORRECT")
 	
 	set_inactive()
 	$Exit.visible = true
 
 # the following functions are called when the user presses their respective buttons
 func _on_button_button_down() -> void: # Button node 1 (top right)
-	check_answer(1)
+	check_answer(1) #give it a name!!!!
 
 func _on_button_2_button_down() -> void: # Button node 2 (top left)
 	check_answer(2)
