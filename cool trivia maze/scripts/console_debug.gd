@@ -1,9 +1,6 @@
 extends Node
 
-var maze: Node2D
-
-func _ready():
-	maze = get_parent().get_node("Maze")
+@onready var maze = get_parent().get_node("Maze")
 
 # Debug mode messages
 func debugPrints():
@@ -34,6 +31,7 @@ func unlockAllDoors():
 	for doorName in room["doorLocks"].keys():
 		room["doorLocks"][doorName] = false
 	print("ALL DOORS UNLOCKED in room (", maze.currentRoomX, ",", maze.currentRoomY, ")")
+	maze.updateDoorVisuals()
 	showDoorStates()
 
 # 
@@ -44,6 +42,7 @@ func lockAllDoors():
 	for doorName in room["doorLocks"].keys():
 		room["doorLocks"][doorName] = true
 	print("ALL DOORS LOCKED in room (", maze.currentRoomX, ",", maze.currentRoomY, ")")
+	maze.updateDoorVisuals()
 	showDoorStates()
 
 # 
@@ -52,13 +51,5 @@ func showDoorStates():
 		return
 	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
 	print("=== ROOM (", maze.currentRoomX, ",", maze.currentRoomY, ") DOOR STATES ===")
-	for doorName in room["doorLocks"].keys():
-		var status = "LOCKED" if room["doorLocks"][doorName] else "UNLOCKED"
-		print(doorName, ": ", status)
+	print(maze.getDoorStates())
 	print("===================")
-
-# show current room coordinates
-func roomCoordsDebug():
-	if not maze:
-		return
-	print("Room Coordinates: ", maze.currentRoomString())

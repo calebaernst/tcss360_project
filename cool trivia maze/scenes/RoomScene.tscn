@@ -305,13 +305,13 @@ metadata/_edit_use_anchors_ = true
 [node name="EntryPoint" type="Node2D" parent="."]
 
 [node name="FromNorth" type="Marker2D" parent="EntryPoint"]
-position = Vector2(0, -71)
+position = Vector2(0, -65)
 
 [node name="FromSouth" type="Marker2D" parent="EntryPoint"]
-position = Vector2(0, 70)
+position = Vector2(0, 65)
 
 [node name="FromEast" type="Marker2D" parent="EntryPoint"]
-position = Vector2(70, 0)
+position = Vector2(65, 0)
 
 [node name="FromWest" type="Marker2D" parent="EntryPoint"]
-position = Vector2(-70, 0)
+position = Vector2(-65, 0)
