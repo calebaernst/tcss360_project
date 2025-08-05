@@ -20,6 +20,10 @@ func open_database():
 	myDatabase.path="res://TriviaQuestions.db"
 	myDatabase.open_db()
 
+	db = SQLite.new()
+	db.path="res://assets/TriviaQuestions.db"
+	db.open_db()
+
 # constructor: puts the menu together
 func build_menu():
 	myAnswerButtons = [$Button, $Button2, $Button3, $Button4] # array of buttons
