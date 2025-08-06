@@ -3,22 +3,20 @@ extends Node2D
 @export var debugMode: bool = true
 @onready var debugConsole = get_parent().get_node("ConsoleDebug")
 
-# prepare assets
+# prepare game assets
 var roomScene: PackedScene = preload("res://scenes/RoomScene.tscn")
 @export var player: NodePath
 @onready var playerNode = get_node(player)
 @onready var BGM = $BGMPlayer
 
-# room assets (instantiated later)
+# maze dimensions/coordinates/navigation variables
 var currentRoomInstance: Node = null
-# rooms are arranged in an array which also represents their actual arrangement
 var mazeRooms: Array = []
 @export var mazeWidth: int = 7
 @export var mazeHeight: int = 7
-# keep track of the current room coordinates of the player
-var currentRoomX: int = 0
-var currentRoomY: int = 0
-var doorCooldown: bool = true
+var currentRoomX: int
+var currentRoomY: int
+@onready var doorsOffCooldown: bool = true
 
 # Simple question system - make sure these are declared at class level
 var pendingDoor: String = ""
@@ -26,41 +24,50 @@ var awaitingAnswer: bool = false
 
 # On start
 func _ready() -> void:
-	prepareMazeArray()
-	setStartingRoom()
-	loadRoom()
-	fixPlayerZ()
+	_prepareMazeArray()
+	_setStartingRoom()
+	_loadRoom()
 	
-	BGM.play()
-	BGM.finished.connect(loopBGM)
+	playerNode.z_index = 1000 # fix the player to always be visible
+	BGM.play() # play BGM
+	BGM.finished.connect(_loopBGM) # set BGM to loop
 	
-	debugConsole.roomCoordsDebug()
+	# debug inputs can be enabled/disabled from the inspector menu for the "Maze" node
 	if debugMode:
 		debugConsole.debugPrints()
 
-func loopBGM() -> void:
+## just repeats the BGM when it finishes playing (because there is no inherent function to do this)
+func _loopBGM() -> void:
 	BGM.play()
 
-## generate maze rooms and store their data in an array
-func prepareMazeArray() -> void:
-	for x in range(mazeWidth):
-		var column: Array = [] # reinitialize the column array on each loop to prevent cells from pointing at the same array
-		for y in range(mazeHeight):
-			var thisRoom = prepareRoom(x,y)
-			print("prepared room at ", x, ",", y)
-			column.append(thisRoom)
-		mazeRooms.append(column)
+# gets the current room of the player
+func currentRoom() -> Dictionary:
+	return mazeRooms[currentRoomX][currentRoomY]
 
-## generates data for a single room (used in conjunction with prepareMazeArray)
-func prepareRoom(x: int, y: int) -> Dictionary:
+func currentRoomToString() -> String:
+	return "(" + str(currentRoomX) + "," + str(currentRoomY) + ")"
+
+## generate maze rooms and store their data in an array
+func _prepareMazeArray() -> void:
+	if not mazeRooms:
+		for x in range(mazeWidth):
+			var column: Array = [] # reinitialize the column array on each loop to prevent cells from pointing at the same array
+			for y in range(mazeHeight):
+				var thisRoom = _prepareRoom(x,y)
+				print("prepared room at ", x, ",", y)
+				column.append(thisRoom)
+			mazeRooms.append(column)
+
+## generates data for a single room (used exclusively in conjunction with prepareMazeArray)
+func _prepareRoom(x: int, y: int) -> Dictionary:
 	# choose a layout for this room at random
-	var chosenRoom = randi_range(1, 4) # the second number should be the number of room layouts available 
+	var chosenLayout = randi_range(1, 4) # the second number should be the number of room layouts available 
 	
 	var room = {
 		"x": x, # X coordinate
 		"y": y, # Y coordinate
 		
-		"chosenLayout": chosenRoom, # the layout of this room
+		"chosenLayout": chosenLayout, # the layout of this room
 		
 		# tell whether the room should have a door in a given direction (edge detection)
 		"doorExists": {
@@ -97,43 +104,45 @@ func prepareRoom(x: int, y: int) -> Dictionary:
 		}
 	}
 	return room
-	
-## start the player in a certain room and unlock the starting doors
-func setStartingRoom() -> void: 
-	currentRoomX = int(mazeWidth / 2)
-	currentRoomY = int(mazeHeight / 2)
+
+## start the player in a random corner and unlock the valid doors in that room 
+func _setStartingRoom() -> void: 
+	match randi_range(1, 4):
+		1:
+			currentRoomX = int(0)
+			currentRoomY = int(0)
+		2:
+			currentRoomX = int(mazeWidth - 1)
+			currentRoomY = int(0)
+		3:
+			currentRoomX = int(0)
+			currentRoomY = int(mazeHeight - 1)
+		4:
+			currentRoomX = int(mazeWidth - 1)
+			currentRoomY = int(mazeHeight - 1)
 	
 	# Unlock doors in starting room
-	if currentRoomX < mazeRooms.size() and currentRoomY < mazeRooms[currentRoomX].size():
-		var startingRoom = mazeRooms[currentRoomX][currentRoomY]
-		for doorName in startingRoom["doorLocks"].keys():
-			startingRoom["doorLocks"][doorName] = false
+	var startingRoom = mazeRooms[currentRoomX][currentRoomY]
+	for doorName in startingRoom["doorLocks"].keys():
+		startingRoom["doorLocks"][doorName] = false
 
 ## load the current/new room
-func loadRoom() -> void:
-	# clear previously loaded room to make way for new one
+func _loadRoom() -> void:
+	# clear previously loaded room from memory
 	if currentRoomInstance:
 		currentRoomInstance.queue_free()
 	# new room instance
 	currentRoomInstance = roomScene.instantiate()
 	add_child(currentRoomInstance)
 	
-	# actually show the room
 	var room = currentRoom()
 	var chosenRoomLayout = room["chosenLayout"]
-	
-	# hide all room layouts first
 	var roomLayouts = currentRoomInstance.get_node("RoomLayouts")
+	# this works by setting the selected layout to visible and all others to invisible
 	for child in roomLayouts.get_children():
 		child.visible = false
-	# show only the chosen room
 	var chosenRoom = roomLayouts.get_node("Room" + str(chosenRoomLayout))
 	chosenRoom.visible = true
-	
-	if currentRoomX == int(mazeWidth / 2) and currentRoomY == int(mazeHeight / 2):
-		print("UNLOCKING STARTING ROOM DOORS")
-		for doorName in room["doorLocks"].keys():
-			room["doorLocks"][doorName] = false
 	
 	# let doors detect the player
 	var currentRoomDoors = currentRoomInstance.get_node("Doors")
@@ -141,43 +150,56 @@ func loadRoom() -> void:
 		var thisDoor = currentRoomDoors.get_node(doorName)
 		thisDoor.connect("body_entered", Callable(self, "doorTouched").bind(doorName))
 	
-	updateDoors(room, currentRoomDoors)
+	updateDoorVisuals()
+	print("Room Coordinates: ", currentRoomToString())
 
-## update the visual state of doors
-func updateDoors(room: Dictionary, currentRoomDoors: Node) -> void:
+## update the visual state of doors based on their actual state
+func updateDoorVisuals() -> void:
+	var room = currentRoom()
+	var doorStates = getDoorStates()
+	var currentRoomDoors = currentRoomInstance.get_node("Doors")
+	
 	for doorName in ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]:
 		var thisDoor = currentRoomDoors.get_node(doorName)
 		var doorVisual = thisDoor.get_node("DoorVisual")
 		var doorBody = thisDoor.get_node("DoorBody")
 		
-		if not room["doorExists"].get(doorName, false):
-			# corresponds to the maze edge - uninteractable, unpassable
-			doorVisual.modulate = Color(0, 0, 0)
-		elif not room["doorInteractable"].get(doorName, false) and room["doorLocks"].get(doorName, true):
-			# corresponds to a broken door - no longer interactable and remains locked
-			doorVisual.modulate = Color(1, 0, 0)
-		elif room["doorLocks"].get(doorName, true):
-			# corresponds to a locked door - player must answer a question to unlock
-			doorVisual.modulate = Color(1, 0, 1)
-		else:
-			# corresponds to an open door - uninteractable, passable
-			doorVisual.modulate = Color(0, 1, 0)
-			if room["doorInteractable"].get(doorName, false) and room["doorLocks"].get(doorName, false):
-				print("Error: A door is both interactable and unlocked.")
-				# the case for Interactable AND NOT locked should NEVER happen
+		match doorStates[doorName]:
+			"WALL":
+				doorVisual.modulate = Color(0, 0, 0)
+			"BROKEN":
+				doorVisual.modulate = Color(1, 0, 0)
+			"LOCKED":
+				doorVisual.modulate = Color(1, 0, 1)
+			"UNLOCKED":
+				doorVisual.modulate = Color(0, 1, 0)
+				if room["doorInteractable"].get(doorName, false) and room["doorLocks"].get(doorName, false):
+					print("Error: A door is both interactable and unlocked.")
+					# the case for Interactable AND NOT locked should NEVER happen
 
-# so apparently collision detection works a lot like that propertychangeevent stuff but it's much less flexible so we need a helper method to even catch it
+## creates a simple dictionary of the door states in the current room, based on the exists/interactable/locked values
+## use doorstates[doorName] to get the state of a specific door
+func getDoorStates() -> Dictionary:
+	var room = currentRoom()
+	var doorStates = {}
+	
+	for doorName in ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]:
+		if not room["doorExists"].get(doorName, false):
+			doorStates[doorName] = "WALL"
+		elif not room["doorInteractable"].get(doorName, true) and room["doorLocks"].get(doorName, true):
+			doorStates[doorName] = "BROKEN"
+		elif room["doorLocks"].get(doorName, true):
+			doorStates[doorName] = "LOCKED"
+		else:
+			doorStates[doorName] = "UNLOCKED"
+	
+	return doorStates
+
 ## Door interaction - test version with lots of debug
 func doorTouched(body: Node, doorName: String) -> void:
-	# print(">>> DOOR TOUCHED: ", doorName, " by: ", body.name)
-	
-	# is it the player?
-	if body != playerNode:
-		# print(">>> Not the player, ignoring")
-		return
-	
-	# prevent pingpong effect
-	if not doorCooldown:
+	# do nothing if the touching object is not the player
+	# also prevent pingpong effect
+	if body != playerNode or not doorsOffCooldown:
 		return
 	
 	var room = currentRoom()
@@ -187,18 +209,18 @@ func doorTouched(body: Node, doorName: String) -> void:
 		# check if the door is locked
 		var isLocked = room["doorLocks"][doorName]
 		if isLocked:
-			print(">>> BLOCKED! Door ", doorName, currentRoomString(), " is LOCKED.")
+			print(">>> BLOCKED! Door ", doorName, currentRoomToString(), " is LOCKED.")
 		else:
-			print(">>> SUCCESS! Door ", doorName, currentRoomString(), " is UNLOCKED. Going through door...")
-			doorCooldown = false
+			print(">>> SUCCESS! ", doorName, currentRoomToString(), " is UNLOCKED. Going through door...")
+			doorsOffCooldown = false
 			moveRooms(doorName)
-			get_tree().create_timer(0.25).timeout.connect(enableDoors)
+			get_tree().create_timer(0.25).timeout.connect(_enableDoors)
 	else:
 		print(">>> Can't move - at maze boundary!")
 
 # just resets the door cooldown
-func enableDoors() -> void:
-	doorCooldown = true
+func _enableDoors() -> void:
+	doorsOffCooldown = true
 
 ## move the player to another room when they go through a door
 func moveRooms(doorName: String) -> void:
@@ -224,25 +246,11 @@ func moveRooms(doorName: String) -> void:
 			entryDoor = "EastDoor"
 	
 	currentRoom()["doorLocks"][entryDoor] = false
-	loadRoom()
+	_loadRoom()
 	
 	var markers = currentRoomInstance.get_node("EntryPoint")
 	var entryPoint = markers.get_node(enteringFrom)
 	playerNode.global_position = entryPoint.global_position
-	
-	debugConsole.roomCoordsDebug()
-
-## sets the player to the highest z-index so that they are always visible
-func fixPlayerZ() -> void:
-	playerNode.z_index = 1000
-
-# gets the current room of the player
-func currentRoom() -> Dictionary:
-	return mazeRooms[currentRoomX][currentRoomY]
-
-func currentRoomString() -> String:
-	return "(" + str(currentRoomX) + "," + str(currentRoomY) + ")"
-
 
 ## Show question in console (simple implementation)
 #func showQuestion(doorName: String, questionData: Dictionary):

@@ -13,7 +13,6 @@ config_version=5
 config/name="Cool Trivia Maze"
 run/main_scene="uid://mjrou6ceuhn5"
 config/features=PackedStringArray("4.4", "GL Compatibility")
-config/icon="res://icon.svg"
 
 [dotnet]
 

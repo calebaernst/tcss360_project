@@ -20,8 +20,8 @@ stream = ExtResource("2_kb82o")
 
 [node name="Player" parent="Entities" instance=ExtResource("5_11w8b")]
 
-[node name="ConsoleDebug" type="Node" parent="."]
-script = ExtResource("4_kb82o")
-
 [node name="QuestionFactory" type="Node" parent="."]
 script = ExtResource("4_7skvd")
+
+[node name="ConsoleDebug" type="Node" parent="."]
+script = ExtResource("4_kb82o")

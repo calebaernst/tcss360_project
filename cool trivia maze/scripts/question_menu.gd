@@ -17,7 +17,7 @@ func _process(_delta: float) -> void:
 # "constructor": opens the database
 func open_database():
 	db = SQLite.new()
-	db.path="res://TriviaQuestions.db"
+	db.path="res://assets/TriviaQuestions.db"
 	db.open_db()
 
 # constructor: puts the menu together
