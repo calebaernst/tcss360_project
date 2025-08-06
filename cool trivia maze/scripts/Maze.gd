@@ -29,8 +29,8 @@ func _ready() -> void:
 	_prepareMazeArray()
 	_setStartingRoom()
 	_loadRoom()
-	_fixPlayerZ()
 	
+	playerNode.z_index = 1000
 	BGM.play()
 	BGM.finished.connect(_loopBGM)
 	
@@ -41,10 +41,6 @@ func _openDatabase():
 	db = SQLite.new()
 	db.path="res://assets/TriviaQuestions.db"
 	db.open_db()
-
-## sets the player to the highest z-index so that they are always visible
-func _fixPlayerZ() -> void:
-	playerNode.z_index = 1000
 
 ## just repeats the BGM when it finishes playing (because there is no inherent function to do this)
 func _loopBGM() -> void:
@@ -137,29 +133,20 @@ func _setStartingRoom() -> void:
 
 ## load the current/new room
 func _loadRoom() -> void:
-	# clear previously loaded room to make way for new one
+	# clear previously loaded room from memory
 	if currentRoomInstance:
 		currentRoomInstance.queue_free()
 	# new room instance
 	currentRoomInstance = roomScene.instantiate()
 	add_child(currentRoomInstance)
 	
-	# actually show the room
 	var room = currentRoom()
 	var chosenRoomLayout = room["chosenLayout"]
-	
-	# hide all room layouts first
 	var roomLayouts = currentRoomInstance.get_node("RoomLayouts")
 	for child in roomLayouts.get_children():
 		child.visible = false
-	# show only the chosen room
 	var chosenRoom = roomLayouts.get_node("Room" + str(chosenRoomLayout))
 	chosenRoom.visible = true
-	
-	if currentRoomX == int(mazeWidth / 2) and currentRoomY == int(mazeHeight / 2):
-		print("UNLOCKING STARTING ROOM DOORS")
-		for doorName in room["doorLocks"].keys():
-			room["doorLocks"][doorName] = false
 	
 	# let doors detect the player
 	var currentRoomDoors = currentRoomInstance.get_node("Doors")
