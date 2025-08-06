@@ -8,16 +8,15 @@ var roomScene: PackedScene = preload("res://scenes/RoomScene.tscn")
 @export var player: NodePath
 @onready var playerNode = get_node(player)
 @onready var BGM = $BGMPlayer
-var db: SQLite
 
 # maze dimensions/coordinates/navigation variables
 var currentRoomInstance: Node = null
 var mazeRooms: Array = []
 @export var mazeWidth: int = 7
 @export var mazeHeight: int = 7
-var currentRoomX: int = 0
-var currentRoomY: int = 0
-var doorsOffCooldown: bool = true
+var currentRoomX: int
+var currentRoomY: int
+@onready var doorsOffCooldown: bool = true
 
 # Simple question system - make sure these are declared at class level
 var pendingDoor: String = ""
@@ -25,22 +24,17 @@ var awaitingAnswer: bool = false
 
 # On start
 func _ready() -> void:
-	_openDatabase()
 	_prepareMazeArray()
 	_setStartingRoom()
 	_loadRoom()
 	
-	playerNode.z_index = 1000
-	BGM.play()
-	BGM.finished.connect(_loopBGM)
+	playerNode.z_index = 1000 # fix the player to always be visible
+	BGM.play() # play BGM
+	BGM.finished.connect(_loopBGM) # set BGM to loop
 	
+	# debug inputs can be enabled/disabled from the inspector menu for the "Maze" node
 	if debugMode:
 		debugConsole.debugPrints()
-
-func _openDatabase():
-	db = SQLite.new()
-	db.path="res://assets/TriviaQuestions.db"
-	db.open_db()
 
 ## just repeats the BGM when it finishes playing (because there is no inherent function to do this)
 func _loopBGM() -> void:
@@ -55,24 +49,25 @@ func currentRoomToString() -> String:
 
 ## generate maze rooms and store their data in an array
 func _prepareMazeArray() -> void:
-	for x in range(mazeWidth):
-		var column: Array = [] # reinitialize the column array on each loop to prevent cells from pointing at the same array
-		for y in range(mazeHeight):
-			var thisRoom = _prepareRoom(x,y)
-			print("prepared room at ", x, ",", y)
-			column.append(thisRoom)
-		mazeRooms.append(column)
+	if not mazeRooms:
+		for x in range(mazeWidth):
+			var column: Array = [] # reinitialize the column array on each loop to prevent cells from pointing at the same array
+			for y in range(mazeHeight):
+				var thisRoom = _prepareRoom(x,y)
+				print("prepared room at ", x, ",", y)
+				column.append(thisRoom)
+			mazeRooms.append(column)
 
 ## generates data for a single room (used exclusively in conjunction with prepareMazeArray)
 func _prepareRoom(x: int, y: int) -> Dictionary:
 	# choose a layout for this room at random
-	var chosenRoom = randi_range(1, 4) # the second number should be the number of room layouts available 
+	var chosenLayout = randi_range(1, 4) # the second number should be the number of room layouts available 
 	
 	var room = {
 		"x": x, # X coordinate
 		"y": y, # Y coordinate
 		
-		"chosenLayout": chosenRoom, # the layout of this room
+		"chosenLayout": chosenLayout, # the layout of this room
 		
 		# tell whether the room should have a door in a given direction (edge detection)
 		"doorExists": {
@@ -143,6 +138,7 @@ func _loadRoom() -> void:
 	var room = currentRoom()
 	var chosenRoomLayout = room["chosenLayout"]
 	var roomLayouts = currentRoomInstance.get_node("RoomLayouts")
+	# this works by setting the selected layout to visible and all others to invisible
 	for child in roomLayouts.get_children():
 		child.visible = false
 	var chosenRoom = roomLayouts.get_node("Room" + str(chosenRoomLayout))
