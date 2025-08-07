@@ -12,7 +12,7 @@ func debugPrints():
 
 # Takes input from user
 func _input(event):
-	if not maze.debugMode:
+	if not maze.debugInputs:
 		return
 	if event is InputEventKey and event.pressed:
 		match event.keycode:

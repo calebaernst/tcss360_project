@@ -1,8 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://mjrou6ceuhn5"]
+[gd_scene load_steps=5 format=3 uid="uid://mjrou6ceuhn5"]
 
 [ext_resource type="Script" uid="uid://boer6h4perfw5" path="res://scripts/Maze.gd" id="1_7skvd"]
 [ext_resource type="AudioStream" uid="uid://cxkpdauib4n8j" path="res://assets/BGM.ogg" id="2_kb82o"]
-[ext_resource type="Script" uid="uid://cwge1t3cteyqg" path="res://scenes/question_factory.gd" id="4_7skvd"]
 [ext_resource type="Script" uid="uid://g3s5a4acqj1q" path="res://scripts/console_debug.gd" id="4_kb82o"]
 [ext_resource type="PackedScene" uid="uid://cgd3tfgbf8qsk" path="res://scenes/player.tscn" id="5_11w8b"]
 
@@ -11,7 +10,10 @@ metadata/_edit_horizontal_guides_ = [48.0]
 
 [node name="Maze" type="Node2D" parent="."]
 script = ExtResource("1_7skvd")
+debugInputs = false
 player = NodePath("../Entities/Player")
+mazeWidth = null
+mazeHeight = null
 
 [node name="BGMPlayer" type="AudioStreamPlayer" parent="Maze"]
 stream = ExtResource("2_kb82o")
@@ -20,8 +22,5 @@ stream = ExtResource("2_kb82o")
 
 [node name="Player" parent="Entities" instance=ExtResource("5_11w8b")]
 
-[node name="ConsoleDebug" type="Node" parent="."]
+[node name="DebugInputs" type="Node" parent="."]
 script = ExtResource("4_kb82o")
-
-[node name="QuestionFactory" type="Node" parent="."]
-script = ExtResource("4_7skvd")

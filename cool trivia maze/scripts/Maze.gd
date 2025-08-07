@@ -1,7 +1,8 @@
 extends Node2D
+class_name Maze
 
-@export var debugMode: bool = true
-@onready var debugConsole = get_parent().get_node("ConsoleDebug")
+@export var debugInputs: bool = true
+@onready var debugConsole = get_parent().get_node("DebugInputs")
 
 # prepare game assets
 var roomScene: PackedScene = preload("res://scenes/RoomScene.tscn")
@@ -33,7 +34,7 @@ func _ready() -> void:
 	BGM.finished.connect(_loopBGM) # set BGM to loop
 	
 	# debug inputs can be enabled/disabled from the inspector menu for the "Maze" node
-	if debugMode:
+	if debugInputs:
 		debugConsole.debugPrints()
 
 ## just repeats the BGM when it finishes playing (because there is no inherent function to do this)
@@ -97,10 +98,10 @@ func _prepareRoom(x: int, y: int) -> Dictionary:
 		
 		# placeholder questions for each door
 		"doorQuestions": {
-			"NorthDoor": {"question": "What is 2 + 2?", "correct": 2, "options": ["1) 3", "2) 4", "3) 5", "4) 6"]},
-			"SouthDoor": {"question": "How many sides does a triangle have?", "correct": 1, "options": ["1) 3", "2) 4", "3) 5", "4) 6"]},
-			"EastDoor": {"question": "What is 3 x 3?", "correct": 3, "options": ["1) 6", "2) 8", "3) 9", "4) 12"]},
-			"WestDoor": {"question": "How many legs does a cat have?", "correct": 2, "options": ["1) 2", "2) 4", "3) 6", "4) 8"]}
+			"NorthDoor": QuestionFactory.getRandomQuestion(),
+			"SouthDoor": QuestionFactory.getRandomQuestion(),
+			"EastDoor": QuestionFactory.getRandomQuestion(),
+			"WestDoor": QuestionFactory.getRandomQuestion()
 		}
 	}
 	return room
@@ -203,6 +204,7 @@ func doorTouched(body: Node, doorName: String) -> void:
 		return
 	
 	var room = currentRoom()
+	print(room["doorQuestions"].get(doorName)) # remove this once question menu is implemented
 	# check if the target direction goes out of bounds, and deny movement if it is
 	var canMove = room["doorExists"].get(doorName, false)
 	if canMove:
