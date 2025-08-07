@@ -12,8 +12,6 @@ metadata/_edit_horizontal_guides_ = [48.0]
 script = ExtResource("1_7skvd")
 debugInputs = false
 player = NodePath("../Entities/Player")
-mazeWidth = null
-mazeHeight = null
 
 [node name="BGMPlayer" type="AudioStreamPlayer" parent="Maze"]
 stream = ExtResource("2_kb82o")

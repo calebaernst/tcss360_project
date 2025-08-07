@@ -96,7 +96,7 @@ func _prepareRoom(x: int, y: int) -> Dictionary:
 			"WestDoor": true
 		},
 		
-		# placeholder questions for each door
+		# questions for each door
 		"doorQuestions": {
 			"NorthDoor": QuestionFactory.getRandomQuestion(),
 			"SouthDoor": QuestionFactory.getRandomQuestion(),
