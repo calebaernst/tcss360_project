@@ -24,9 +24,9 @@ func open_database():
 func build_menu():
 	myAnswerButtons = [$Button, $Button2, $Button3, $Button4] # array of buttons
 	myQuestionChoices = get_question()
-	$Label.text = myQuestionChoices[0]["question"] 
+	$Label.text = myQuestionChoices[0]["question"]
 	set_default()
-	var question_type = get_type()
+	var question_type : String = get_type()
 	if (question_type != "open response"):
 		var choices = get_answers(myQuestionChoices)
 		choices.shuffle()
@@ -56,11 +56,11 @@ func get_answers(theQues : Array) -> Array:
 
 # getter: randomly selects a question from the database
 func get_question() -> Array:
-	var max_count = get_table_count()
-	var rng = RandomNumberGenerator.new() # declare rng
-	var randNum = rng.randi_range(1, max_count) # get random integer
+	var max_count : int = get_table_count()
+	var rng : Object = RandomNumberGenerator.new() # declare rng
+	var randNum : int = rng.randi_range(1, max_count) # get random integer
 	# select all rows random id
-	var array = myDatabase.select_rows("Questions", "id ='" + str(randNum) + "'", ["*"])
+	var array : Array = myDatabase.select_rows("Questions", "id ='" + str(randNum) + "'", ["*"])
 	return array
 
 # getter: gets total amount of rows in a table
@@ -71,7 +71,7 @@ func get_table_count() -> int:
 		output += 1
 	return output
 
-# setter: enseure default button states
+# setter: ensure default button states - declare initial states
 func set_default():
 	# default visibility
 	$Response.visible = false
