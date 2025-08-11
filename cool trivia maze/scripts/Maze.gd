@@ -20,6 +20,7 @@ var currentRoomY: int
 var exitX: int
 var exitY: int
 @onready var doorsOffCooldown: bool = true
+const cardinals = ["North", "South", "East", "West"]
 
 # Simple question system - make sure these are declared at class level
 var pendingDoor: String = ""
@@ -50,7 +51,7 @@ func _loopBGM() -> void:
 func getCurrentRoom() -> Dictionary:
 	return mazeRooms[currentRoomX][currentRoomY]
 
-func currentRoomToString() -> String:
+func currentRoomCoords() -> String:
 	return "(" + str(currentRoomX) + "," + str(currentRoomY) + ")"
 
 ## generate maze rooms and store their data in an array
@@ -63,6 +64,23 @@ func _prepareMazeArray() -> void:
 				print("prepared room at ", x, ",", y)
 				column.append(thisRoom)
 			mazeRooms.append(column)
+		
+		# link adjacent doors so that they always share the same state (point to the same reference)
+		for x in range(mazeWidth):
+			for y in range(mazeHeight):
+				var room = mazeRooms[x][y]
+				
+				# link north door with south door of room above (vertical link)
+				if y < mazeHeight - 1:
+					var northRoom = mazeRooms[x][y + 1]
+					var sharedDoor = room["roomDoors"]["North"]
+					northRoom["roomDoors"]["South"] = sharedDoor
+				
+				# link east door with west door of room to the right (horizontal link)
+				if x < mazeWidth - 1:
+					var eastRoom = mazeRooms[x + 1][y]
+					var sharedDoor = room["roomDoors"]["East"]
+					eastRoom["roomDoors"]["West"] = sharedDoor
 
 ## generates data for a single room (used exclusively in conjunction with prepareMazeArray)
 func _prepareRoom(x: int, y: int) -> Dictionary:
@@ -75,41 +93,38 @@ func _prepareRoom(x: int, y: int) -> Dictionary:
 		
 		"chosenLayout": chosenLayout, # the layout of this room
 		
-		# tell whether the room should have a door in a given direction (edge detection)
-		"doorExists": {
-			"NorthDoor": y < mazeHeight - 1,
-			"SouthDoor": y > 0,
-			"EastDoor": x < mazeWidth - 1,
-			"WestDoor": x > 0,
-		},
-		
-		# tell whether doors can be interacted with 
-		# set to false after the player answers the question, regardless of if it was correct or not
-		"doorInteractable": {
-			"NorthDoor": true,
-			"SouthDoor": true,
-			"EastDoor": true,
-			"WestDoor": true
-		},
-		
-		# tell whether doors are locked or not (default to true, set to false upon correct answer)
-		# true = locked; locked doors cannot be passed; unlocked doors enable movement to adjacent rooms
-		"doorLocks": {
-			"NorthDoor": true,
-			"SouthDoor": true,
-			"EastDoor": true,
-			"WestDoor": true
-		},
-		
-		# questions for each door
-		"doorQuestions": {
-			"NorthDoor": QuestionFactory.getRandomQuestion(),
-			"SouthDoor": QuestionFactory.getRandomQuestion(),
-			"EastDoor": QuestionFactory.getRandomQuestion(),
-			"WestDoor": QuestionFactory.getRandomQuestion()
+		"roomDoors": {
+			"North": _prepareDoor("North", x, y),
+			"South": _prepareDoor("South", x, y),
+			"East": _prepareDoor("East", x, y),
+			"West": _prepareDoor("West", x, y),
+			}
 		}
-	}
 	return room
+
+## prepares a door with values which determine its state
+func _prepareDoor(direction: String, x: int, y: int) -> Dictionary:
+	var exists
+	match direction:
+		"North":
+			exists = y < mazeHeight - 1
+		"South":
+			exists = y > 0
+		"East":
+			exists = x < mazeWidth - 1
+		"West":
+			exists = x > 0
+		_:
+			exists = false
+			push_error("Invalid door direction designated")
+	
+	var newDoor = {
+		"exists": exists,
+		"interactable": true, 
+		"locked": true,
+		"question": QuestionFactory.getRandomQuestion()
+		}
+	return newDoor
 
 ## start the player in a random corner and unlock the valid doors in that room 
 func _setStartingRoom() -> void: 
@@ -129,8 +144,8 @@ func _setStartingRoom() -> void:
 	
 	# Unlock doors in starting room
 	var startingRoom = mazeRooms[currentRoomX][currentRoomY]
-	for doorName in startingRoom["doorLocks"].keys():
-		startingRoom["doorLocks"][doorName] = false
+	for doorName in cardinals:
+		startingRoom["roomDoors"][doorName]["locked"] = false
 
 ## load the current/new room
 func loadRoom() -> void:
@@ -152,13 +167,13 @@ func loadRoom() -> void:
 	
 	# let doors detect the player
 	var currentRoomDoors = currentRoomInstance.get_node("Doors")
-	for doorName in ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]:
+	for doorName in cardinals:
 		var thisDoor = currentRoomDoors.get_node(doorName)
 		thisDoor.connect("body_entered", Callable(self, "doorTouched").bind(doorName))
 	
 	updateDoorVisuals()
 	updateWinCon()
-	print("Room Coordinates: ", currentRoomToString())
+	print("Room Coordinates: ", currentRoomCoords())
 
 ## update the door visuals to reflect their internal state
 func updateDoorVisuals() -> void:
@@ -166,7 +181,7 @@ func updateDoorVisuals() -> void:
 	var doorStates = getDoorStates()
 	var currentRoomDoors = currentRoomInstance.get_node("Doors")
 	
-	for doorName in ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]:
+	for doorName in cardinals:
 		var thisDoor = currentRoomDoors.get_node(doorName)
 		var doorVisual = thisDoor.get_node("DoorVisual")
 		
@@ -182,9 +197,6 @@ func updateDoorVisuals() -> void:
 			"UNLOCKED":
 				thisDoor.visible = true
 				doorVisual.texture = preload("res://assets/CTM_Door2.png")
-				if room["doorInteractable"].get(doorName, false) and room["doorLocks"].get(doorName, false):
-					push_error("Door ", thisDoor," is both interactable and unlocked.")
-					# the case for Interactable AND NOT locked should NEVER happen
 
 ## updates the status of the exit point and checks whether or not the player has lost
 func updateWinCon():
@@ -194,7 +206,8 @@ func updateWinCon():
 		exitPoint.visible = false
 		exitPoint.get_node("PlayerDetector").set_deferred("monitoring", false)
 	else:
-		exitPoint.connect("body_entered", Callable(self, "victory"))
+		if not exitPoint.is_connected("body_entered", Callable(self, "victory")): # prevent duplicate signal (similar to pingpong effect)
+			exitPoint.connect("body_entered", Callable(self, "victory"))
 		exitPoint.visible = true
 		exitPoint.get_node("PlayerDetector").set_deferred("monitoring", true)
 
@@ -209,12 +222,13 @@ func getDoorStates() -> Dictionary:
 	var room = getCurrentRoom()
 	var doorStates = {}
 	
-	for doorName in ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]:
-		if not room["doorExists"].get(doorName, false):
+	for doorName in cardinals:
+		var door = room["roomDoors"][doorName]
+		if not door["exists"]:
 			doorStates[doorName] = "WALL"
-		elif not room["doorInteractable"].get(doorName, true) and room["doorLocks"].get(doorName, true):
+		elif not door["interactable"] and door["locked"]:
 			doorStates[doorName] = "BROKEN"
-		elif room["doorLocks"].get(doorName, true):
+		elif door["locked"]:
 			doorStates[doorName] = "LOCKED"
 		else:
 			doorStates[doorName] = "UNLOCKED"
@@ -229,16 +243,18 @@ func doorTouched(body: Node, doorName: String) -> void:
 		return
 	
 	var room = getCurrentRoom()
-	print(room["doorQuestions"].get(doorName)) # remove this once question menu is implemented
+	var door = room["roomDoors"][doorName]
+	print(door["question"]) # TODO: remove this once question menu is implemented
+	
 	# check if the target direction goes out of bounds, and deny movement if it is
-	var canMove = room["doorExists"].get(doorName, false)
+	var canMove = door["exists"]
 	if canMove:
 		# check if the door is locked
-		var isLocked = room["doorLocks"][doorName]
+		var isLocked = door["locked"]
 		if isLocked:
-			print(">>> BLOCKED! Door ", doorName, currentRoomToString(), " is LOCKED.")
+			print(">>> BLOCKED! Door ", doorName, currentRoomCoords(), " is LOCKED.")
 		else:
-			print(">>> SUCCESS! ", doorName, currentRoomToString(), " is UNLOCKED. Going through door...")
+			print(">>> SUCCESS! ", doorName, currentRoomCoords(), " is UNLOCKED. Going through door...")
 			doorsOffCooldown = false
 			call_deferred("moveRooms", doorName) # used to be moveRooms(doorName) but godot doesn't like that (functions effectively the same either way)
 			get_tree().create_timer(0.25).timeout.connect(_enableDoors)
@@ -250,66 +266,30 @@ func _enableDoors() -> void:
 	doorsOffCooldown = true
 
 ## move the player to another room when they go through a door
-func moveRooms(doorName: String) -> void:
+func moveRooms(door: String) -> void:
 	var enteringFrom = ""
 	var entryDoor = ""
-	# match is literally just a switch statement
-	match doorName:
-		"NorthDoor":
+	
+	match door:
+		"North":
 			currentRoomY += 1
 			enteringFrom = "FromSouth"
-			entryDoor = "SouthDoor"
-		"SouthDoor":
+			entryDoor = "North"
+		"South":
 			currentRoomY -= 1
 			enteringFrom = "FromNorth"
-			entryDoor = "NorthDoor"
-		"EastDoor":
+			entryDoor = "South"
+		"East":
 			currentRoomX += 1
 			enteringFrom = "FromWest"
-			entryDoor = "WestDoor"
-		"WestDoor":
+			entryDoor = "West"
+		"West":
 			currentRoomX -= 1
 			enteringFrom = "FromEast"
-			entryDoor = "EastDoor"
+			entryDoor = "East"
 	
-	getCurrentRoom()["doorLocks"][entryDoor] = false
 	loadRoom()
 	
 	var markers = currentRoomInstance.get_node("EntryPoint")
 	var entryPoint = markers.get_node(enteringFrom)
 	playerNode.global_position = entryPoint.global_position
-
-## Show question in console (simple implementation)
-#func showQuestion(doorName: String, questionData: Dictionary):
-	#pendingDoor = doorName
-	#awaitingAnswer = true
-	#
-	#print("\n=== DOOR LOCKED ===")
-	#print("Question: " + questionData["question"])
-	#for option in questionData["options"]:
-		#print(option)
-	#print("Press the number key (1-4) for your answer")
-	#print("==================")
-
-# Check if answer is correct
-#func checkAnswer(answerNum: int):
-	#if not awaitingAnswer:
-		#return
-		#
-	#var room = mazeRooms[currentRoomX][currentRoomY]
-	#var questionData = room["doorQuestions"][pendingDoor]
-	#
-	#if answerNum == questionData["correct"]:
-		#print("✓ CORRECT! Door unlocked.")
-		## Unlock the door permanently
-		#room["doorLocks"][pendingDoor] = false
-		## Now go through the door
-		#doorCooldown = false
-		#moveRooms(pendingDoor)
-		#get_tree().create_timer(0.25).timeout.connect(enableDoors)
-	#else:
-		#print("✗ INCORRECT! Door remains locked.")
-	#
-	## Reset question state
-	#awaitingAnswer = false
-	#pendingDoor = ""

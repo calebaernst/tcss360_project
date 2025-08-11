@@ -257,58 +257,58 @@ tile_set = ExtResource("1_mym6t")
 
 [node name="Doors" type="Node2D" parent="."]
 
-[node name="NorthDoor" type="Area2D" parent="Doors"]
+[node name="North" type="Area2D" parent="Doors"]
 position = Vector2(0, -3)
 metadata/_edit_group_ = true
 metadata/_edit_lock_ = true
 
-[node name="PlayerDetector" type="CollisionShape2D" parent="Doors/NorthDoor"]
+[node name="PlayerDetector" type="CollisionShape2D" parent="Doors/North"]
 position = Vector2(0, -85)
 shape = SubResource("RectangleShape2D_mym6t")
 
-[node name="DoorVisual" type="Sprite2D" parent="Doors/NorthDoor"]
+[node name="DoorVisual" type="Sprite2D" parent="Doors/North"]
 position = Vector2(0, -85)
 texture = ExtResource("4_jnjkj")
 
-[node name="SouthDoor" type="Area2D" parent="Doors"]
+[node name="South" type="Area2D" parent="Doors"]
 position = Vector2(0, 3)
 rotation = 3.14159
 metadata/_edit_group_ = true
 metadata/_edit_lock_ = true
 
-[node name="PlayerDetector" type="CollisionShape2D" parent="Doors/SouthDoor"]
+[node name="PlayerDetector" type="CollisionShape2D" parent="Doors/South"]
 position = Vector2(0, -85)
 shape = SubResource("RectangleShape2D_mym6t")
 
-[node name="DoorVisual" type="Sprite2D" parent="Doors/SouthDoor"]
+[node name="DoorVisual" type="Sprite2D" parent="Doors/South"]
 position = Vector2(0, -85)
 texture = ExtResource("4_jnjkj")
 
-[node name="EastDoor" type="Area2D" parent="Doors"]
+[node name="East" type="Area2D" parent="Doors"]
 position = Vector2(3, 0)
 rotation = 1.5708
 metadata/_edit_group_ = true
 metadata/_edit_lock_ = true
 
-[node name="PlayerDetector" type="CollisionShape2D" parent="Doors/EastDoor"]
+[node name="PlayerDetector" type="CollisionShape2D" parent="Doors/East"]
 position = Vector2(0, -85)
 shape = SubResource("RectangleShape2D_mym6t")
 
-[node name="DoorVisual" type="Sprite2D" parent="Doors/EastDoor"]
+[node name="DoorVisual" type="Sprite2D" parent="Doors/East"]
 position = Vector2(0, -85)
 texture = ExtResource("4_jnjkj")
 
-[node name="WestDoor" type="Area2D" parent="Doors"]
+[node name="West" type="Area2D" parent="Doors"]
 position = Vector2(-3, 0)
 rotation = -1.5708
 metadata/_edit_group_ = true
 metadata/_edit_lock_ = true
 
-[node name="PlayerDetector" type="CollisionShape2D" parent="Doors/WestDoor"]
+[node name="PlayerDetector" type="CollisionShape2D" parent="Doors/West"]
 position = Vector2(0, -85)
 shape = SubResource("RectangleShape2D_mym6t")
 
-[node name="DoorVisual" type="Sprite2D" parent="Doors/WestDoor"]
+[node name="DoorVisual" type="Sprite2D" parent="Doors/West"]
 position = Vector2(0, -85)
 texture = ExtResource("4_jnjkj")
 

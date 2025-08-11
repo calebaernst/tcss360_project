@@ -31,9 +31,9 @@ func unlockAllDoors() -> void:
 	if not maze or maze.mazeRooms.is_empty():
 		return
 	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
-	for doorName in room["doorLocks"].keys():
-		room["doorLocks"][doorName] = false
-	print("ALL DOORS UNLOCKED in room ", maze.currentRoomToString())
+	for doorName in maze.cardinals:
+		room["roomDoors"][doorName]["locked"] = false
+	print("ALL DOORS UNLOCKED in room ", maze.currentRoomCoords())
 	debugRoutine()
 
 ## locks all doors in the current room
@@ -41,19 +41,19 @@ func lockAllDoors() -> void:
 	if not maze or maze.mazeRooms.is_empty():
 		return
 	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
-	for doorName in room["doorLocks"].keys():
-		room["doorLocks"][doorName] = true
-	print("ALL DOORS LOCKED in room ", maze.currentRoomToString())
+	for doorName in maze.cardinals:
+		room["roomDoors"][doorName]["locked"] = true
+	print("ALL DOORS LOCKED in room ", maze.currentRoomCoords())
 	debugRoutine()
 
 func breakAllDoors() -> void:
 	if not maze or maze.mazeRooms.is_empty():
 		return
 	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
-	for doorName in room["doorLocks"].keys():
-		room["doorLocks"][doorName] = true
-		room["doorInteractable"][doorName] = false
-	print("ALL DOORS BROKEN in room ", maze.currentRoomToString())
+	for doorName in maze.cardinals:
+		room["roomDoors"][doorName]["locked"] = true
+		room["roomDoors"][doorName]["interactable"] = false
+	print("ALL DOORS BROKEN in room ", maze.currentRoomCoords())
 	debugRoutine()
 
 func debugRoutine() -> void:
@@ -66,6 +66,6 @@ func printDoorStates() -> void:
 	if not maze or maze.mazeRooms.is_empty():
 		return
 	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
-	print("=== ROOM ", maze.currentRoomToString(), " DOOR STATES ===")
+	print("=== ROOM ", maze.currentRoomCoords(), " DOOR STATES ===")
 	print(maze.getDoorStates())
 	print("===================")
