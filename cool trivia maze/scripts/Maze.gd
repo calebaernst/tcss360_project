@@ -233,7 +233,7 @@ func doorTouched(body: Node, doorName: String) -> void:
 		return
 	
 
-	var room = currentRoom()
+	var room = getCurrentRoom()
 ## If the door was already answered and marked non-interactable, do nothing
 	if (not room["doorInteractable"].get(doorName, true)) and room["doorLocks"].get(doorName, true):
 		## brief cooldown to avoid spam when standing in the trigger
@@ -263,7 +263,7 @@ func showTriviaQuestion(door_name: String) -> void:
 	if awaitingAnswer: return
 	pendingDoor = door_name
 	awaitingAnswer = true
-	currentQuestion = currentRoom()["doorQuestions"][door_name]
+	currentQuestion = getCurrentRoom()["doorQuestions"][door_name]
 
 	playerNode.set_physics_process(false)
 
@@ -370,7 +370,7 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 		return
 
 	var door_to_move := pendingDoor       # cache before closing
-	var room := currentRoom()
+	var room := getCurrentRoom()
 
 	var isCorrect := selectedAnswer.strip_edges().to_lower() == \
 		currentQuestion.correctAnswer.strip_edges().to_lower()
