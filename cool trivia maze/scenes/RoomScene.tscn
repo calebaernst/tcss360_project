@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=4 uid="uid://co88w5x7dsb8m"]
+[gd_scene load_steps=10 format=4 uid="uid://co88w5x7dsb8m"]
 
 [ext_resource type="TileSet" uid="uid://chf1baqwe0ywc" path="res://assets/temp-tilemap.tres" id="1_mym6t"]
 [ext_resource type="Texture2D" uid="uid://buvd3jsgnqdtp" path="res://assets/cave_/cave_.png" id="2_jnjkj"]
@@ -201,6 +201,8 @@ sources/1 = SubResource("TileSetAtlasSource_jnjkj")
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mym6t"]
 size = Vector2(32, 16)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jnjkj"]
+
 [node name="RoomFrame" type="Node2D"]
 
 [node name="RoomLayouts" type="Node2D" parent="."]
@@ -258,6 +260,7 @@ tile_set = ExtResource("1_mym6t")
 [node name="NorthDoor" type="Area2D" parent="Doors"]
 position = Vector2(0, -3)
 metadata/_edit_group_ = true
+metadata/_edit_lock_ = true
 
 [node name="PlayerDetector" type="CollisionShape2D" parent="Doors/NorthDoor"]
 position = Vector2(0, -85)
@@ -271,6 +274,7 @@ texture = ExtResource("4_jnjkj")
 position = Vector2(0, 3)
 rotation = 3.14159
 metadata/_edit_group_ = true
+metadata/_edit_lock_ = true
 
 [node name="PlayerDetector" type="CollisionShape2D" parent="Doors/SouthDoor"]
 position = Vector2(0, -85)
@@ -284,6 +288,7 @@ texture = ExtResource("4_jnjkj")
 position = Vector2(3, 0)
 rotation = 1.5708
 metadata/_edit_group_ = true
+metadata/_edit_lock_ = true
 
 [node name="PlayerDetector" type="CollisionShape2D" parent="Doors/EastDoor"]
 position = Vector2(0, -85)
@@ -297,6 +302,7 @@ texture = ExtResource("4_jnjkj")
 position = Vector2(-3, 0)
 rotation = -1.5708
 metadata/_edit_group_ = true
+metadata/_edit_lock_ = true
 
 [node name="PlayerDetector" type="CollisionShape2D" parent="Doors/WestDoor"]
 position = Vector2(0, -85)
@@ -319,3 +325,17 @@ position = Vector2(65, 0)
 
 [node name="FromWest" type="Marker2D" parent="EntryPoint"]
 position = Vector2(-65, 0)
+
+[node name="ExitPoint" type="Area2D" parent="."]
+metadata/_edit_group_ = true
+metadata/_edit_lock_ = true
+
+[node name="PlayerDetector" type="CollisionShape2D" parent="ExitPoint"]
+shape = SubResource("RectangleShape2D_jnjkj")
+
+[node name="ColorRect" type="ColorRect" parent="ExitPoint"]
+offset_left = -10.0
+offset_top = -10.0
+offset_right = 10.0
+offset_bottom = 10.0
+color = Color(1, 0, 1, 1)

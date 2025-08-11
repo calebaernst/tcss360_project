@@ -18,6 +18,8 @@ var currentRoomInstance: Node = null
 var mazeRooms: Array = []
 var currentRoomX: int
 var currentRoomY: int
+var exitX: int
+var exitY: int
 @onready var doorsOffCooldown: bool = true
 
 ## Question System Integration
@@ -28,6 +30,9 @@ var currentQuestion: Question = null
 
 ## On start
 func _ready() -> void:
+	exitX = mazeWidth / 2
+	exitY = mazeHeight / 2
+	
 	_prepareMazeArray()
 	_setStartingRoom()
 	loadRoom()
@@ -45,7 +50,7 @@ func _loopBGM() -> void:
 	BGM.play()
 
 # gets the current room of the player
-func currentRoom() -> Dictionary:
+func getCurrentRoom() -> Dictionary:
 	return mazeRooms[currentRoomX][currentRoomY]
 
 func currentRoomToString() -> String:
@@ -139,7 +144,7 @@ func loadRoom() -> void:
 	currentRoomInstance = roomScene.instantiate()
 	add_child(currentRoomInstance)
 	
-	var room = currentRoom()
+	var room = getCurrentRoom()
 	var chosenRoomLayout = room["chosenLayout"]
 	var roomLayouts = currentRoomInstance.get_node("RoomLayouts")
 	# this works by setting the selected layout to visible and all others to invisible
@@ -155,11 +160,12 @@ func loadRoom() -> void:
 		thisDoor.connect("body_entered", Callable(self, "doorTouched").bind(doorName))
 	
 	updateDoorVisuals()
+	updateWinCon()
 	print("Room Coordinates: ", currentRoomToString())
 
-## update the visual state of doors based on their actual state
+## update the door visuals to reflect their internal state
 func updateDoorVisuals() -> void:
-	var room = currentRoom()
+	var room = getCurrentRoom()
 	var doorStates = getDoorStates()
 	var currentRoomDoors = currentRoomInstance.get_node("Doors")
 	
@@ -169,24 +175,41 @@ func updateDoorVisuals() -> void:
 		
 		match doorStates[doorName]:
 			"WALL":
-				doorVisual.visible = false
+				thisDoor.visible = false
 			"BROKEN":
-				doorVisual.visible = true
+				thisDoor.visible = true
 				doorVisual.texture = preload("res://assets/CTM_Door3.png")
 			"LOCKED":
-				doorVisual.visible = true
+				thisDoor.visible = true
 				doorVisual.texture = preload("res://assets/CTM_Door1.png")
 			"UNLOCKED":
-				doorVisual.visible = true
+				thisDoor.visible = true
 				doorVisual.texture = preload("res://assets/CTM_Door2.png")
 				if room["doorInteractable"].get(doorName, false) and room["doorLocks"].get(doorName, false):
-					print("Error: A door is both interactable and unlocked.")
+					push_error("Door ", thisDoor," is both interactable and unlocked.")
 					# the case for Interactable AND NOT locked should NEVER happen
+
+## updates the status of the exit point and checks whether or not the player has lost
+func updateWinCon():
+	var exitPoint = currentRoomInstance.get_node("ExitPoint")
+	
+	if currentRoomX != exitX or currentRoomY != exitY:
+		exitPoint.visible = false
+		exitPoint.get_node("PlayerDetector").set_deferred("monitoring", false)
+	else:
+		exitPoint.connect("body_entered", Callable(self, "victory"))
+		exitPoint.visible = true
+		exitPoint.get_node("PlayerDetector").set_deferred("monitoring", true)
+
+## called only when the player reaches the exit
+func victory(body: Node):
+	if body == playerNode:
+		print("you have reached the exit (congrats)")
 
 ## creates a simple dictionary of the door states in the current room, based on the exists/interactable/locked values
 ## use doorstates[doorName] to get the state of a specific door
 func getDoorStates() -> Dictionary:
-	var room = currentRoom()
+	var room = getCurrentRoom()
 	var doorStates = {}
 	
 	for doorName in ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]:
@@ -209,6 +232,7 @@ func doorTouched(body: Node, doorName: String) -> void:
 	if body != playerNode or not doorsOffCooldown or awaitingAnswer:
 		return
 	
+
 	var room = currentRoom()
 ## If the door was already answered and marked non-interactable, do nothing
 	if (not room["doorInteractable"].get(doorName, true)) and room["doorLocks"].get(doorName, true):
@@ -218,6 +242,7 @@ func doorTouched(body: Node, doorName: String) -> void:
 		print(">>> DOOR DISABLED: %s at %s" % [doorName, currentRoomToString()])
 		return
 	## check if the target direction goes out of bounds, and deny movement if it is
+  
 	var canMove = room["doorExists"].get(doorName, false)
 	if canMove:
 		## check if the door is locked
@@ -414,7 +439,7 @@ func moveRooms(doorName: String) -> void:
 			enteringFrom = "FromEast"
 			entryDoor = "EastDoor"
 	
-	currentRoom()["doorLocks"][entryDoor] = false
+	getCurrentRoom()["doorLocks"][entryDoor] = false
 	loadRoom()
 	
 	var markers = currentRoomInstance.get_node("EntryPoint")
