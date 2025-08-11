@@ -33,6 +33,7 @@ func unlockAllDoors() -> void:
 	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
 	for doorName in maze.cardinalDoors:
 		room[doorName]["locked"] = false
+		room[doorName]["interactable"] = false
 	print("ALL DOORS UNLOCKED in room ", maze.currentRoomCoords())
 	debugRoutine()
 
@@ -43,6 +44,7 @@ func lockAllDoors() -> void:
 	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
 	for doorName in maze.cardinalDoors:
 		room[doorName]["locked"] = true
+		room[doorName]["interactable"] = true
 	print("ALL DOORS LOCKED in room ", maze.currentRoomCoords())
 	debugRoutine()
 
