@@ -276,7 +276,7 @@ func showTriviaQuestion(door_name: String) -> void:
 	if awaitingAnswer: return
 	pendingDoor = door_name
 	awaitingAnswer = true
-	currentQuestion = getCurrentRoom()["doorQuestions"][door_name]
+	currentQuestion = getCurrentRoom()[door_name]["question"]
 
 	playerNode.set_physics_process(false)
 
@@ -389,8 +389,8 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 
 	if isCorrect:
 		print("✓ CORRECT! ", currentQuestion.correctMessage)
-		room["doorLocks"][door_to_move] = false
-		room["doorInteractable"][door_to_move] = false  # no re-quiz
+		room[door_to_move]["locked"] = false
+		room[door_to_move]["interactable"] = false  # no re-quiz
 
 		_closeQuestionMenu()  # this clears pendingDoor, but we cached it
 
@@ -400,7 +400,7 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 		get_tree().create_timer(0.25).timeout.connect(_enableDoors)
 	else:
 		print("✗ INCORRECT! ", currentQuestion.incorrectMessage)
-		room["doorInteractable"][door_to_move] = false
+		room[door_to_move]["interactable"] = false
 		_closeQuestionMenu()
 
 	updateDoorVisuals()
@@ -426,8 +426,8 @@ func _enableDoors() -> void:
 	doorsOffCooldown = true
 
 ## move the player to another room when they go through a door
-func moveRooms(doorName: String) -> void:
-	if doorName == null or doorName == "":
+func moveRooms(door: String) -> void:
+	if door == null or door == "":
 		push_error("moveRooms called with empty door name")
 		return
 	var enteringFrom = ""
