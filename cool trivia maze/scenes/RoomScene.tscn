@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=4 uid="uid://co88w5x7dsb8m"]
+[gd_scene load_steps=9 format=4 uid="uid://co88w5x7dsb8m"]
 
 [ext_resource type="TileSet" uid="uid://chf1baqwe0ywc" path="res://assets/temp-tilemap.tres" id="1_mym6t"]
 [ext_resource type="Texture2D" uid="uid://buvd3jsgnqdtp" path="res://assets/cave_/cave_.png" id="2_jnjkj"]
 [ext_resource type="Texture2D" uid="uid://bdocde7y0t261" path="res://assets/CTM_Tileset.png" id="3_mym6t"]
+[ext_resource type="Texture2D" uid="uid://b1ftf0slxgq4e" path="res://assets/CTM_Door1.png" id="4_jnjkj"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7sa2y"]
 texture = ExtResource("2_jnjkj")
@@ -198,7 +199,7 @@ sources/0 = SubResource("TileSetAtlasSource_7sa2y")
 sources/1 = SubResource("TileSetAtlasSource_jnjkj")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mym6t"]
-size = Vector2(26, 14)
+size = Vector2(32, 16)
 
 [node name="RoomFrame" type="Node2D"]
 
@@ -255,67 +256,55 @@ tile_set = ExtResource("1_mym6t")
 [node name="Doors" type="Node2D" parent="."]
 
 [node name="NorthDoor" type="Area2D" parent="Doors"]
-position = Vector2(0, -1)
+position = Vector2(0, -3)
 metadata/_edit_group_ = true
 
 [node name="PlayerDetector" type="CollisionShape2D" parent="Doors/NorthDoor"]
-position = Vector2(0, -86)
+position = Vector2(0, -85)
 shape = SubResource("RectangleShape2D_mym6t")
 
-[node name="DoorVisual" type="ColorRect" parent="Doors/NorthDoor"]
-offset_left = -13.0
-offset_top = -93.0
-offset_right = 13.0
-offset_bottom = -79.0
-metadata/_edit_use_anchors_ = true
+[node name="DoorVisual" type="Sprite2D" parent="Doors/NorthDoor"]
+position = Vector2(0, -85)
+texture = ExtResource("4_jnjkj")
 
 [node name="SouthDoor" type="Area2D" parent="Doors"]
-position = Vector2(0, 1)
+position = Vector2(0, 3)
 rotation = 3.14159
 metadata/_edit_group_ = true
 
 [node name="PlayerDetector" type="CollisionShape2D" parent="Doors/SouthDoor"]
-position = Vector2(0, -86)
+position = Vector2(0, -85)
 shape = SubResource("RectangleShape2D_mym6t")
 
-[node name="DoorVisual" type="ColorRect" parent="Doors/SouthDoor"]
-offset_left = -13.0
-offset_top = -93.0
-offset_right = 13.0
-offset_bottom = -79.0
-metadata/_edit_use_anchors_ = true
+[node name="DoorVisual" type="Sprite2D" parent="Doors/SouthDoor"]
+position = Vector2(0, -85)
+texture = ExtResource("4_jnjkj")
 
 [node name="EastDoor" type="Area2D" parent="Doors"]
-position = Vector2(1, 0)
+position = Vector2(3, 0)
 rotation = 1.5708
 metadata/_edit_group_ = true
 
 [node name="PlayerDetector" type="CollisionShape2D" parent="Doors/EastDoor"]
-position = Vector2(0, -86)
+position = Vector2(0, -85)
 shape = SubResource("RectangleShape2D_mym6t")
 
-[node name="DoorVisual" type="ColorRect" parent="Doors/EastDoor"]
-offset_left = -13.0
-offset_top = -93.0
-offset_right = 13.0
-offset_bottom = -79.0
-metadata/_edit_use_anchors_ = true
+[node name="DoorVisual" type="Sprite2D" parent="Doors/EastDoor"]
+position = Vector2(0, -85)
+texture = ExtResource("4_jnjkj")
 
 [node name="WestDoor" type="Area2D" parent="Doors"]
-position = Vector2(-1, 0)
+position = Vector2(-3, 0)
 rotation = -1.5708
 metadata/_edit_group_ = true
 
 [node name="PlayerDetector" type="CollisionShape2D" parent="Doors/WestDoor"]
-position = Vector2(0, -86)
+position = Vector2(0, -85)
 shape = SubResource("RectangleShape2D_mym6t")
 
-[node name="DoorVisual" type="ColorRect" parent="Doors/WestDoor"]
-offset_left = -13.0
-offset_top = -93.0
-offset_right = 13.0
-offset_bottom = -79.0
-metadata/_edit_use_anchors_ = true
+[node name="DoorVisual" type="Sprite2D" parent="Doors/WestDoor"]
+position = Vector2(0, -85)
+texture = ExtResource("4_jnjkj")
 
 [node name="EntryPoint" type="Node2D" parent="."]
 

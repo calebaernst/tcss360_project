@@ -166,13 +166,16 @@ func updateDoorVisuals() -> void:
 		
 		match doorStates[doorName]:
 			"WALL":
-				doorVisual.modulate = Color(0, 0, 0)
+				doorVisual.visible = false
 			"BROKEN":
-				doorVisual.modulate = Color(1, 0, 0)
+				doorVisual.visible = true
+				doorVisual.texture = preload("res://assets/CTM_Door3.png")
 			"LOCKED":
-				doorVisual.modulate = Color(1, 0, 1)
+				doorVisual.visible = true
+				doorVisual.texture = preload("res://assets/CTM_Door1.png")
 			"UNLOCKED":
-				doorVisual.modulate = Color(0, 1, 0)
+				doorVisual.visible = true
+				doorVisual.texture = preload("res://assets/CTM_Door2.png")
 				if room["doorInteractable"].get(doorName, false) and room["doorLocks"].get(doorName, false):
 					print("Error: A door is both interactable and unlocked.")
 					# the case for Interactable AND NOT locked should NEVER happen
