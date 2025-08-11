@@ -16,7 +16,10 @@ signal question_answered_incorrectly(door_name: String)
 
 # prepare assets
 var roomScene: PackedScene = preload("res://scenes/RoomScene.tscn")
+<<<<<<< Updated upstream
 # reference the question menu
+=======
+>>>>>>> Stashed changes
 var questionMenuScene: PackedScene = preload("res://scenes/question_menu.tscn")
 @export var player: NodePath
 @onready var playerNode = get_node(player)
@@ -36,9 +39,14 @@ var currentRoomY: int = 0
 var doorCooldown: bool = true
 
 # Simple question system - make sure these are declared at class level
+var questionMenuInstance: Control = null
 var pendingDoor: String = ""
 var awaitingAnswer: bool = false
+<<<<<<< Updated upstream
 var questionMenuInstance: Node = null
+=======
+var currentQuestion: Question = null
+>>>>>>> Stashed changes
 
 # On start
 func _ready() -> void:
@@ -214,7 +222,11 @@ func doorTouched(body: Node, doorName: String) -> void:
 		return
 		
 	var room = currentRoom()
+<<<<<<< Updated upstream
 	# check if the target direction goes out of bounds, and deny movement if it is
+=======
+	## check if the target direction goes out of bounds, and deny movement if it is
+>>>>>>> Stashed changes
 	var canMove = room["doorExists"].get(doorName, false)
 	if canMove:
 		# check if the door is locked
@@ -235,6 +247,7 @@ func doorTouched(body: Node, doorName: String) -> void:
 	else:
 		print(">>> Can't move - at maze boundary!")
 
+<<<<<<< Updated upstream
 func showQuestionForDoor(doorName: String) -> void:
 	if awaitingAnswer:
 		return
@@ -261,10 +274,151 @@ func _on_question_completed(is_correct: bool) -> void:
 		return
 		
 	# Clean up question menu
+=======
+func showTriviaQuestion(doorName: String) -> void:
+	if awaitingAnswer:
+		return
+		
+	pendingDoor = doorName
+	awaitingAnswer = true
+	currentQuestion = currentRoom()["doorQuestions"][doorName]
+	
+	# Pause player movement
+	playerNode.set_physics_process(false)
+	
+	# Create and show question menu
+	questionMenuInstance = questionMenuScene.instantiate()
+	get_tree().current_scene.add_child(questionMenuInstance)
+	
+	# Setup the question menu with our question data
+	setupQuestionMenu()
+	
+	# Connect to question menu signals
+	questionMenuInstance.connect("question_answered", _onQuestionAnswered)
+	questionMenuInstance.connect("menu_exited", _onQuestionMenuExited)
+
+## Setup the question menu with the current question
+func setupQuestionMenu() -> void:
+	if not questionMenuInstance or not currentQuestion:
+		return
+		
+	# Set the question text
+	var questionLabel = questionMenuInstance.get_node("Label")
+	questionLabel.text = currentQuestion.questionText
+	
+	# Handle different question types
+	match currentQuestion.type:
+		"multiple choice":
+			setupMultipleChoiceQuestion()
+		"true/false":
+			setupTrueFalseQuestion()
+		"open response":
+			setupOpenResponseQuestion()
+
+## Setup multiple choice question display
+func setupMultipleChoiceQuestion() -> void:
+	var buttons = [
+		questionMenuInstance.get_node("Button"),
+		questionMenuInstance.get_node("Button2"),
+		questionMenuInstance.get_node("Button3"),
+		questionMenuInstance.get_node("Button4")
+	]
+	
+	# Show all answer buttons
+	for i in range(buttons.size()):
+		if i < currentQuestion.answerChoices.size():
+			buttons[i].visible = true
+			buttons[i].text = currentQuestion.answerChoices[i]
+		else:
+			buttons[i].visible = false
+
+## Hide open response elements
+	questionMenuInstance.get_node("Response").visible = false
+	questionMenuInstance.get_node("Submit").visible = false
+
+## Setup true/false question (use first two buttons)
+func setupTrueFalseQuestion() -> void:
+	var buttons = [
+		questionMenuInstance.get_node("Button"),
+		questionMenuInstance.get_node("Button2"),
+		questionMenuInstance.get_node("Button3"),
+		questionMenuInstance.get_node("Button4")
+	]
+	
+	# Show only first two buttons for True/False
+	buttons[0].visible = true
+	buttons[1].visible = true
+	buttons[2].visible = false
+	buttons[3].visible = false
+	
+	# Set True/False text
+	for i in range(min(2, currentQuestion.answerChoices.size())):
+		buttons[i].text = currentQuestion.answerChoices[i]
+	
+	# Hide open response elements
+	questionMenuInstance.get_node("Response").visible = false
+	questionMenuInstance.get_node("Submit").visible = false
+
+## Setup open response question
+func setupOpenResponseQuestion() -> void:
+	# Hide all multiple choice buttons
+	questionMenuInstance.get_node("Button").visible = false
+	questionMenuInstance.get_node("Button2").visible = false
+	questionMenuInstance.get_node("Button3").visible = false
+	questionMenuInstance.get_node("Button4").visible = false
+	
+	# Show text input and submit button
+	questionMenuInstance.get_node("Response").visible = true
+	questionMenuInstance.get_node("Submit").visible = true
+	questionMenuInstance.get_node("Response").text = ""
+
+## Handle when player answers a question
+func _onQuestionAnswered(selectedAnswer: String) -> void:
+	if not awaitingAnswer or not currentQuestion:
+		return
+		
+	var isCorrect = selectedAnswer.strip_edges().to_lower() == currentQuestion.correctAnswer.strip_edges().to_lower()
+	
+	if isCorrect:
+		print("✓ CORRECT! ", currentQuestion.correctMessage)
+		# Unlock the door
+		var room = currentRoom()
+		room["doorLocks"][pendingDoor] = false
+		room["doorInteractable"][pendingDoor] = false  # Mark as answered
+		
+		# Close question menu and move through door
+		_closeQuestionMenu()
+		
+		# Small delay then move through the door
+		await get_tree().create_timer(0.5).timeout
+		doorsOffCooldown = false
+		moveRooms(pendingDoor)
+		get_tree().create_timer(0.25).timeout.connect(_enableDoors)
+		
+	else:
+		print("✗ INCORRECT! ", currentQuestion.incorrectMessage)
+		# Mark door as answered but keep it locked
+		var room = currentRoom()
+		room["doorInteractable"][pendingDoor] = false
+		
+		# Close question menu
+		_closeQuestionMenu()
+
+## Update door visuals
+	updateDoorVisuals()
+
+##Handle when player exits question menu without answering
+func _onQuestionMenuExited() -> void:
+	_closeQuestionMenu()
+
+## Close and cleanup question menu
+func _closeQuestionMenu() -> void:
+>>>>>>> Stashed changes
 	if questionMenuInstance:
 		questionMenuInstance.queue_free()
 		questionMenuInstance = null
 	
+<<<<<<< Updated upstream
 	# Resume game
 	get_tree().paused = false
 	
@@ -299,14 +453,26 @@ func _on_question_completed(is_correct: bool) -> void:
 		# Update door visuals to show red (attempted but failed)
 		var currentRoomDoors = currentRoomInstance.get_node("Doors")
 		updateDoors(room, currentRoomDoors)
+=======
+	# Resume player movement
+	playerNode.set_physics_process(true)
+>>>>>>> Stashed changes
 	
 	# Reset question state
 	awaitingAnswer = false
 	pendingDoor = ""
+<<<<<<< Updated upstream
 	
 ## just resets the door cooldown
 func enableDoors() -> void:
 	doorCooldown = true
+=======
+	currentQuestion = null
+
+# just resets the door cooldown
+func _enableDoors() -> void:
+	doorsOffCooldown = true
+>>>>>>> Stashed changes
 
 ## move the player to another room when they go through a door
 func moveRooms(doorName: String) -> void:
@@ -339,6 +505,7 @@ func moveRooms(doorName: String) -> void:
 	var markers = currentRoomInstance.get_node("EntryPoint")
 	var entryPoint = markers.get_node(enteringFrom)
 	playerNode.global_position = entryPoint.global_position
+<<<<<<< Updated upstream
 	
 	debugConsole.roomCoordsDebug()
 
@@ -375,3 +542,5 @@ func _on_question_answered_correctly(door_name: String):
 func _on_question_answered_incorrectly(door_name: String):
 	print("Player answered incorrectly for door: ", door_name)
 	
+=======
+>>>>>>> Stashed changes
