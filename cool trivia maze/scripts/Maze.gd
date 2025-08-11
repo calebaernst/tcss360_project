@@ -12,8 +12,8 @@ var questionMenuScene: PackedScene = preload("res://scenes/question_menu.tscn")
 @onready var BGM = $BGMPlayer
 
 ## maze dimensions/coordinates/navigation variables
-@export var mazeWidth: int = 7
-@export var mazeHeight: int = 7
+@export var mazeWidth: int = 9
+@export var mazeHeight: int = 9
 var currentRoomInstance: Node = null
 var mazeRooms: Array = []
 var currentRoomX: int
@@ -44,7 +44,7 @@ func _ready() -> void:
 func _loopBGM() -> void:
 	BGM.play()
 
-## gets the current room of the player
+# gets the current room of the player
 func currentRoom() -> Dictionary:
 	return mazeRooms[currentRoomX][currentRoomY]
 
