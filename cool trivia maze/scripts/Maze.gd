@@ -11,7 +11,7 @@ var questionMenuScene: PackedScene = preload("res://scenes/question_menu.tscn")
 @onready var playerNode = get_node(player)
 @onready var BGM = $BGMPlayer
 
-## maze dimensions/coordinates/navigation variables
+# maze dimensions/coordinates/navigation variables
 @export var mazeWidth: int = 9
 @export var mazeHeight: int = 9
 var currentRoomInstance: Node = null
