@@ -5,6 +5,15 @@ var myDatabase : SQLite # initialize SQLite database field
 var myQuestionChoices : Array # randomly chosen question field
 var myAnswerButtons : Array # array of buttons for answers field
 
+# enumerated variable
+enum Select {
+	submit,
+	button1,
+	button2,
+	button3, 
+	button4
+}
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	open_database() # database constructor
@@ -107,7 +116,7 @@ func set_buttons(theChoices : Array, theType : String) -> void:
 		myAnswerButtons[i].text = theChoices[i] # set button text to answer
 
 # verifier: checks if answer is correct and prints correct/incorrect message
-func check_answer(theInput : int) -> void:
+func check_answer(theInput : Select) -> void:
 	var is_correct : bool = false
 	if (theInput == 0): # if the user submitted an open response
 		is_correct = $Response.text == myQuestionChoices[0]["correct answer"]
@@ -127,19 +136,19 @@ func check_answer(theInput : int) -> void:
 
 # the following functions are called when the user presses their respective buttons
 func _on_button_button_down() -> void: # Button node 1 (top right)
-	check_answer(1) #give it a name!!!!
+	check_answer(Select.button1) 
 
 func _on_button_2_button_down() -> void: # Button node 2 (top left)
-	check_answer(2)
+	check_answer(Select.button2)
 
 func _on_button_3_button_down() -> void: # Button node 3 (bottom right)
-	check_answer(3)
+	check_answer(Select.button3)
 
 func _on_button_4_button_down() -> void: # Button node 4 (bottom left)
-	check_answer(4)
+	check_answer(Select.button4)
 
 func _on_submit_button_down() -> void:
-	check_answer(0)
+	check_answer(Select.submit)
 
 func _on_exit_button_down() -> void:
 	build_menu()
