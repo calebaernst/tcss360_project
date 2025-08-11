@@ -201,7 +201,8 @@ func getDoorStates() -> Dictionary:
 	
 	return doorStates
 
-## Door interaction - test version with lots of debug
+
+## Door interaction - with question system integration
 func doorTouched(body: Node, doorName: String) -> void:
 	# do nothing if the touching object is not the player
 	# also prevent pingpong effect
@@ -216,7 +217,7 @@ func doorTouched(body: Node, doorName: String) -> void:
 		var isLocked = room["doorLocks"][doorName]
 		if isLocked:
 			print(">>> BLOCKED! Door ", doorName, currentRoomToString(), " is LOCKED.")
-			showTriviaQuestion(doorName)
+			showTriviaQuestion(doorName)  # This is the missing line!
 		else:
 			print(">>> SUCCESS! ", doorName, currentRoomToString(), " is UNLOCKED. Going through door...")
 			doorsOffCooldown = false
@@ -226,29 +227,37 @@ func doorTouched(body: Node, doorName: String) -> void:
 		print(">>> Can't move - at maze boundary!")
 
 ## Show trivia question when player touches locked door
-func showTriviaQuestion(doorName: String) -> void:
-	if awaitingAnswer:
-		return
-		
-	pendingDoor = doorName
+func showTriviaQuestion(door_name: String) -> void:
+	if awaitingAnswer: return
+	pendingDoor = door_name
 	awaitingAnswer = true
-	currentQuestion = currentRoom()["doorQuestions"][doorName]
-	
-	# Pause player movement
+	currentQuestion = currentRoom()["doorQuestions"][door_name]
+
 	playerNode.set_physics_process(false)
-	
-	# Create and show question menu
+
 	questionMenuInstance = questionMenuScene.instantiate()
-	get_tree().current_scene.add_child(questionMenuInstance)
-	
-	# Setup the question menu with our question data
+
+	# --- ensure a UI CanvasLayer exists and add the menu there ---
+	var root := get_tree().current_scene
+	var ui := root.get_node_or_null("UI")
+	if ui == null:
+		ui = CanvasLayer.new()
+		ui.name = "UI"
+		ui.layer = 100  # above world
+		root.add_child(ui)
+	ui.add_child(questionMenuInstance)
+
+	# draw in screen space and fill viewport
+	questionMenuInstance.top_level = true
+	questionMenuInstance.set_anchors_preset(Control.PRESET_FULL_RECT)
+	questionMenuInstance.visible = true
+
 	setupQuestionMenu()
-	
-	# Connect to question menu signals
+
 	questionMenuInstance.connect("question_answered", _onQuestionAnswered)
 	questionMenuInstance.connect("menu_exited", _onQuestionMenuExited)
 
-## NEW: Setup the question menu with the current question
+## Setup the question menu with the current question
 func setupQuestionMenu() -> void:
 	if not questionMenuInstance or not currentQuestion:
 		return
@@ -332,15 +341,15 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 	
 	if isCorrect:
 		print("✓ CORRECT! ", currentQuestion.correctMessage)
-		# Unlock the door
+		## Unlock the door
 		var room = currentRoom()
 		room["doorLocks"][pendingDoor] = false
 		room["doorInteractable"][pendingDoor] = false  # Mark as answered
 		
-		# Close question menu and move through door
+		## Close question menu and move through door
 		_closeQuestionMenu()
 		
-		# Small delay then move through the door
+		## Small delay then move through the door
 		await get_tree().create_timer(0.5).timeout
 		doorsOffCooldown = false
 		moveRooms(pendingDoor)
@@ -348,33 +357,29 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 		
 	else:
 		print("✗ INCORRECT! ", currentQuestion.incorrectMessage)
-		# Mark door as answered but keep it locked
-		var room = currentRoom()
-		room["doorInteractable"][pendingDoor] = false
-		
-		# Close question menu
+		## Mark door as answered but keep it locked
+		currentRoom()["doorInteractable"][pendingDoor] = false
+		## Close question menu
 		_closeQuestionMenu()
 	
 	# Update door visuals
 	updateDoorVisuals()
 
-## NEW: Handle when player exits question menu without answering
+## Handle when player exits question menu without answering
 func _onQuestionMenuExited() -> void:
 	_closeQuestionMenu()
 
-## NEW: Close and cleanup question menu
-func _closeQuestionMenu() -> void:
+## Close and cleanup question menu
+func _closeQuestionMenu(preserve_state: bool = false) -> void:
 	if questionMenuInstance:
 		questionMenuInstance.queue_free()
 		questionMenuInstance = null
-	
-	# Resume player movement
 	playerNode.set_physics_process(true)
-	
-	# Reset question state
 	awaitingAnswer = false
-	pendingDoor = ""
-	currentQuestion = null
+	if not preserve_state:
+		pendingDoor = ""
+		currentQuestion = null
+
 
 ## just resets the door cooldown
 func _enableDoors() -> void:
@@ -382,6 +387,9 @@ func _enableDoors() -> void:
 
 ## move the player to another room when they go through a door
 func moveRooms(doorName: String) -> void:
+	if doorName == null or doorName == "":
+		push_error("moveRooms called with empty door name")
+		return
 	var enteringFrom = ""
 	var entryDoor = ""
 	# match is literally just a switch statement
