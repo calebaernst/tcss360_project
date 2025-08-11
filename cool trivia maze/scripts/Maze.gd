@@ -11,10 +11,10 @@ var roomScene: PackedScene = preload("res://scenes/RoomScene.tscn")
 @onready var BGM = $BGMPlayer
 
 # maze dimensions/coordinates/navigation variables
-var currentRoomInstance: Node = null
-var mazeRooms: Array = []
 @export var mazeWidth: int = 7
 @export var mazeHeight: int = 7
+var currentRoomInstance: Node = null
+var mazeRooms: Array = []
 var currentRoomX: int
 var currentRoomY: int
 @onready var doorsOffCooldown: bool = true
@@ -27,7 +27,7 @@ var awaitingAnswer: bool = false
 func _ready() -> void:
 	_prepareMazeArray()
 	_setStartingRoom()
-	_loadRoom()
+	loadRoom()
 	
 	playerNode.z_index = 1000 # fix the player to always be visible
 	BGM.play() # play BGM
@@ -128,7 +128,7 @@ func _setStartingRoom() -> void:
 		startingRoom["doorLocks"][doorName] = false
 
 ## load the current/new room
-func _loadRoom() -> void:
+func loadRoom() -> void:
 	# clear previously loaded room from memory
 	if currentRoomInstance:
 		currentRoomInstance.queue_free()
@@ -163,7 +163,6 @@ func updateDoorVisuals() -> void:
 	for doorName in ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]:
 		var thisDoor = currentRoomDoors.get_node(doorName)
 		var doorVisual = thisDoor.get_node("DoorVisual")
-		var doorBody = thisDoor.get_node("DoorBody")
 		
 		match doorStates[doorName]:
 			"WALL":
@@ -215,7 +214,7 @@ func doorTouched(body: Node, doorName: String) -> void:
 		else:
 			print(">>> SUCCESS! ", doorName, currentRoomToString(), " is UNLOCKED. Going through door...")
 			doorsOffCooldown = false
-			moveRooms(doorName)
+			call_deferred("moveRooms", doorName) # used to be moveRooms(doorName) but godot doesn't like that (functions effectively the same either way)
 			get_tree().create_timer(0.25).timeout.connect(_enableDoors)
 	else:
 		print(">>> Can't move - at maze boundary!")
@@ -248,7 +247,7 @@ func moveRooms(doorName: String) -> void:
 			entryDoor = "EastDoor"
 	
 	currentRoom()["doorLocks"][entryDoor] = false
-	_loadRoom()
+	loadRoom()
 	
 	var markers = currentRoomInstance.get_node("EntryPoint")
 	var entryPoint = markers.get_node(enteringFrom)
