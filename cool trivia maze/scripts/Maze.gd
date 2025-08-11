@@ -372,8 +372,7 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 	var door_to_move := pendingDoor       # cache before closing
 	var room := currentRoom()
 
-	var isCorrect := selectedAnswer.strip_edges().to_lower() == \
-		currentQuestion.correctAnswer.strip_edges().to_lower()
+	var isCorrect := selectedAnswer.strip_edges().to_lower() == currentQuestion.correctAnswer.strip_edges().to_lower()
 
 	if isCorrect:
 		print("✓ CORRECT! ", currentQuestion.correctMessage)
