@@ -4,8 +4,9 @@ class_name Maze
 @export var debugInputs: bool = true
 @onready var debugConsole = get_parent().get_node("DebugInputs")
 
-# prepare game assets
+## prepare game assets
 var roomScene: PackedScene = preload("res://scenes/RoomScene.tscn")
+var questionMenuScene: PackedScene = preload("res://scenes/question_menu.tscn")
 @export var player: NodePath
 @onready var playerNode = get_node(player)
 @onready var BGM = $BGMPlayer
@@ -22,13 +23,13 @@ var exitY: int
 const cardinalDoors = ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]
 var doorsOffCooldown: bool = true
 
-# Question System Integration
+## Question System Integration
 var questionMenuInstance: Control = null
 var pendingDoor: String = ""
 var awaitingAnswer: bool = false
 var currentQuestion: Question = null
 
-# On start
+## On start
 func _ready() -> void:
 	exitX = mazeWidth / 2
 	exitY = mazeHeight / 2
@@ -142,17 +143,17 @@ func _setStartingRoom() -> void:
 			currentRoomX = int(mazeWidth - 1)
 			currentRoomY = int(mazeHeight - 1)
 	
-	# Unlock doors in starting room
+	## Unlock doors in starting room
 	var startingRoom = mazeRooms[currentRoomX][currentRoomY]
 	for doorName in cardinalDoors:
 		startingRoom[doorName]["locked"] = false
 
 ## load the current/new room
 func loadRoom() -> void:
-	# clear previously loaded room from memory
+	## clear previously loaded room from memory
 	if currentRoomInstance:
 		currentRoomInstance.queue_free()
-	# new room instance
+	## new room instance
 	currentRoomInstance = roomScene.instantiate()
 	add_child(currentRoomInstance)
 	
@@ -165,7 +166,7 @@ func loadRoom() -> void:
 	var chosenRoom = roomLayouts.get_node("Room" + str(chosenRoomLayout))
 	chosenRoom.visible = true
 	
-	# let doors detect the player
+	## let doors detect the player
 	var currentRoomDoors = currentRoomInstance.get_node("Doors")
 	for doorName in cardinalDoors:
 		var thisDoor = currentRoomDoors.get_node(doorName)
@@ -235,13 +236,15 @@ func getDoorStates() -> Dictionary:
 	
 	return doorStates
 
-## Door interaction - test version with lots of debug
+
+## Door interaction - with question system integration
 func doorTouched(body: Node, doorName: String) -> void:
 	# do nothing if the touching object is not the player
 	# also prevent pingpong effect
-	if body != playerNode or not doorsOffCooldown:
+	if body != playerNode or not doorsOffCooldown or awaitingAnswer:
 		return
 	
+
 	var room = getCurrentRoom()
 	var door = room[doorName]
 	## If the door was already answered and marked non-interactable, do nothing
@@ -268,6 +271,7 @@ func doorTouched(body: Node, doorName: String) -> void:
 	else:
 		print(">>> Can't move - at maze boundary!")
 
+## Show trivia question when player touches locked door
 func showTriviaQuestion(door_name: String) -> void:
 	if awaitingAnswer: return
 	pendingDoor = door_name
@@ -416,13 +420,14 @@ func _closeQuestionMenu(preserve_state: bool = false) -> void:
 		pendingDoor = ""
 		currentQuestion = null
 
-# just resets the door cooldown
+
+## just resets the door cooldown
 func _enableDoors() -> void:
 	doorsOffCooldown = true
 
 ## move the player to another room when they go through a door
-func moveRooms(door: String) -> void:
-	if door == null or door == "":
+func moveRooms(doorName: String) -> void:
+	if doorName == null or doorName == "":
 		push_error("moveRooms called with empty door name")
 		return
 	var enteringFrom = ""
