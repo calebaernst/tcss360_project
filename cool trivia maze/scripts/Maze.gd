@@ -210,6 +210,13 @@ func doorTouched(body: Node, doorName: String) -> void:
 		return
 	
 	var room = currentRoom()
+## If the door was already answered and marked non-interactable, do nothing
+	if (not room["doorInteractable"].get(doorName, true)) and room["doorLocks"].get(doorName, true):
+		## brief cooldown to avoid spam when standing in the trigger
+		doorsOffCooldown = false
+		get_tree().create_timer(0.2).timeout.connect(_enableDoors)
+		print(">>> DOOR DISABLED: %s at %s" % [doorName, currentRoomToString()])
+		return
 	## check if the target direction goes out of bounds, and deny movement if it is
 	var canMove = room["doorExists"].get(doorName, false)
 	if canMove:
@@ -336,35 +343,31 @@ func setupOpenResponseQuestion() -> void:
 func _onQuestionAnswered(selectedAnswer: String) -> void:
 	if not awaitingAnswer or not currentQuestion:
 		return
-		
-	var isCorrect = selectedAnswer.strip_edges().to_lower() == currentQuestion.correctAnswer.strip_edges().to_lower()
-	
+
+	var door_to_move := pendingDoor       # cache before closing
+	var room := currentRoom()
+
+	var isCorrect := selectedAnswer.strip_edges().to_lower() == \
+		currentQuestion.correctAnswer.strip_edges().to_lower()
+
 	if isCorrect:
 		print("✓ CORRECT! ", currentQuestion.correctMessage)
-		## Unlock the door
-		var room = currentRoom()
-		room["doorLocks"][pendingDoor] = false
-		room["doorInteractable"][pendingDoor] = false  # Mark as answered
-		
-		## Close question menu and move through door
-		_closeQuestionMenu()
-		
-		## Small delay then move through the door
+		room["doorLocks"][door_to_move] = false
+		room["doorInteractable"][door_to_move] = false  # no re-quiz
+
+		_closeQuestionMenu()  # this clears pendingDoor, but we cached it
+
 		await get_tree().create_timer(0.5).timeout
 		doorsOffCooldown = false
-		moveRooms(pendingDoor)
+		moveRooms(door_to_move)  # <<< use the cached value
 		get_tree().create_timer(0.25).timeout.connect(_enableDoors)
-		
 	else:
 		print("✗ INCORRECT! ", currentQuestion.incorrectMessage)
-		## Mark door as answered but keep it locked
-		currentRoom()["doorInteractable"][pendingDoor] = false
-		## Close question menu
+		room["doorInteractable"][door_to_move] = false
 		_closeQuestionMenu()
-	
-	# Update door visuals
-	updateDoorVisuals()
 
+	updateDoorVisuals()
+	
 ## Handle when player exits question menu without answering
 func _onQuestionMenuExited() -> void:
 	_closeQuestionMenu()
