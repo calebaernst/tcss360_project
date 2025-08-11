@@ -31,8 +31,8 @@ func unlockAllDoors() -> void:
 	if not maze or maze.mazeRooms.is_empty():
 		return
 	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
-	for doorName in maze.cardinals:
-		room["roomDoors"][doorName]["locked"] = false
+	for doorName in maze.cardinalDoors:
+		room[doorName]["locked"] = false
 	print("ALL DOORS UNLOCKED in room ", maze.currentRoomCoords())
 	debugRoutine()
 
@@ -41,8 +41,8 @@ func lockAllDoors() -> void:
 	if not maze or maze.mazeRooms.is_empty():
 		return
 	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
-	for doorName in maze.cardinals:
-		room["roomDoors"][doorName]["locked"] = true
+	for doorName in maze.cardinalDoors:
+		room[doorName]["locked"] = true
 	print("ALL DOORS LOCKED in room ", maze.currentRoomCoords())
 	debugRoutine()
 
@@ -50,9 +50,9 @@ func breakAllDoors() -> void:
 	if not maze or maze.mazeRooms.is_empty():
 		return
 	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
-	for doorName in maze.cardinals:
-		room["roomDoors"][doorName]["locked"] = true
-		room["roomDoors"][doorName]["interactable"] = false
+	for doorName in maze.cardinalDoors:
+		room[doorName]["locked"] = true
+		room[doorName]["interactable"] = false
 	print("ALL DOORS BROKEN in room ", maze.currentRoomCoords())
 	debugRoutine()
 

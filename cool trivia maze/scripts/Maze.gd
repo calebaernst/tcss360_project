@@ -19,12 +19,8 @@ var currentRoomX: int
 var currentRoomY: int
 var exitX: int
 var exitY: int
-@onready var doorsOffCooldown: bool = true
-const cardinals = ["North", "South", "East", "West"]
-
-# Simple question system - make sure these are declared at class level
-var pendingDoor: String = ""
-var awaitingAnswer: bool = false
+const cardinalDoors = ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]
+var doorsOffCooldown: bool = true
 
 # On start
 func _ready() -> void:
@@ -73,14 +69,14 @@ func _prepareMazeArray() -> void:
 				# link north door with south door of room above (vertical link)
 				if y < mazeHeight - 1:
 					var northRoom = mazeRooms[x][y + 1]
-					var sharedDoor = room["roomDoors"]["North"]
-					northRoom["roomDoors"]["South"] = sharedDoor
+					var sharedDoor = room["NorthDoor"]
+					northRoom["SouthDoor"] = sharedDoor
 				
 				# link east door with west door of room to the right (horizontal link)
 				if x < mazeWidth - 1:
 					var eastRoom = mazeRooms[x + 1][y]
-					var sharedDoor = room["roomDoors"]["East"]
-					eastRoom["roomDoors"]["West"] = sharedDoor
+					var sharedDoor = room["EastDoor"]
+					eastRoom["WestDoor"] = sharedDoor
 
 ## generates data for a single room (used exclusively in conjunction with prepareMazeArray)
 func _prepareRoom(x: int, y: int) -> Dictionary:
@@ -93,12 +89,10 @@ func _prepareRoom(x: int, y: int) -> Dictionary:
 		
 		"chosenLayout": chosenLayout, # the layout of this room
 		
-		"roomDoors": {
-			"North": _prepareDoor("North", x, y),
-			"South": _prepareDoor("South", x, y),
-			"East": _prepareDoor("East", x, y),
-			"West": _prepareDoor("West", x, y),
-			}
+		"NorthDoor": _prepareDoor("North", x, y),
+		"SouthDoor": _prepareDoor("South", x, y),
+		"EastDoor": _prepareDoor("East", x, y),
+		"WestDoor": _prepareDoor("West", x, y),
 		}
 	return room
 
@@ -144,8 +138,8 @@ func _setStartingRoom() -> void:
 	
 	# Unlock doors in starting room
 	var startingRoom = mazeRooms[currentRoomX][currentRoomY]
-	for doorName in cardinals:
-		startingRoom["roomDoors"][doorName]["locked"] = false
+	for doorName in cardinalDoors:
+		startingRoom[doorName]["locked"] = false
 
 ## load the current/new room
 func loadRoom() -> void:
@@ -167,7 +161,7 @@ func loadRoom() -> void:
 	
 	# let doors detect the player
 	var currentRoomDoors = currentRoomInstance.get_node("Doors")
-	for doorName in cardinals:
+	for doorName in cardinalDoors:
 		var thisDoor = currentRoomDoors.get_node(doorName)
 		thisDoor.connect("body_entered", Callable(self, "doorTouched").bind(doorName))
 	
@@ -181,7 +175,7 @@ func updateDoorVisuals() -> void:
 	var doorStates = getDoorStates()
 	var currentRoomDoors = currentRoomInstance.get_node("Doors")
 	
-	for doorName in cardinals:
+	for doorName in cardinalDoors:
 		var thisDoor = currentRoomDoors.get_node(doorName)
 		var doorVisual = thisDoor.get_node("DoorVisual")
 		
@@ -222,8 +216,8 @@ func getDoorStates() -> Dictionary:
 	var room = getCurrentRoom()
 	var doorStates = {}
 	
-	for doorName in cardinals:
-		var door = room["roomDoors"][doorName]
+	for doorName in cardinalDoors:
+		var door = room[doorName]
 		if not door["exists"]:
 			doorStates[doorName] = "WALL"
 		elif not door["interactable"] and door["locked"]:
@@ -243,7 +237,7 @@ func doorTouched(body: Node, doorName: String) -> void:
 		return
 	
 	var room = getCurrentRoom()
-	var door = room["roomDoors"][doorName]
+	var door = room[doorName]
 	print(door["question"]) # TODO: remove this once question menu is implemented
 	
 	# check if the target direction goes out of bounds, and deny movement if it is
@@ -268,25 +262,19 @@ func _enableDoors() -> void:
 ## move the player to another room when they go through a door
 func moveRooms(door: String) -> void:
 	var enteringFrom = ""
-	var entryDoor = ""
-	
 	match door:
-		"North":
+		"NorthDoor":
 			currentRoomY += 1
 			enteringFrom = "FromSouth"
-			entryDoor = "North"
-		"South":
+		"SouthDoor":
 			currentRoomY -= 1
 			enteringFrom = "FromNorth"
-			entryDoor = "South"
-		"East":
+		"EastDoor":
 			currentRoomX += 1
 			enteringFrom = "FromWest"
-			entryDoor = "West"
-		"West":
+		"WestDoor":
 			currentRoomX -= 1
 			enteringFrom = "FromEast"
-			entryDoor = "East"
 	
 	loadRoom()
 	
