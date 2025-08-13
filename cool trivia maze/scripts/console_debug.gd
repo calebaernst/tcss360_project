@@ -5,25 +5,25 @@ extends Node
 ## show keybinds for debug inputs
 func debugPrints():
 	print("=== DEBUG CONTROLS ENABLED ===")
-	print("Press U to UNLOCK all doors in current room")
-	print("Press L to LOCK all doors in current room") 
-	print("Press B to BREAK all doors in current room") 
-	print("Press SPACE to show current door lock states")
+	print("Press 1 to UNLOCK all doors in current room")
+	print("Press 2 to LOCK all doors in current room") 
+	print("Press 3 to BREAK all doors in current room") 
+	print("Press 4 to show current door lock states")
 	print("===================")
 
 ## Takes input from user
 func _input(event):
-	if not maze.debugInputs:
+	if not maze.debugInputs or maze.currentQuestion:
 		return
 	if event is InputEventKey and event.pressed:
 		match event.keycode:
-			KEY_U:
+			KEY_1:
 				unlockAllDoors()
-			KEY_L:
+			KEY_2:
 				lockAllDoors()
-			KEY_B:
+			KEY_3:
 				breakAllDoors()
-			KEY_SPACE:
+			KEY_4:
 				printDoorStates()
 
 # unlocks all doors in the current room
@@ -67,7 +67,6 @@ func debugRoutine() -> void:
 func printDoorStates() -> void:
 	if not maze or maze.mazeRooms.is_empty():
 		return
-	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
 	print("=== ROOM ", maze.currentRoomCoords(), " DOOR STATES ===")
 	print(maze.getDoorStates())
 	print("===================")

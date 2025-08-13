@@ -39,16 +39,11 @@ func _ready() -> void:
 	loadRoom()
 	
 	playerNode.z_index = 1000 # fix the player to always be visible
-	BGM.play() # play BGM
-	BGM.finished.connect(_loopBGM) # set BGM to loop
+	BGM.play()
 	
 	# debug inputs can be enabled/disabled from the inspector menu for the "Maze" node
 	if debugInputs:
 		debugConsole.debugPrints()
-
-## just repeats the BGM when it finishes playing (because there is no inherent function to do this)
-func _loopBGM() -> void:
-	BGM.play()
 
 # gets the current room of the player
 func getCurrentRoom() -> Dictionary:
@@ -172,13 +167,22 @@ func loadRoom() -> void:
 		var thisDoor = currentRoomDoors.get_node(doorName)
 		thisDoor.connect("body_entered", Callable(self, "doorTouched").bind(doorName))
 	
+	# display and enable the exit point if the room being loaded in is the exit room
+	var exitPoint = currentRoomInstance.get_node("ExitPoint")
+	if currentRoomX == exitX and currentRoomY == exitY:
+		if not exitPoint.is_connected("body_entered", Callable(self, "victory")): # prevent duplicate signal
+			exitPoint.connect("body_entered", Callable(self, "victory"))
+		exitPoint.visible = true
+		exitPoint.get_node("PlayerDetector").set_deferred("monitoring", true)
+	else:
+		exitPoint.visible = false
+		exitPoint.get_node("PlayerDetector").set_deferred("monitoring", false)
+	
 	updateDoorVisuals()
-	updateWinCon()
 	print("Room Coordinates: ", currentRoomCoords())
 
 ## update the door visuals to reflect their internal state
 func updateDoorVisuals() -> void:
-	var room = getCurrentRoom()
 	var doorStates = getDoorStates()
 	var currentRoomDoors = currentRoomInstance.get_node("Doors")
 	
@@ -200,25 +204,20 @@ func updateDoorVisuals() -> void:
 				doorVisual.texture = preload("res://assets/CTM_Door2.png")
 
 ## updates the status of the exit point and checks whether or not the player has lost
-func updateWinCon():
-	var exitPoint = currentRoomInstance.get_node("ExitPoint")
-	
-	if currentRoomX != exitX or currentRoomY != exitY:
-		exitPoint.visible = false
-		exitPoint.get_node("PlayerDetector").set_deferred("monitoring", false)
-	else:
-		if not exitPoint.is_connected("body_entered", Callable(self, "victory")): # prevent duplicate signal (similar to pingpong effect)
-			exitPoint.connect("body_entered", Callable(self, "victory"))
-		exitPoint.visible = true
-		exitPoint.get_node("PlayerDetector").set_deferred("monitoring", true)
+func updateWinCon() -> void:
+	var gameLost = not _canReachExit()
+	if gameLost:
+		defeat()
 
 ## called only when the player reaches the exit
-func victory(body: Node):
+func victory(body: Node) -> void:
 	if body == playerNode:
 		print("you have reached the exit (congrats)")
 
+func defeat() -> void:
+	print("you can't make it to the exit any more, so you lose :(")
+
 ## creates a simple dictionary of the door states in the current room, based on the exists/interactable/locked values
-## use doorstates[doorName] to get the state of a specific door
 func getDoorStates() -> Dictionary:
 	var room = getCurrentRoom()
 	var doorStates = {}
@@ -270,6 +269,37 @@ func doorTouched(body: Node, doorName: String) -> void:
 			get_tree().create_timer(0.25).timeout.connect(_enableDoors)
 	else:
 		print(">>> Can't move - at maze boundary!")
+
+## just resets the door cooldown
+func _enableDoors() -> void:
+	doorsOffCooldown = true
+
+## move the player to another room when they go through a door
+func moveRooms(door: String) -> void:
+	var enteringFrom = ""
+	match door:
+		"NorthDoor":
+			currentRoomY += 1
+			enteringFrom = "FromSouth"
+		"SouthDoor":
+			currentRoomY -= 1
+			enteringFrom = "FromNorth"
+		"EastDoor":
+			currentRoomX += 1
+			enteringFrom = "FromWest"
+		"WestDoor":
+			currentRoomX -= 1
+			enteringFrom = "FromEast"
+		_:
+			push_error("moveRooms called with invalid door name")
+			return
+	
+	loadRoom()
+	
+	var markers = currentRoomInstance.get_node("EntryPoint")
+	var entryPoint = markers.get_node(enteringFrom)
+	playerNode.global_position = entryPoint.global_position
+
 
 ## Show trivia question when player touches locked door
 func showTriviaQuestion(door_name: String) -> void:
@@ -402,6 +432,7 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 		print("✗ INCORRECT! ", currentQuestion.incorrectMessage)
 		room[door_to_move]["interactable"] = false
 		_closeQuestionMenu()
+		updateWinCon()
 
 	updateDoorVisuals()
 	
@@ -420,33 +451,50 @@ func _closeQuestionMenu(preserve_state: bool = false) -> void:
 		pendingDoor = ""
 		currentQuestion = null
 
-
-## just resets the door cooldown
-func _enableDoors() -> void:
-	doorsOffCooldown = true
-
-## move the player to another room when they go through a door
-func moveRooms(door: String) -> void:
-	if door == null or door == "":
-		push_error("moveRooms called with empty door name")
-		return
-	var enteringFrom = ""
-	match door:
-		"NorthDoor":
-			currentRoomY += 1
-			enteringFrom = "FromSouth"
-		"SouthDoor":
-			currentRoomY -= 1
-			enteringFrom = "FromNorth"
-		"EastDoor":
-			currentRoomX += 1
-			enteringFrom = "FromWest"
-		"WestDoor":
-			currentRoomX -= 1
-			enteringFrom = "FromEast"
+## check if there is a valid path from the player's current room to the exit room
+## this utilizes a brute force-y approach and so is relatively computationally expensive
+func _canReachExit() -> bool:
+	# if you're in the exit room you can definitely reach the exit
+	if currentRoomX == exitX and currentRoomY == exitY:
+		return true
 	
-	loadRoom()
+	var queue = [[currentRoomX, currentRoomY]]  # queue of [x, y] coordinates, representing rooms marked to be explored next
+	var visited = {}  # track visited rooms (dictionary is insanely more efficient than array for this purpose)
+	visited[str(currentRoomX) + "," + str(currentRoomY)] = true
 	
-	var markers = currentRoomInstance.get_node("EntryPoint")
-	var entryPoint = markers.get_node(enteringFrom)
-	playerNode.global_position = entryPoint.global_position
+	while queue.size() > 0:
+		var pathHead = queue.pop_front()
+		var pathHeadX = pathHead[0]
+		var pathHeadY = pathHead[1]
+		var thisRoom = mazeRooms[pathHeadX][pathHeadY]
+		
+		# dictionary for the relative coordinate offsets for the surrounding rooms/directions
+		var cardinalDirections = [ # for the sake of simplicity, we name all of the keys "door"
+			{"door": "NorthDoor", "dx": 0, "dy": 1}, # north
+			{"door": "SouthDoor", "dx": 0, "dy": -1}, # south
+			{"door": "EastDoor", "dx": 1, "dy": 0}, # east
+			{"door": "WestDoor", "dx": -1, "dy": 0} # west
+		]
+		
+		for direction in cardinalDirections:
+			var thisDoor = thisRoom[direction.door]
+			var aheadX = pathHeadX + direction.dx
+			var aheadY = pathHeadY + direction.dy
+			var aheadCoords = str(aheadX) + "," + str(aheadY)
+			
+			# skip this room if already visited
+			if visited.has(aheadCoords):
+				continue
+			# skip this door if it's a wall or broken
+			if not thisDoor["exists"] or (thisDoor["locked"] and not thisDoor["interactable"]):
+				continue
+			# if target is reached, a valid path exists
+			if aheadX == exitX and aheadY == exitY:
+				return true
+			
+			# if the door is locked or unlocked, add the ahead room to the queue and mark it as visited (because it will be visited via the queue)
+			visited[aheadCoords] = true
+			queue.append([aheadX, aheadY])
+	
+	# if the while loop completes, no path exists
+	return false
