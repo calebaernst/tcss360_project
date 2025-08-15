@@ -40,7 +40,18 @@ func _ready() -> void:
 	if not $Exit.button_down.is_connected(_on_exit_button_down):
 		$Exit.button_down.connect(_on_exit_button_down)
 
-## Called every frame. 'delta' is the elapsed time since the previous frame.
+## ensure Exit uses 'pressed' and is enabled (more reliable click)
+	$Exit.disabled = false
+	if not $Exit.pressed.is_connected(_on_exit_button_down):
+		$Exit.pressed.connect(_on_exit_button_down)
+		
+		# Make Exit the topmost sibling 
+	$Exit.z_index = 1000
+	move_child($Exit, get_child_count() - 1)
+
+## let it take keyboard focus too
+	$Exit.focus_mode = Control.FOCUS_ALL
+
 ## setter: ensure default button states - declare initial states
 func set_default():
 	# default visibility
@@ -58,7 +69,7 @@ func set_default():
 	$Submit.disabled = false
 	questionAnswered = false  # Reset answered state
 	
-## Button signal handlers - UPDATED to emit signals
+## Button signal handlers 
 func _on_button_button_down() -> void:
 	if questionAnswered:
 		return
@@ -99,9 +110,8 @@ func _on_exit_button_down() -> void:
 
 ## Allow keyboard input for quick exit
 func _input(event):
-	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_ESCAPE:
-			menu_exited.emit()
-			
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		menu_exited.emit()
+		
 func _process(_delta: float) -> void:
 	pass
