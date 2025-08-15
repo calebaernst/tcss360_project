@@ -9,6 +9,7 @@ var myDatabase : SQLite # initialize SQLite database field
 var myQuestionChoices : Array # randomly chosen question field
 var myAnswerButtons : Array # array of buttons for answers field
 var selectedAnswerText: String = ""
+var questionAnswered: bool = false  # Track if question has been answered
 
 ## enumerated variable
 enum Select {
@@ -55,30 +56,52 @@ func set_default():
 	for i in range(myAnswerButtons.size()):
 		myAnswerButtons[i].disabled = false
 	$Submit.disabled = false
-
+	questionAnswered = false  # Reset answered state
+	
 ## Button signal handlers - UPDATED to emit signals
 func _on_button_button_down() -> void:
+	if questionAnswered:
+		return
 	selectedAnswerText = $Button.text
+	questionAnswered = true
 	question_answered.emit(selectedAnswerText)
 
 func _on_button_2_button_down() -> void:
+	if questionAnswered:
+		return
 	selectedAnswerText = $Button2.text
+	questionAnswered = true
 	question_answered.emit(selectedAnswerText)
 
 func _on_button_3_button_down() -> void:
+	if questionAnswered:
+		return
 	selectedAnswerText = $Button3.text
+	questionAnswered = true
 	question_answered.emit(selectedAnswerText)
 
 func _on_button_4_button_down() -> void:
+	if questionAnswered:
+		return
 	selectedAnswerText = $Button4.text
+	questionAnswered = true
 	question_answered.emit(selectedAnswerText)
 
 func _on_submit_button_down() -> void:
+	if questionAnswered:
+		return
 	selectedAnswerText = $Response.text
+	questionAnswered = true
 	question_answered.emit(selectedAnswerText)
 
 func _on_exit_button_down() -> void:
 	menu_exited.emit()
 
+## Allow keyboard input for quick exit
+func _input(event):
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_ESCAPE:
+			menu_exited.emit()
+			
 func _process(_delta: float) -> void:
 	pass

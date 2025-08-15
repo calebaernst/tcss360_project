@@ -421,7 +421,11 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 		print("✓ CORRECT! ", currentQuestion.correctMessage)
 		room[door_to_move]["locked"] = false
 		room[door_to_move]["interactable"] = false  # no re-quiz
-
+		
+	## Show correct message on GUI and then proceed
+		showAnswerFeedback(true, currentQuestion.correctMessage)
+		await get_tree().create_timer(2.0).timeout  # Show message for 2 seconds
+		
 		_closeQuestionMenu()  # this clears pendingDoor, but we cached it
 
 		await get_tree().create_timer(0.5).timeout
@@ -431,10 +435,73 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 	else:
 		print("✗ INCORRECT! ", currentQuestion.incorrectMessage)
 		room[door_to_move]["interactable"] = false
-		_closeQuestionMenu()
+		var feedback_message = currentQuestion.incorrectMessage + "\n\nCorrect Answer: " + currentQuestion.correctAnswer
+		showAnswerFeedback(false, feedback_message)
+		
 		updateWinCon()
 
 	updateDoorVisuals()
+	
+	
+	## shows answer feedback on the GUI
+func showAnswerFeedback(isCorrect: bool, message: String) -> void:
+	if not questionMenuInstance:
+		return
+		
+	# Disable all answer buttons to prevent further input
+	var buttons = [
+		questionMenuInstance.get_node("Button"),
+		questionMenuInstance.get_node("Button2"),
+		questionMenuInstance.get_node("Button3"),
+		questionMenuInstance.get_node("Button4")
+	]
+	
+	for button in buttons:
+		button.disabled = true
+	
+	questionMenuInstance.get_node("Submit").disabled = true
+	
+	## Create or update feedback label
+	var feedbackLabel = questionMenuInstance.get_node_or_null("FeedbackLabel")
+	if not feedbackLabel:
+		feedbackLabel = Label.new()
+		feedbackLabel.name = "FeedbackLabel"
+		questionMenuInstance.add_child(feedbackLabel)
+		# Position the feedback label below the question
+		feedbackLabel.position = Vector2(64, 600)
+		feedbackLabel.size = Vector2(1024, 200)
+		feedbackLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		feedbackLabel.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		feedbackLabel.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	
+	# Set the feedback text and color
+	feedbackLabel.text = message
+	feedbackLabel.visible = true
+	
+	if isCorrect:
+		feedbackLabel.modulate = Color.GREEN
+	else:
+		feedbackLabel.modulate = Color.RED
+		# For incorrect answers, also highlight the correct answer in the buttons
+		highlightCorrectAnswer()
+
+## Highlight the correct answer in the button interface
+func highlightCorrectAnswer() -> void:
+	if not questionMenuInstance or not currentQuestion:
+		return
+		
+	var buttons = [
+		questionMenuInstance.get_node("Button"),
+		questionMenuInstance.get_node("Button2"),
+		questionMenuInstance.get_node("Button3"),
+		questionMenuInstance.get_node("Button4")
+	]
+	
+	# Find and highlight the button with the correct answer
+	for button in buttons:
+		if button.visible and button.text.strip_edges().to_lower() == currentQuestion.correctAnswer.strip_edges().to_lower():
+			button.modulate = Color.GREEN
+			break
 	
 ## Handle when player exits question menu without answering
 func _onQuestionMenuExited() -> void:
