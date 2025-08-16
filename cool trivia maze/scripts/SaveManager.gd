@@ -24,11 +24,26 @@ static func saveGame(maze: Maze, saveSlot: int) -> void:
 		push_error("Cannot write save file to path: " + saveFilePath)
 		return
 	
+	var serializedMaze = []
+	for x in range(len(maze.mazeRooms)):
+		var column = []
+		for y in range(len(maze.mazeRooms[x])):
+			var roomData = maze.mazeRooms[x][y].duplicate(true)
+			var cardinalDoors = ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]
+			for doorName in cardinalDoors:
+				if roomData.has(doorName) and roomData[doorName].has("question"):
+					var question = roomData[doorName]["question"]
+					if question is Question:
+						roomData[doorName]["question"] = question.serialize()
+			
+			column.append(roomData)
+		serializedMaze.append(column)
+	
 	# prepare all data relevant to "current game state" 
 	var saveData = {
 		"currentRoomX": maze.currentRoomX,
 		"currentRoomY": maze.currentRoomY,
-		"mazeRooms": maze.mazeRooms
+		"mazeRooms": serializedMaze
 		}
 	
 	targetFile.store_string(JSON.stringify(saveData))
@@ -41,26 +56,43 @@ static func loadGame(maze: Maze, saveSlot: int) -> void:
 	var targetFile = FileAccess.open(saveFilePath, FileAccess.READ)
 	# if insufficient read permissions, malformed filepath, or file does not exist, abort the process and throw an error
 	if targetFile == null:
-		push_error("Cannot read save file: " + saveFilePath)
+		print("Cannot read save file: " + saveFilePath)
 		return
 	
 	var jsonString = targetFile.get_as_text()
 	var json = JSON.new()
 	var parseResult = json.parse(jsonString)
 	if not parseResult == OK:
-		push_error("Save file cannot be parsed.")
+		print("Save file ", jsonString, " cannot be parsed.")
 		return
 	var saveData = json.data
 	
+	var loadedMaze = []
+	for x in range(len(saveData["mazeRooms"])):
+		var column = []
+		for y in range(len(saveData["mazeRooms"][x])):
+			var roomData = saveData["mazeRooms"][x][y]
+			var reconstructedRoom = roomData.duplicate(true)
+			var cardinalDoors = ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]
+			for doorName in cardinalDoors:
+				if reconstructedRoom.has(doorName) and reconstructedRoom[doorName].has("question"):
+					var questionData = reconstructedRoom[doorName]["question"]
+					if questionData is Dictionary:
+						reconstructedRoom[doorName]["question"] = Question.deserialize(questionData)
+			
+			column.append(reconstructedRoom)
+		loadedMaze.append(column)
+	
 	maze.currentRoomX = saveData["currentRoomX"]
 	maze.currentRoomY = saveData["currentRoomY"]
-	maze.mazeRooms = saveData["mazeRooms"]
-	
+	maze.mazeRooms = loadedMaze
+	maze.linkDoors()
 	targetFile.close()
 	maze.loadRoom()
+	maze.playerNode.global_position = Vector2(0,0)
 	print("Loaded save from slot ", saveSlot)
 
-## delete a save
+## delete a save file
 static func deleteSave(saveSlot: int) -> void:
 	var saveFilePath = getSaveFilepath(saveSlot)
 	if FileAccess.file_exists(saveFilePath):
@@ -73,7 +105,7 @@ static func deleteSave(saveSlot: int) -> void:
 		if deletionResult == OK:
 			print("Deleted save file ", saveSlot)
 		else: 
-			push_error("Failed to delete save file ", saveSlot)
+			print("Failed to delete save file ", saveSlot)
 	else:
 		# you should not be able to do this
-		push_error("Attempted deletion of a save file which does not exist.")
+		print("Attempted deletion of a save ", saveSlot ," which is already empty.")

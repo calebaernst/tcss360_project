@@ -62,23 +62,27 @@ func _prepareMazeArray() -> void:
 				print("prepared room at ", x, ",", y)
 				column.append(thisRoom)
 			mazeRooms.append(column)
-		
-		# link adjacent doors so that they always share the same state (point to the same reference)
-		for x in range(mazeWidth):
-			for y in range(mazeHeight):
-				var room = mazeRooms[x][y]
-				
-				# link north door with south door of room above (vertical link)
-				if y < mazeHeight - 1:
-					var northRoom = mazeRooms[x][y + 1]
-					var sharedDoor = room["NorthDoor"]
-					northRoom["SouthDoor"] = sharedDoor
-				
-				# link east door with west door of room to the right (horizontal link)
-				if x < mazeWidth - 1:
-					var eastRoom = mazeRooms[x + 1][y]
-					var sharedDoor = room["EastDoor"]
-					eastRoom["WestDoor"] = sharedDoor
+	
+	linkDoors()
+
+## links adjacent doors so that they always share the same state (point to the same reference)
+## should only be called upon game initialization or loading a save file
+func linkDoors() -> void:
+	for x in range(mazeWidth):
+		for y in range(mazeHeight):
+			var room = mazeRooms[x][y]
+			
+			# link north door with south door of room above (vertical link)
+			if y < mazeHeight - 1:
+				var northRoom = mazeRooms[x][y + 1]
+				var sharedDoor = room["NorthDoor"]
+				northRoom["SouthDoor"] = sharedDoor
+			
+			# link east door with west door of room to the right (horizontal link)
+			if x < mazeWidth - 1:
+				var eastRoom = mazeRooms[x + 1][y]
+				var sharedDoor = room["EastDoor"]
+				eastRoom["WestDoor"] = sharedDoor
 
 ## generates data for a single room (used exclusively in conjunction with prepareMazeArray)
 func _prepareRoom(x: int, y: int) -> Dictionary:
@@ -158,7 +162,7 @@ func loadRoom() -> void:
 	# this works by setting the selected layout to visible and all others to invisible
 	for child in roomLayouts.get_children():
 		child.visible = false
-	var chosenRoom = roomLayouts.get_node("Room" + str(chosenRoomLayout))
+	var chosenRoom = roomLayouts.get_node("Room" + str(int(chosenRoomLayout)))
 	chosenRoom.visible = true
 	
 	## let doors detect the player
