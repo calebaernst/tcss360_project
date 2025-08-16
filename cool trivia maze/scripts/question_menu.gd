@@ -27,6 +27,7 @@ func _ready() -> void:
 	set_default()
 
 	## Connect button signals manually if not connected in scene
+	## This HAS to be brute force as there is no other way to handle this
 	if not $Button.button_down.is_connected(_on_button_button_down):
 		$Button.button_down.connect(_on_button_button_down)
 	if not $Button2.button_down.is_connected(_on_button_2_button_down):

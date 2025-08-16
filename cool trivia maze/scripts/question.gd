@@ -24,6 +24,7 @@ func _init(theId: int, theType: String, theQuestionText: String, theCorrectAnswe
 	answerChoices.append(theCorrectAnswer)
 	answerChoices.shuffle()
 
+## simple toString method
 func _to_string() -> String:
 	var output = "Question Data: \n {ID: %d | Type: %s | Text: %s | " % [id, type, questionText]
 	if type != "open response":
@@ -31,3 +32,36 @@ func _to_string() -> String:
 	output += "Answer: %s | Correct: %s | Incorrect: %s}" % [correctAnswer, correctMessage, incorrectMessage]
 	
 	return output
+
+## save/load serialization support (write)
+func serialize() -> Dictionary:
+	return {
+		"questionText": questionText,
+		"type": type,
+		"answerChoices": answerChoices,
+		"correctAnswer": correctAnswer,
+		"correctMessage": correctMessage,
+		"incorrectMessage": incorrectMessage
+	}
+
+## save/load serialization support (read)
+static func deserialize(data: Dictionary) -> Question:
+	var incorrect_answers = []
+	var correct_answer = data.get("correctAnswer", "")
+	var answer_choices = data.get("answerChoices", [])
+	
+	for choice in answer_choices:
+		if choice != correct_answer:
+			incorrect_answers.append(choice)
+	
+	var question = Question.new(
+		data.get("id", 0),
+		data.get("type", ""),
+		data.get("questionText", ""),
+		correct_answer,
+		incorrect_answers,
+		data.get("correctMessage", ""),
+		data.get("incorrectMessage", "")
+	)
+	
+	return question

@@ -5,10 +5,19 @@ extends Node
 ## show keybinds for debug inputs
 func debugPrints():
 	print("=== DEBUG CONTROLS ENABLED ===")
-	print("Press 1 to UNLOCK all doors in current room")
-	print("Press 2 to LOCK all doors in current room") 
-	print("Press 3 to BREAK all doors in current room") 
-	print("Press 4 to show current door lock states")
+	print("Press ; to UNLOCK all doors in current room")
+	print("Press ' to LOCK all doors in current room") 
+	print("Press / to BREAK all doors in current room") 
+	print("Press SPACE to show current door lock states")
+	print("Press 1 to SAVE to SLOT 1")
+	print("Press 2 to SAVE to SLOT 2")
+	print("Press 3 to SAVE to SLOT 3")
+	print("Press 4 to LOAD from SLOT 1")
+	print("Press 5 to LOAD from SLOT 2")
+	print("Press 6 to LOAD from SLOT 3")
+	print("Press 7 to DELETE SLOT 1")
+	print("Press 8 to DELETE SLOT 2")
+	print("Press 9 to DELETE SLOT 3")
 	print("===================")
 
 ## Takes input from user
@@ -17,14 +26,34 @@ func _input(event):
 		return
 	if event is InputEventKey and event.pressed:
 		match event.keycode:
-			KEY_1:
+			KEY_SEMICOLON:
 				unlockAllDoors()
-			KEY_2:
+			KEY_APOSTROPHE:
 				lockAllDoors()
-			KEY_3:
+			KEY_SLASH:
 				breakAllDoors()
-			KEY_4:
+			KEY_SPACE:
 				printDoorStates()
+				
+				
+			KEY_1:
+				SaveManager.saveGame(1)
+			KEY_2:
+				SaveManager.saveGame(2)
+			KEY_3:
+				SaveManager.saveGame(3)
+			KEY_4:
+				SaveManager.loadGame(1)
+			KEY_5:
+				SaveManager.loadGame(2)
+			KEY_6:
+				SaveManager.loadGame(3)
+			KEY_7:
+				SaveManager.deleteSave(1)
+			KEY_8:
+				SaveManager.deleteSave(2)
+			KEY_9:
+				SaveManager.deleteSave(3)
 
 # unlocks all doors in the current room
 func unlockAllDoors() -> void:
