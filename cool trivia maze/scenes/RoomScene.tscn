@@ -1,9 +1,10 @@
-[gd_scene load_steps=10 format=4 uid="uid://co88w5x7dsb8m"]
+[gd_scene load_steps=11 format=4 uid="uid://co88w5x7dsb8m"]
 
 [ext_resource type="TileSet" uid="uid://chf1baqwe0ywc" path="res://assets/temp-tilemap.tres" id="1_mym6t"]
 [ext_resource type="Texture2D" uid="uid://buvd3jsgnqdtp" path="res://assets/cave_/cave_.png" id="2_jnjkj"]
 [ext_resource type="Texture2D" uid="uid://bdocde7y0t261" path="res://assets/CTM_Tileset.png" id="3_mym6t"]
 [ext_resource type="Texture2D" uid="uid://b1ftf0slxgq4e" path="res://assets/CTM_Door1.png" id="4_jnjkj"]
+[ext_resource type="Texture2D" uid="uid://c1k5kkdjbb08f" path="res://assets/CTM_WinSprite.png" id="5_xxf71"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7sa2y"]
 texture = ExtResource("2_jnjkj")
@@ -201,7 +202,8 @@ sources/1 = SubResource("TileSetAtlasSource_jnjkj")
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mym6t"]
 size = Vector2(32, 16)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_jnjkj"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_uhx6y"]
+radius = 6.00521
 
 [node name="RoomFrame" type="Node2D"]
 
@@ -331,11 +333,9 @@ metadata/_edit_group_ = true
 metadata/_edit_lock_ = true
 
 [node name="PlayerDetector" type="CollisionShape2D" parent="ExitPoint"]
-shape = SubResource("RectangleShape2D_jnjkj")
+position = Vector2(3, -0.5)
+scale = Vector2(2, 2)
+shape = SubResource("CircleShape2D_uhx6y")
 
-[node name="ColorRect" type="ColorRect" parent="ExitPoint"]
-offset_left = -10.0
-offset_top = -10.0
-offset_right = 10.0
-offset_bottom = 10.0
-color = Color(1, 0, 1, 1)
+[node name="Sprite2D" type="Sprite2D" parent="ExitPoint"]
+texture = ExtResource("5_xxf71")
