@@ -14,6 +14,8 @@ var questionMenuScene: PackedScene = preload("res://scenes/question_menu.tscn")
 # maze dimensions/coordinates/navigation variables
 @export var mazeWidth: int = 9
 @export var mazeHeight: int = 9
+var playerSelectedAnswer: String = ""  # Store the player's answer
+
 var currentRoomInstance: Node = null
 var mazeRooms: Array = []
 var currentRoomX: int
@@ -28,6 +30,7 @@ var questionMenuInstance: Control = null
 var pendingDoor: String = ""
 var awaitingAnswer: bool = false
 var currentQuestion: Question = null
+var lastAnswerCorrect: bool = false   ## remember result until Exit is pressed
 
 ## On start
 func _ready() -> void:
@@ -317,7 +320,7 @@ func showTriviaQuestion(door_name: String) -> void:
 
 	questionMenuInstance = questionMenuScene.instantiate()
 
-	# --- ensure a UI CanvasLayer exists and add the menu there ---
+	## ensure a UI CanvasLayer exists and add the menu there ---
 	var root := get_tree().current_scene
 	var ui := root.get_node_or_null("UI")
 	if ui == null:
@@ -417,34 +420,154 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 	if not awaitingAnswer or not currentQuestion:
 		return
 
-	var door_to_move := pendingDoor       # cache before closing
+	var door_to_move := pendingDoor
 	var room := getCurrentRoom()
 
-	var isCorrect := selectedAnswer.strip_edges().to_lower() == currentQuestion.correctAnswer.strip_edges().to_lower()
+	var isCorrect := selectedAnswer.strip_edges().to_lower() \
+		== str(currentQuestion.correctAnswer).strip_edges().to_lower()
+	lastAnswerCorrect = isCorrect
+	playerSelectedAnswer = selectedAnswer  # optional but handy
 
+	# --- Build a safe, always-present feedback message ---
+	var msg := ""
 	if isCorrect:
-		print("✓ CORRECT! ", currentQuestion.correctMessage)
+		msg = str(currentQuestion.correctMessage)
+		if msg.strip_edges() == "":
+			msg = "Correct!"
+		# unlock and mark as used
 		room[door_to_move]["locked"] = false
-		room[door_to_move]["interactable"] = false  # no re-quiz
-
-		_closeQuestionMenu()  # this clears pendingDoor, but we cached it
-
-		await get_tree().create_timer(0.5).timeout
-		doorsOffCooldown = false
-		moveRooms(door_to_move)  # <<< use the cached value
-		get_tree().create_timer(0.25).timeout.connect(_enableDoors)
-	else:
-		print("✗ INCORRECT! ", currentQuestion.incorrectMessage)
 		room[door_to_move]["interactable"] = false
-		_closeQuestionMenu()
+	else:
+		var base := str(currentQuestion.incorrectMessage)
+		if base.strip_edges() == "":
+			base = "Incorrect."
+		msg = base + "\n\nCorrect Answer: " + str(currentQuestion.correctAnswer)
+		room[door_to_move]["interactable"] = false
 		updateWinCon()
 
-	updateDoorVisuals()
-	
-## Handle when player exits question menu without answering
-func _onQuestionMenuExited() -> void:
-	_closeQuestionMenu()
+	# Show feedback and (for MC/TF) highlight choices; for open response we color Submit.
+	showAnswerFeedback(isCorrect, msg, selectedAnswer)
 
+	updateDoorVisuals()
+
+	## shows answer feedback on the GUI
+func showAnswerFeedback(isCorrect: bool, message: String, playerAnswer: String = "") -> void:
+	if not questionMenuInstance:
+		return
+
+	# Disable all answer buttons + clear styles
+	var buttons = [
+		questionMenuInstance.get_node("Button"),
+		questionMenuInstance.get_node("Button2"),
+		questionMenuInstance.get_node("Button3"),
+		questionMenuInstance.get_node("Button4")
+	]
+	for b in buttons:
+		b.disabled = true
+		b.modulate = Color(1, 1, 1, 1)
+		b.remove_theme_color_override("font_color")
+		b.remove_theme_color_override("font_disabled_color")
+
+## Submit (open response)
+	var submit := questionMenuInstance.get_node_or_null("Submit")
+	if submit:
+		submit.disabled = true
+		submit.remove_theme_color_override("font_color")
+		submit.remove_theme_color_override("font_disabled_color")
+
+## Feedback panel + label (make sure they never block clicks)
+	var feedbackPanel = questionMenuInstance.get_node_or_null("FeedbackPanel")
+	if not feedbackPanel:
+		feedbackPanel = Panel.new()
+		feedbackPanel.name = "FeedbackPanel"
+		feedbackPanel.position = Vector2(64, 580)
+		feedbackPanel.size = Vector2(1024, 220)
+		feedbackPanel.modulate = Color(0, 0, 0, 0.9)
+		questionMenuInstance.add_child(feedbackPanel)
+
+	var feedbackLabel = questionMenuInstance.get_node_or_null("FeedbackLabel")
+	if not feedbackLabel:
+		feedbackLabel = Label.new()
+		feedbackLabel.name = "FeedbackLabel"
+		feedbackPanel.add_child(feedbackLabel)
+		feedbackLabel.set_anchors_preset(Control.PRESET_FULL_RECT)
+		feedbackLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		feedbackLabel.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		feedbackLabel.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+# Ensure both ignore mouse *every time* (covers existing nodes)
+	feedbackPanel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	feedbackLabel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	# Always show a message
+	feedbackLabel.text = message if message.strip_edges() != "" else ( "Correct!" if isCorrect else "Incorrect." )
+	feedbackPanel.visible = true
+	feedbackLabel.visible = true
+
+## Text colors
+	var GREEN = Color(0.2, 0.95, 0.2)
+	var RED   = Color(0.95, 0.25, 0.25)
+	var GRAY  = Color(0.65, 0.65, 0.65)
+
+	feedbackLabel.add_theme_color_override("font_color", (GREEN if isCorrect else RED))
+
+## For MC/TF we highlight the buttons and for open response there are no visible buttons.
+	var any_button_visible := false
+	for b in buttons:
+		if b.visible:
+			any_button_visible = true
+			break
+
+	if any_button_visible:
+		highlightCorrectAnswer(playerAnswer)  # MC/TF path
+	else:
+	# Open-response path: color the Submit text so player gets a cue
+		if submit:
+			submit.add_theme_color_override("font_color", (GREEN if isCorrect else RED))
+			submit.add_theme_color_override("font_disabled_color", (GREEN if isCorrect else RED))
+
+# NEW: utility to set both normal and disabled text color on Buttons
+func _set_button_text_color(b: Button, c: Color) -> void:
+	b.add_theme_color_override("font_color", c)
+	b.add_theme_color_override("font_disabled_color", c)
+
+## Highlight the correct answer in the button interface (using text color)
+func highlightCorrectAnswer(playerAnswer: String) -> void:
+	if not questionMenuInstance or not currentQuestion:
+		return
+		
+	var buttons = [
+		questionMenuInstance.get_node("Button"),
+		questionMenuInstance.get_node("Button2"),
+		questionMenuInstance.get_node("Button3"),
+		questionMenuInstance.get_node("Button4")
+	]
+
+	var correctLower = currentQuestion.correctAnswer.strip_edges().to_lower()
+	var playerLower  = playerAnswer.strip_edges().to_lower()
+
+	var GREEN = Color(0.2, 0.95, 0.2)
+	var RED   = Color(0.95, 0.25, 0.25)
+	var GRAY  = Color(0.65, 0.65, 0.65)
+	
+	for button in buttons:
+		if not button.visible:
+			continue
+		var txt = button.text.strip_edges().to_lower()
+		if txt == correctLower:
+			_set_button_text_color(button, GREEN)
+		elif txt == playerLower:
+			_set_button_text_color(button, RED)
+		else:
+			_set_button_text_color(button, GRAY)
+
+## Handle when player exits question menu without answering OR after feedback
+func _onQuestionMenuExited() -> void:
+	var door_to_move := pendingDoor          ## move only if correct
+
+	_closeQuestionMenu()                     ## re-enable player input
+	awaitingAnswer = false                   ## allow doors again
+	
 ## Close and cleanup question menu
 func _closeQuestionMenu(preserve_state: bool = false) -> void:
 	if questionMenuInstance:
