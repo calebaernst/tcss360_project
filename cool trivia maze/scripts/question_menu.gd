@@ -9,6 +9,7 @@ var myDatabase : SQLite # initialize SQLite database field
 var myQuestionChoices : Array # randomly chosen question field
 var myAnswerButtons : Array # array of buttons for answers field
 var selectedAnswerText: String = ""
+var questionAnswered: bool = false  # Track if question has been answered
 
 ## enumerated variable
 enum Select {
@@ -39,7 +40,18 @@ func _ready() -> void:
 	if not $Exit.button_down.is_connected(_on_exit_button_down):
 		$Exit.button_down.connect(_on_exit_button_down)
 
-## Called every frame. 'delta' is the elapsed time since the previous frame.
+## ensure Exit uses 'pressed' and is enabled (more reliable click)
+	$Exit.disabled = false
+	if not $Exit.pressed.is_connected(_on_exit_button_down):
+		$Exit.pressed.connect(_on_exit_button_down)
+		
+		# Make Exit the topmost sibling 
+	$Exit.z_index = 1000
+	move_child($Exit, get_child_count() - 1)
+
+## let it take keyboard focus too
+	$Exit.focus_mode = Control.FOCUS_ALL
+
 ## setter: ensure default button states - declare initial states
 func set_default():
 	# default visibility
@@ -55,30 +67,51 @@ func set_default():
 	for i in range(myAnswerButtons.size()):
 		myAnswerButtons[i].disabled = false
 	$Submit.disabled = false
-
-## Button signal handlers - UPDATED to emit signals
+	questionAnswered = false  # Reset answered state
+	
+## Button signal handlers 
 func _on_button_button_down() -> void:
+	if questionAnswered:
+		return
 	selectedAnswerText = $Button.text
+	questionAnswered = true
 	question_answered.emit(selectedAnswerText)
 
 func _on_button_2_button_down() -> void:
+	if questionAnswered:
+		return
 	selectedAnswerText = $Button2.text
+	questionAnswered = true
 	question_answered.emit(selectedAnswerText)
 
 func _on_button_3_button_down() -> void:
+	if questionAnswered:
+		return
 	selectedAnswerText = $Button3.text
+	questionAnswered = true
 	question_answered.emit(selectedAnswerText)
 
 func _on_button_4_button_down() -> void:
+	if questionAnswered:
+		return
 	selectedAnswerText = $Button4.text
+	questionAnswered = true
 	question_answered.emit(selectedAnswerText)
 
 func _on_submit_button_down() -> void:
+	if questionAnswered:
+		return
 	selectedAnswerText = $Response.text
+	questionAnswered = true
 	question_answered.emit(selectedAnswerText)
 
 func _on_exit_button_down() -> void:
 	menu_exited.emit()
 
+## Allow keyboard input for quick exit
+func _input(event):
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		menu_exited.emit()
+		
 func _process(_delta: float) -> void:
 	pass
