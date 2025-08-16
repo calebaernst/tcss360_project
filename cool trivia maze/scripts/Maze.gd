@@ -31,6 +31,7 @@ var currentQuestion: Question = null
 
 ## On start
 func _ready() -> void:
+	SaveManager.theMaze = self
 	exitX = mazeWidth / 2
 	exitY = mazeHeight / 2
 	

@@ -1,6 +1,8 @@
 extends RefCounted
 class_name SaveManager
 
+static var theMaze: Maze = null
+
 ## get the filepath for the specified save slot (3 save slots)
 static func getSaveFilepath(saveSlot: int) -> String:
 	match saveSlot:
@@ -16,7 +18,7 @@ static func getSaveFilepath(saveSlot: int) -> String:
 	return ""
 
 ## save game data to a file
-static func saveGame(maze: Maze, saveSlot: int) -> void:
+static func saveGame(saveSlot: int) -> void:
 	var saveFilePath = getSaveFilepath(saveSlot)
 	var targetFile = FileAccess.open(saveFilePath, FileAccess.WRITE)
 	# if insufficient write permissions, or malformed filepath, abort the process and throw an error
@@ -25,10 +27,10 @@ static func saveGame(maze: Maze, saveSlot: int) -> void:
 		return
 	
 	var serializedMaze = []
-	for x in range(len(maze.mazeRooms)):
+	for x in range(len(theMaze.mazeRooms)):
 		var column = []
-		for y in range(len(maze.mazeRooms[x])):
-			var roomData = maze.mazeRooms[x][y].duplicate(true)
+		for y in range(len(theMaze.mazeRooms[x])):
+			var roomData = theMaze.mazeRooms[x][y].duplicate(true)
 			var cardinalDoors = ["NorthDoor", "SouthDoor", "EastDoor", "WestDoor"]
 			for doorName in cardinalDoors:
 				if roomData.has(doorName) and roomData[doorName].has("question"):
@@ -41,8 +43,8 @@ static func saveGame(maze: Maze, saveSlot: int) -> void:
 	
 	# prepare all data relevant to "current game state" 
 	var saveData = {
-		"currentRoomX": maze.currentRoomX,
-		"currentRoomY": maze.currentRoomY,
+		"currentRoomX": theMaze.currentRoomX,
+		"currentRoomY": theMaze.currentRoomY,
 		"mazeRooms": serializedMaze
 		}
 	
@@ -51,7 +53,7 @@ static func saveGame(maze: Maze, saveSlot: int) -> void:
 	print("Saved to slot ", saveSlot)
 
 ## load game data from a file
-static func loadGame(maze: Maze, saveSlot: int) -> void:
+static func loadGame(saveSlot: int) -> void:
 	var saveFilePath = getSaveFilepath(saveSlot)
 	var targetFile = FileAccess.open(saveFilePath, FileAccess.READ)
 	# if insufficient read permissions, malformed filepath, or file does not exist, abort the process and throw an error
@@ -83,13 +85,13 @@ static func loadGame(maze: Maze, saveSlot: int) -> void:
 			column.append(reconstructedRoom)
 		loadedMaze.append(column)
 	
-	maze.currentRoomX = saveData["currentRoomX"]
-	maze.currentRoomY = saveData["currentRoomY"]
-	maze.mazeRooms = loadedMaze
-	maze.linkDoors()
+	theMaze.currentRoomX = saveData["currentRoomX"]
+	theMaze.currentRoomY = saveData["currentRoomY"]
+	theMaze.mazeRooms = loadedMaze
+	theMaze.linkDoors()
 	targetFile.close()
-	maze.loadRoom()
-	maze.playerNode.global_position = Vector2(0,0)
+	theMaze.loadRoom()
+	theMaze.playerNode.global_position = Vector2(0,0)
 	print("Loaded save from slot ", saveSlot)
 
 ## delete a save file

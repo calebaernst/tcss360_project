@@ -37,17 +37,17 @@ func _input(event):
 				
 				
 			KEY_1:
-				SaveManager.saveGame(maze, 1)
+				SaveManager.saveGame(1)
 			KEY_2:
-				SaveManager.saveGame(maze, 2)
+				SaveManager.saveGame(2)
 			KEY_3:
-				SaveManager.saveGame(maze, 3)
+				SaveManager.saveGame(3)
 			KEY_4:
-				SaveManager.loadGame(maze, 1)
+				SaveManager.loadGame(1)
 			KEY_5:
-				SaveManager.loadGame(maze, 2)
+				SaveManager.loadGame(2)
 			KEY_6:
-				SaveManager.loadGame(maze, 3)
+				SaveManager.loadGame(3)
 			KEY_7:
 				SaveManager.deleteSave(1)
 			KEY_8:
