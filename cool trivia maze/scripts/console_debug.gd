@@ -5,9 +5,9 @@ extends Node
 ## show keybinds for debug inputs
 func debugPrints():
 	print("=== DEBUG CONTROLS ENABLED ===")
-	print("Press U to UNLOCK all doors in current room")
-	print("Press L to LOCK all doors in current room") 
-	print("Press B to BREAK all doors in current room") 
+	print("Press ; to UNLOCK all doors in current room")
+	print("Press ' to LOCK all doors in current room") 
+	print("Press / to BREAK all doors in current room") 
 	print("Press SPACE to show current door lock states")
 	print("Press 1 to SAVE to SLOT 1")
 	print("Press 2 to SAVE to SLOT 2")
@@ -26,11 +26,11 @@ func _input(event):
 		return
 	if event is InputEventKey and event.pressed:
 		match event.keycode:
-			KEY_U:
+			KEY_SEMICOLON:
 				unlockAllDoors()
-			KEY_L:
+			KEY_APOSTROPHE:
 				lockAllDoors()
-			KEY_B:
+			KEY_SLASH:
 				breakAllDoors()
 			KEY_SPACE:
 				printDoorStates()

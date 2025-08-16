@@ -14,6 +14,10 @@ config/name="Cool Trivia Maze"
 run/main_scene="uid://mjrou6ceuhn5"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 
+[audio]
+
+buses/default_bus_layout="res://scripts/default_bus_layout.tres"
+
 [dotnet]
 
 project/assembly_name="Cool Trivia Maze"
