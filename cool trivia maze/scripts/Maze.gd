@@ -411,6 +411,7 @@ func setupOpenResponseQuestion() -> void:
 	questionMenuInstance.get_node("Response").text = ""
 
 ## Handle when player answers a question
+
 func _onQuestionAnswered(selectedAnswer: String) -> void:
 	if not awaitingAnswer or not currentQuestion:
 		return
@@ -421,15 +422,14 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 	var isCorrect := selectedAnswer.strip_edges().to_lower() \
 		== str(currentQuestion.correctAnswer).strip_edges().to_lower()
 	lastAnswerCorrect = isCorrect
-	playerSelectedAnswer = selectedAnswer  # optional but handy
+	playerSelectedAnswer = selectedAnswer
 
-	# --- Build a safe, always-present feedback message ---
+	# Decide message + update door state
 	var msg := ""
 	if isCorrect:
 		msg = str(currentQuestion.correctMessage)
 		if msg.strip_edges() == "":
 			msg = "Correct!"
-		# unlock and mark as used
 		room[door_to_move]["locked"] = false
 		room[door_to_move]["interactable"] = false
 	else:
@@ -440,88 +440,58 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 		room[door_to_move]["interactable"] = false
 		updateWinCon()
 
-	# Show feedback and (for MC/TF) highlight choices; for open response we color Submit.
-	showAnswerFeedback(isCorrect, msg, selectedAnswer)
-
 	updateDoorVisuals()
 
-	## shows answer feedback on the GUI
-func showAnswerFeedback(isCorrect: bool, message: String, playerAnswer: String = "") -> void:
-	if not questionMenuInstance:
-		return
+	## put the result "in place of" the question, hide all inputs, show Continue
+	_showResultAndContinue(msg, isCorrect)
 
-	# Disable all answer buttons + clear styles
-	var buttons = [
-		questionMenuInstance.get_node("Button"),
-		questionMenuInstance.get_node("Button2"),
-		questionMenuInstance.get_node("Button3"),
-		questionMenuInstance.get_node("Button4")
-	]
-	for b in buttons:
-		b.disabled = true
-		b.modulate = Color(1, 1, 1, 1)
-		b.remove_theme_color_override("font_color")
-		b.remove_theme_color_override("font_disabled_color")
+# Hide all answer inputs (buttons 1-4, Response, Submit)
+func _hideAllQuestionInputs() -> void:
+	if not questionMenuInstance: return
+	var ids = ["Button", "Button2", "Button3", "Button4", "Response", "Submit"]
+	for id in ids:
+		var n = questionMenuInstance.get_node_or_null(id)
+		if n:
+			n.visible = false
+			if "disabled" in n: n.disabled = true
 
-## Submit (open response)
-	var submit := questionMenuInstance.get_node_or_null("Submit")
-	if submit:
-		submit.disabled = true
-		submit.remove_theme_color_override("font_color")
-		submit.remove_theme_color_override("font_disabled_color")
+# Show the result message where the question label is, and reveal a Continue button
+func _showResultAndContinue(message: String, isCorrect: bool) -> void:
+	if not questionMenuInstance: return
 
-## Feedback panel + label (make sure they never block clicks)
-	var feedbackPanel = questionMenuInstance.get_node_or_null("FeedbackPanel")
-	if not feedbackPanel:
-		feedbackPanel = Panel.new()
-		feedbackPanel.name = "FeedbackPanel"
-		feedbackPanel.position = Vector2(64, 580)
-		feedbackPanel.size = Vector2(1024, 220)
-		feedbackPanel.modulate = Color(0, 0, 0, 0.9)
-		questionMenuInstance.add_child(feedbackPanel)
+	# 1) Replace the question text with the result message
+	var questionLabel := questionMenuInstance.get_node("Label") as Label
+	questionLabel.text = message
+	var result_color := Color(0.2, 0.95, 0.2) if isCorrect else Color(0.95, 0.25, 0.25)
+	questionLabel.add_theme_color_override("font_color", result_color)
+	
+	# 2) Hide all inputs so only the message and Continue remain
+	_hideAllQuestionInputs()
 
-	var feedbackLabel = questionMenuInstance.get_node_or_null("FeedbackLabel")
-	if not feedbackLabel:
-		feedbackLabel = Label.new()
-		feedbackLabel.name = "FeedbackLabel"
-		feedbackPanel.add_child(feedbackLabel)
-		feedbackLabel.set_anchors_preset(Control.PRESET_FULL_RECT)
-		feedbackLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		feedbackLabel.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		feedbackLabel.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	# 3) Ensure a Continue button exists, position it, and wire it up
+	var cont := questionMenuInstance.get_node_or_null("Continue") as Button
+	if cont == null:
+		cont = Button.new()
+		cont.name = "Continue"
+		cont.text = "Continue"
+		questionMenuInstance.add_child(cont)
+		# simple layout near bottom; tweak to your UI taste
+		cont.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		cont.anchor_left = 0.5
+		cont.anchor_right = 0.5
+		cont.anchor_top = 1.0
+		cont.anchor_bottom = 1.0
+		cont.position = Vector2(-64, -96)  # centered-ish
+		cont.size = Vector2(128, 48)
 
-# Ensure both ignore mouse *every time* (covers existing nodes)
-	feedbackPanel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	feedbackLabel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if not cont.is_connected("pressed", Callable(self, "_onContinuePressed")):
+		cont.connect("pressed", Callable(self, "_onContinuePressed"))
 
-	# Always show a message
-	feedbackLabel.text = message if message.strip_edges() != "" else ( "Correct!" if isCorrect else "Incorrect." )
-	feedbackPanel.visible = true
-	feedbackLabel.visible = true
+	cont.visible = true
+	cont.disabled = false
 
-## Text colors
-	var GREEN = Color(0.2, 0.95, 0.2)
-	var RED   = Color(0.95, 0.25, 0.25)
-	var GRAY  = Color(0.65, 0.65, 0.65)
 
-	feedbackLabel.add_theme_color_override("font_color", (GREEN if isCorrect else RED))
-
-## For MC/TF we highlight the buttons and for open response there are no visible buttons.
-	var any_button_visible := false
-	for b in buttons:
-		if b.visible:
-			any_button_visible = true
-			break
-
-	if any_button_visible:
-		highlightCorrectAnswer(playerAnswer)  # MC/TF path
-	else:
-	# Open-response path: color the Submit text so player gets a cue
-		if submit:
-			submit.add_theme_color_override("font_color", (GREEN if isCorrect else RED))
-			submit.add_theme_color_override("font_disabled_color", (GREEN if isCorrect else RED))
-
-# NEW: utility to set both normal and disabled text color on Buttons
+# utility to set both normal and disabled text color on Buttons
 func _set_button_text_color(b: Button, c: Color) -> void:
 	b.add_theme_color_override("font_color", c)
 	b.add_theme_color_override("font_disabled_color", c)
