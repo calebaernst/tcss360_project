@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Cool Trivia Maze"
-run/main_scene="uid://mjrou6ceuhn5"
+run/main_scene="uid://xuww2yjwif0i"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 
 [audio]

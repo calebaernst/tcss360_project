@@ -110,4 +110,7 @@ static func deleteSave(saveSlot: int) -> void:
 			print("Failed to delete save file ", saveSlot)
 	else:
 		# you should not be able to do this
-		print("Attempted deletion of a save ", saveSlot ," which is already empty.")
+		print("Attempted deletion of save file ", saveSlot ," which is already empty.")
+
+static func saveExists(slot: int) -> bool:
+	return FileAccess.file_exists(getSaveFilepath(slot))
