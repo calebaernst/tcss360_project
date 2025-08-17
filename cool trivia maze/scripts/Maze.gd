@@ -2,7 +2,6 @@ extends Node2D
 class_name Maze
 
 @export var debugInputs: bool = true
-@onready var debugConsole = get_parent().get_node("DebugInputs")
 
 ## prepare game assets
 var roomScene: PackedScene = preload("res://scenes/RoomScene.tscn")
@@ -34,18 +33,23 @@ var lastAnswerCorrect: bool = false   ## remember result until Exit is pressed
 
 ## On start
 func _ready() -> void:
-	SaveManager.theMaze = self
+	SaveManager.theMaze = self # connect save manager
+	if SaveManager.saveExists(SaveManager.currentSlot):
+		SaveManager.loadGame(SaveManager.currentSlot)
+	else: 
+		_prepareMazeArray()
+		_setStartingRoom()
+		SaveManager.saveGame(SaveManager.currentSlot)
+	
 	exitX = mazeWidth / 2
 	exitY = mazeHeight / 2
-	
-	_prepareMazeArray()
-	_setStartingRoom()
 	loadRoom()
 	
 	playerNode.z_index = 1000 # fix the player to always be visible
 	BGM.play()
 	
 	# debug inputs can be enabled/disabled from the inspector menu for the "Maze" node
+	debugConsole.theMaze = self
 	if debugInputs:
 		debugConsole.debugPrints()
 

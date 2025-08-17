@@ -2,6 +2,7 @@ extends RefCounted
 class_name SaveManager
 
 static var theMaze: Maze = null
+static var currentSlot: int = 0
 
 ## get the filepath for the specified save slot (3 save slots)
 static func getSaveFilepath(saveSlot: int) -> String:
@@ -54,20 +55,9 @@ static func saveGame(saveSlot: int) -> void:
 
 ## load game data from a file
 static func loadGame(saveSlot: int) -> void:
-	var saveFilePath = getSaveFilepath(saveSlot)
-	var targetFile = FileAccess.open(saveFilePath, FileAccess.READ)
-	# if insufficient read permissions, malformed filepath, or file does not exist, abort the process and throw an error
-	if targetFile == null:
-		print("Cannot read save file: " + saveFilePath)
+	var saveData = getSaveData(saveSlot)
+	if saveData == null:
 		return
-	
-	var jsonString = targetFile.get_as_text()
-	var json = JSON.new()
-	var parseResult = json.parse(jsonString)
-	if not parseResult == OK:
-		print("Save file ", jsonString, " cannot be parsed.")
-		return
-	var saveData = json.data
 	
 	var loadedMaze = []
 	for x in range(len(saveData["mazeRooms"])):
@@ -89,7 +79,6 @@ static func loadGame(saveSlot: int) -> void:
 	theMaze.currentRoomY = saveData["currentRoomY"]
 	theMaze.mazeRooms = loadedMaze
 	theMaze.linkDoors()
-	targetFile.close()
 	theMaze.loadRoom()
 	theMaze.playerNode.global_position = Vector2(0,0)
 	print("Loaded save from slot ", saveSlot)
@@ -110,4 +99,37 @@ static func deleteSave(saveSlot: int) -> void:
 			print("Failed to delete save file ", saveSlot)
 	else:
 		# you should not be able to do this
-		print("Attempted deletion of a save ", saveSlot ," which is already empty.")
+		print("Attempted deletion of save file ", saveSlot ," which is already empty.")
+
+static func saveExists(saveSlot: int) -> bool:
+	return FileAccess.file_exists(getSaveFilepath(saveSlot))
+
+static func getSaveData(saveSlot: int):
+	var saveFilePath = getSaveFilepath(saveSlot)
+	var targetFile = FileAccess.open(saveFilePath, FileAccess.READ)
+	# if insufficient read permissions, malformed filepath, or file does not exist, abort the process and throw an error
+	if targetFile == null:
+		print("Cannot read save file: " + saveFilePath)
+		return
+	
+	var jsonString = targetFile.get_as_text()
+	var json = JSON.new()
+	var parseResult = json.parse(jsonString)
+	var saveData = json.data
+	targetFile.close()
+	if not parseResult == OK:
+		print("Save file ", jsonString, " cannot be parsed.")
+		return
+	
+	return saveData
+
+static func getSlotDisplay(saveSlot: int) -> String:
+	var saveData = getSaveData(saveSlot)
+	if saveData == null:
+		return ""
+	
+	# put here whatever set of variables you want tracked by this thing
+	var x: int = saveData.get("currentRoomX", -1)
+	var y: int = saveData.get("currentRoomY", -1)
+	
+	return "(" + str(x) + ", " + str(y) + ")"
