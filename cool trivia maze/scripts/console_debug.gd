@@ -1,14 +1,16 @@
 extends Node
+class_name debugConsole
 
-@onready var maze = get_parent().get_node("Maze")
+static var theMaze = null
 
 ## show keybinds for debug inputs
-func debugPrints():
-	print("=== DEBUG CONTROLS ENABLED ===")
-	print("Press ; to UNLOCK all doors in current room")
-	print("Press ' to LOCK all doors in current room") 
-	print("Press / to BREAK all doors in current room") 
-	print("Press SPACE to show current door lock states")
+static func debugPrints():
+	print("=== DEBUG CONTROLS ===")
+	print("Press SPACE to again show these controls in console")
+	print("Press U to UNLOCK all doors in current room")
+	print("Press L to LOCK all doors in current room") 
+	print("Press B to BREAK all doors in current room") 
+	print("Press C to show current door lock states")
 	print("Press 1 to SAVE to SLOT 1")
 	print("Press 2 to SAVE to SLOT 2")
 	print("Press 3 to SAVE to SLOT 3")
@@ -22,19 +24,20 @@ func debugPrints():
 
 ## Takes input from user
 func _input(event):
-	if not maze.debugInputs or maze.currentQuestion:
+	if not theMaze.debugInputs or theMaze.currentQuestion:
 		return
 	if event is InputEventKey and event.pressed:
 		match event.keycode:
-			KEY_SEMICOLON:
+			KEY_U:
 				unlockAllDoors()
-			KEY_APOSTROPHE:
+			KEY_L:
 				lockAllDoors()
-			KEY_SLASH:
+			KEY_B:
 				breakAllDoors()
-			KEY_SPACE:
+			KEY_C:
 				printDoorStates()
-				
+			KEY_SPACE:
+				debugPrints()
 				
 			KEY_1:
 				SaveManager.saveGame(1)
@@ -56,46 +59,46 @@ func _input(event):
 				SaveManager.deleteSave(3)
 
 # unlocks all doors in the current room
-func unlockAllDoors() -> void:
-	if not maze or maze.mazeRooms.is_empty():
+static func unlockAllDoors() -> void:
+	if not theMaze or theMaze.mazeRooms.is_empty():
 		return
-	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
-	for doorName in maze.cardinalDoors:
+	var room = theMaze.mazeRooms[theMaze.currentRoomX][theMaze.currentRoomY]
+	for doorName in theMaze.cardinalDoors:
 		room[doorName]["locked"] = false
 		room[doorName]["interactable"] = false
-	print("ALL DOORS UNLOCKED in room ", maze.currentRoomCoords())
+	print("ALL DOORS UNLOCKED in room ", theMaze.currentRoomCoords())
 	debugRoutine()
 
 ## locks all doors in the current room
-func lockAllDoors() -> void:
-	if not maze or maze.mazeRooms.is_empty():
+static func lockAllDoors() -> void:
+	if not theMaze or theMaze.mazeRooms.is_empty():
 		return
-	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
-	for doorName in maze.cardinalDoors:
+	var room = theMaze.mazeRooms[theMaze.currentRoomX][theMaze.currentRoomY]
+	for doorName in theMaze.cardinalDoors:
 		room[doorName]["locked"] = true
 		room[doorName]["interactable"] = true
-	print("ALL DOORS LOCKED in room ", maze.currentRoomCoords())
+	print("ALL DOORS LOCKED in room ", theMaze.currentRoomCoords())
 	debugRoutine()
 
-func breakAllDoors() -> void:
-	if not maze or maze.mazeRooms.is_empty():
+static func breakAllDoors() -> void:
+	if not theMaze or theMaze.mazeRooms.is_empty():
 		return
-	var room = maze.mazeRooms[maze.currentRoomX][maze.currentRoomY]
-	for doorName in maze.cardinalDoors:
+	var room = theMaze.mazeRooms[theMaze.currentRoomX][theMaze.currentRoomY]
+	for doorName in theMaze.cardinalDoors:
 		room[doorName]["locked"] = true
 		room[doorName]["interactable"] = false
-	print("ALL DOORS BROKEN in room ", maze.currentRoomCoords())
+	print("ALL DOORS BROKEN in room ", theMaze.currentRoomCoords())
 	debugRoutine()
 
-func debugRoutine() -> void:
-	maze.updateDoorVisuals()
-	maze.updateWinCon()
+static func debugRoutine() -> void:
+	theMaze.updateDoorVisuals()
+	theMaze.updateWinCon()
 	printDoorStates()
 
 ## print to the console the state of doors in the current room
-func printDoorStates() -> void:
-	if not maze or maze.mazeRooms.is_empty():
+static func printDoorStates() -> void:
+	if not theMaze or theMaze.mazeRooms.is_empty():
 		return
-	print("=== ROOM ", maze.currentRoomCoords(), " DOOR STATES ===")
-	print(maze.getDoorStates())
+	print("=== ROOM ", theMaze.currentRoomCoords(), " DOOR STATES ===")
+	print(theMaze.getDoorStates())
 	print("===================")
