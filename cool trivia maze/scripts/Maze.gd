@@ -330,7 +330,7 @@ func showTriviaQuestion(door_name: String) -> void:
 		root.add_child(ui)
 	ui.add_child(questionMenuInstance)
 
-	# draw in screen space and fill viewport
+	## draw in screen space and fill viewport
 	questionMenuInstance.top_level = true
 	questionMenuInstance.set_anchors_preset(Control.PRESET_FULL_RECT)
 	questionMenuInstance.visible = true
@@ -345,11 +345,11 @@ func setupQuestionMenu() -> void:
 	if not questionMenuInstance or not currentQuestion:
 		return
 		
-	# Set the question text
+	## Set the question text
 	var questionLabel = questionMenuInstance.get_node("Label")
 	questionLabel.text = currentQuestion.questionText
 	
-	# Handle different question types
+	## Handle different question types
 	match currentQuestion.type:
 		"multiple choice":
 			setupMultipleChoiceQuestion()
@@ -357,6 +357,14 @@ func setupQuestionMenu() -> void:
 			setupTrueFalseQuestion()
 		"open response":
 			setupOpenResponseQuestion()
+			
+	# Make Exit available again for a fresh question
+	var exit_btn := questionMenuInstance.get_node_or_null("Exit") as Button
+	if exit_btn:
+		exit_btn.visible = true
+		exit_btn.disabled = false
+		exit_btn.mouse_filter = Control.MOUSE_FILTER_STOP
+
 
 ## Setup multiple choice question display
 func setupMultipleChoiceQuestion() -> void:
@@ -367,7 +375,7 @@ func setupMultipleChoiceQuestion() -> void:
 		questionMenuInstance.get_node("Button4")
 	]
 	
-	# Show all answer buttons
+	## Show all answer buttons
 	for i in range(buttons.size()):
 		if i < currentQuestion.answerChoices.size():
 			buttons[i].visible = true
@@ -375,7 +383,7 @@ func setupMultipleChoiceQuestion() -> void:
 		else:
 			buttons[i].visible = false
 	
-	# Hide open response elements
+	## Hide open response elements
 	questionMenuInstance.get_node("Response").visible = false
 	questionMenuInstance.get_node("Submit").visible = false
 
@@ -388,17 +396,17 @@ func setupTrueFalseQuestion() -> void:
 		questionMenuInstance.get_node("Button4")
 	]
 	
-	# Show only first two buttons for True/False
+	## Show only first two buttons for True/False
 	buttons[0].visible = true
 	buttons[1].visible = true
 	buttons[2].visible = false
 	buttons[3].visible = false
 	
-	# Set True/False text
+	## Set True/False text
 	for i in range(min(2, currentQuestion.answerChoices.size())):
 		buttons[i].text = currentQuestion.answerChoices[i]
 	
-	# Hide open response elements
+	## Hide open response elements
 	questionMenuInstance.get_node("Response").visible = false
 	questionMenuInstance.get_node("Submit").visible = false
 
@@ -429,7 +437,7 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 	lastAnswerCorrect = isCorrect
 	playerSelectedAnswer = selectedAnswer
 
-	# Decide message + update door state
+	## Decide message + update door state
 	var msg := ""
 	if isCorrect:
 		msg = str(currentQuestion.correctMessage)
@@ -450,7 +458,7 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 	## put the result "in place of" the question, hide all inputs, show Continue
 	_showResultAndContinue(msg, isCorrect)
 
-# Hide all answer inputs (buttons 1-4, Response, Submit)
+## Hide all answer inputs (buttons 1-4, Response, Submit)
 func _hideAllQuestionInputs() -> void:
 	if not questionMenuInstance: return
 	var ids = ["Button", "Button2", "Button3", "Button4", "Response", "Submit"]
@@ -460,24 +468,31 @@ func _hideAllQuestionInputs() -> void:
 			n.visible = false
 			if "disabled" in n: n.disabled = true
 
-# Show the result message where the question label is, and reveal a Continue button
+## Show the result message where the question label is, and reveal a Continue button
 func _showResultAndContinue(message: String, isCorrect: bool) -> void:
 	if not questionMenuInstance:
 		return
 
-	# 1) Replace the question text with the result message
+	## 1) Replace the question text with the result message
 	var questionLabel := questionMenuInstance.get_node("Label") as Label
 	questionLabel.text = message
 	var result_color := Color(0.2, 0.95, 0.2) if isCorrect else Color(0.95, 0.25, 0.25)
 	questionLabel.add_theme_color_override("font_color", result_color)
 
-	# 2) Hide all inputs so only the message and Continue remain
+	## 2) Hide all inputs so only the message and Continue remain
 	_hideAllQuestionInputs()
 
-	# 3) Use the pre-made Continue button, center it, and wire it up
+	## Hide the Exit button after answering
+	var exit_btn := questionMenuInstance.get_node_or_null("Exit") as Button
+	if exit_btn:
+		exit_btn.visible = false
+		exit_btn.disabled = true
+		exit_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE  # so it can't eat clicks
+		
+	## 3) Use the pre-made Continue button I made in question.menu
 	var cont := questionMenuInstance.get_node("Continue") as Button
 
-	# (optional) size & centering – Godot 4 uses custom_minimum_size
+	## size & centering
 	cont.custom_minimum_size = Vector2(220, 60)
 	cont.set_anchors_preset(Control.PRESET_CENTER, false)
 	cont.offset_left   = -cont.custom_minimum_size.x * 0.5
@@ -503,7 +518,7 @@ func _onContinuePressed() -> void:
 		get_tree().create_timer(0.25).timeout.connect(_enableDoors)
 
 
-# utility to set both normal and disabled text color on Buttons
+## utility to set both normal and disabled text color on Buttons
 func _set_button_text_color(b: Button, c: Color) -> void:
 	b.add_theme_color_override("font_color", c)
 	b.add_theme_color_override("font_disabled_color", c)
@@ -559,7 +574,7 @@ func _closeQuestionMenu(preserve_state: bool = false) -> void:
 ## check if there is a valid path from the player's current room to the exit room
 ## this utilizes a brute force-y approach and so is relatively computationally expensive
 func _canReachExit() -> bool:
-	# if you're in the exit room you can definitely reach the exit
+	## if you're in the exit room you can definitely reach the exit
 	if currentRoomX == exitX and currentRoomY == exitY:
 		return true
 	
@@ -573,7 +588,7 @@ func _canReachExit() -> bool:
 		var pathHeadY = pathHead[1]
 		var thisRoom = mazeRooms[pathHeadX][pathHeadY]
 		
-		# dictionary for the relative coordinate offsets for the surrounding rooms/directions
+		## dictionary for the relative coordinate offsets for the surrounding rooms/directions
 		var cardinalDirections = [ # for the sake of simplicity, we name all of the keys "door"
 			{"door": "NorthDoor", "dx": 0, "dy": 1}, # north
 			{"door": "SouthDoor", "dx": 0, "dy": -1}, # south
@@ -587,7 +602,7 @@ func _canReachExit() -> bool:
 			var aheadY = pathHeadY + direction.dy
 			var aheadCoords = str(aheadX) + "," + str(aheadY)
 			
-			# skip this room if already visited
+			## skip this room if already visited
 			if visited.has(aheadCoords):
 				continue
 			# skip this door if it's a wall or broken
@@ -597,9 +612,9 @@ func _canReachExit() -> bool:
 			if aheadX == exitX and aheadY == exitY:
 				return true
 			
-			# if the door is locked or unlocked, add the ahead room to the queue and mark it as visited (because it will be visited via the queue)
+			## if the door is locked or unlocked, add the ahead room to the queue and mark it as visited (because it will be visited via the queue)
 			visited[aheadCoords] = true
 			queue.append([aheadX, aheadY])
 	
-	# if the while loop completes, no path exists
+	## if the while loop completes, no path exists
 	return false
