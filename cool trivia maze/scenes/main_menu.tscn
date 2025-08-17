@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3 uid="uid://xuww2yjwif0i"]
+
+[ext_resource type="Script" uid="uid://cjlg2suugqacd" path="res://scripts/main_menu.gd" id="1_06t4h"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_06t4h")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 256.0
+offset_top = 192.0
+offset_right = 832.0
+offset_bottom = 512.0
+text = "Click anywhere to start"
+horizontal_alignment = 1
+vertical_alignment = 1

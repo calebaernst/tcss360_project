@@ -330,7 +330,7 @@ func showTriviaQuestion(door_name: String) -> void:
 		root.add_child(ui)
 	ui.add_child(questionMenuInstance)
 
-	# draw in screen space and fill viewport
+	## draw in screen space and fill viewport
 	questionMenuInstance.top_level = true
 	questionMenuInstance.set_anchors_preset(Control.PRESET_FULL_RECT)
 	questionMenuInstance.visible = true
@@ -345,11 +345,11 @@ func setupQuestionMenu() -> void:
 	if not questionMenuInstance or not currentQuestion:
 		return
 		
-	# Set the question text
+	## Set the question text
 	var questionLabel = questionMenuInstance.get_node("Label")
 	questionLabel.text = currentQuestion.questionText
 	
-	# Handle different question types
+	## Handle different question types
 	match currentQuestion.type:
 		"multiple choice":
 			setupMultipleChoiceQuestion()
@@ -357,6 +357,14 @@ func setupQuestionMenu() -> void:
 			setupTrueFalseQuestion()
 		"open response":
 			setupOpenResponseQuestion()
+			
+	# Make Exit available again for a fresh question
+	var exit_btn := questionMenuInstance.get_node_or_null("Exit") as Button
+	if exit_btn:
+		exit_btn.visible = true
+		exit_btn.disabled = false
+		exit_btn.mouse_filter = Control.MOUSE_FILTER_STOP
+
 
 ## Setup multiple choice question display
 func setupMultipleChoiceQuestion() -> void:
@@ -367,7 +375,7 @@ func setupMultipleChoiceQuestion() -> void:
 		questionMenuInstance.get_node("Button4")
 	]
 	
-	# Show all answer buttons
+	## Show all answer buttons
 	for i in range(buttons.size()):
 		if i < currentQuestion.answerChoices.size():
 			buttons[i].visible = true
@@ -375,7 +383,7 @@ func setupMultipleChoiceQuestion() -> void:
 		else:
 			buttons[i].visible = false
 	
-	# Hide open response elements
+	## Hide open response elements
 	questionMenuInstance.get_node("Response").visible = false
 	questionMenuInstance.get_node("Submit").visible = false
 
@@ -388,17 +396,17 @@ func setupTrueFalseQuestion() -> void:
 		questionMenuInstance.get_node("Button4")
 	]
 	
-	# Show only first two buttons for True/False
+	## Show only first two buttons for True/False
 	buttons[0].visible = true
 	buttons[1].visible = true
 	buttons[2].visible = false
 	buttons[3].visible = false
 	
-	# Set True/False text
+	## Set True/False text
 	for i in range(min(2, currentQuestion.answerChoices.size())):
 		buttons[i].text = currentQuestion.answerChoices[i]
 	
-	# Hide open response elements
+	## Hide open response elements
 	questionMenuInstance.get_node("Response").visible = false
 	questionMenuInstance.get_node("Submit").visible = false
 
@@ -416,6 +424,7 @@ func setupOpenResponseQuestion() -> void:
 	questionMenuInstance.get_node("Response").text = ""
 
 ## Handle when player answers a question
+
 func _onQuestionAnswered(selectedAnswer: String) -> void:
 	if not awaitingAnswer or not currentQuestion:
 		return
@@ -426,15 +435,14 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 	var isCorrect := selectedAnswer.strip_edges().to_lower() \
 		== str(currentQuestion.correctAnswer).strip_edges().to_lower()
 	lastAnswerCorrect = isCorrect
-	playerSelectedAnswer = selectedAnswer  # optional but handy
+	playerSelectedAnswer = selectedAnswer
 
-	# --- Build a safe, always-present feedback message ---
+	## Decide message + update door state
 	var msg := ""
 	if isCorrect:
 		msg = str(currentQuestion.correctMessage)
 		if msg.strip_edges() == "":
 			msg = "Correct!"
-		# unlock and mark as used
 		room[door_to_move]["locked"] = false
 		room[door_to_move]["interactable"] = false
 	else:
@@ -445,88 +453,72 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 		room[door_to_move]["interactable"] = false
 		updateWinCon()
 
-	# Show feedback and (for MC/TF) highlight choices; for open response we color Submit.
-	showAnswerFeedback(isCorrect, msg, selectedAnswer)
-
 	updateDoorVisuals()
 
-	## shows answer feedback on the GUI
-func showAnswerFeedback(isCorrect: bool, message: String, playerAnswer: String = "") -> void:
+	## put the result "in place of" the question, hide all inputs, show Continue
+	_showResultAndContinue(msg, isCorrect)
+
+## Hide all answer inputs (buttons 1-4, Response, Submit)
+func _hideAllQuestionInputs() -> void:
+	if not questionMenuInstance: return
+	var ids = ["Button", "Button2", "Button3", "Button4", "Response", "Submit"]
+	for id in ids:
+		var n = questionMenuInstance.get_node_or_null(id)
+		if n:
+			n.visible = false
+			if "disabled" in n: n.disabled = true
+
+## Show the result message where the question label is, and reveal a Continue button
+func _showResultAndContinue(message: String, isCorrect: bool) -> void:
 	if not questionMenuInstance:
 		return
 
-	# Disable all answer buttons + clear styles
-	var buttons = [
-		questionMenuInstance.get_node("Button"),
-		questionMenuInstance.get_node("Button2"),
-		questionMenuInstance.get_node("Button3"),
-		questionMenuInstance.get_node("Button4")
-	]
-	for b in buttons:
-		b.disabled = true
-		b.modulate = Color(1, 1, 1, 1)
-		b.remove_theme_color_override("font_color")
-		b.remove_theme_color_override("font_disabled_color")
+	## 1) Replace the question text with the result message
+	var questionLabel := questionMenuInstance.get_node("Label") as Label
+	questionLabel.text = message
+	var result_color := Color(0.2, 0.95, 0.2) if isCorrect else Color(0.95, 0.25, 0.25)
+	questionLabel.add_theme_color_override("font_color", result_color)
 
-## Submit (open response)
-	var submit := questionMenuInstance.get_node_or_null("Submit")
-	if submit:
-		submit.disabled = true
-		submit.remove_theme_color_override("font_color")
-		submit.remove_theme_color_override("font_disabled_color")
+	## 2) Hide all inputs so only the message and Continue remain
+	_hideAllQuestionInputs()
 
-## Feedback panel + label (make sure they never block clicks)
-	var feedbackPanel = questionMenuInstance.get_node_or_null("FeedbackPanel")
-	if not feedbackPanel:
-		feedbackPanel = Panel.new()
-		feedbackPanel.name = "FeedbackPanel"
-		feedbackPanel.position = Vector2(64, 580)
-		feedbackPanel.size = Vector2(1024, 220)
-		feedbackPanel.modulate = Color(0, 0, 0, 0.9)
-		questionMenuInstance.add_child(feedbackPanel)
+	## Hide the Exit button after answering
+	var exit_btn := questionMenuInstance.get_node_or_null("Exit") as Button
+	if exit_btn:
+		exit_btn.visible = false
+		exit_btn.disabled = true
+		exit_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE  # so it can't eat clicks
+		
+	## 3) Use the pre-made Continue button I made in question.menu
+	var cont := questionMenuInstance.get_node("Continue") as Button
 
-	var feedbackLabel = questionMenuInstance.get_node_or_null("FeedbackLabel")
-	if not feedbackLabel:
-		feedbackLabel = Label.new()
-		feedbackLabel.name = "FeedbackLabel"
-		feedbackPanel.add_child(feedbackLabel)
-		feedbackLabel.set_anchors_preset(Control.PRESET_FULL_RECT)
-		feedbackLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		feedbackLabel.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		feedbackLabel.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	## size & centering
+	cont.custom_minimum_size = Vector2(220, 60)
+	cont.set_anchors_preset(Control.PRESET_CENTER, false)
+	cont.offset_left   = -cont.custom_minimum_size.x * 0.5
+	cont.offset_top    = -cont.custom_minimum_size.y * 0.5
+	cont.offset_right  =  cont.custom_minimum_size.x * 0.5
+	cont.offset_bottom =  cont.custom_minimum_size.y * 0.5
 
-# Ensure both ignore mouse *every time* (covers existing nodes)
-	feedbackPanel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	feedbackLabel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if not cont.is_connected("pressed", Callable(self, "_onContinuePressed")):
+		cont.connect("pressed", Callable(self, "_onContinuePressed"))
 
-	# Always show a message
-	feedbackLabel.text = message if message.strip_edges() != "" else ( "Correct!" if isCorrect else "Incorrect." )
-	feedbackPanel.visible = true
-	feedbackLabel.visible = true
+	cont.visible = true
+	cont.disabled = false
+	cont.grab_focus()
 
-## Text colors
-	var GREEN = Color(0.2, 0.95, 0.2)
-	var RED   = Color(0.95, 0.25, 0.25)
-	var GRAY  = Color(0.65, 0.65, 0.65)
+## controller for the continue button being presseda
+func _onContinuePressed() -> void:
+	var door_to_move := pendingDoor
+	_closeQuestionMenu()
+	awaitingAnswer = false
+	if lastAnswerCorrect and door_to_move != "":
+		doorsOffCooldown = false
+		call_deferred("moveRooms", door_to_move)
+		get_tree().create_timer(0.25).timeout.connect(_enableDoors)
 
-	feedbackLabel.add_theme_color_override("font_color", (GREEN if isCorrect else RED))
 
-## For MC/TF we highlight the buttons and for open response there are no visible buttons.
-	var any_button_visible := false
-	for b in buttons:
-		if b.visible:
-			any_button_visible = true
-			break
-
-	if any_button_visible:
-		highlightCorrectAnswer(playerAnswer)  # MC/TF path
-	else:
-	# Open-response path: color the Submit text so player gets a cue
-		if submit:
-			submit.add_theme_color_override("font_color", (GREEN if isCorrect else RED))
-			submit.add_theme_color_override("font_disabled_color", (GREEN if isCorrect else RED))
-
-# NEW: utility to set both normal and disabled text color on Buttons
+## utility to set both normal and disabled text color on Buttons
 func _set_button_text_color(b: Button, c: Color) -> void:
 	b.add_theme_color_override("font_color", c)
 	b.add_theme_color_override("font_disabled_color", c)
@@ -582,7 +574,7 @@ func _closeQuestionMenu(preserve_state: bool = false) -> void:
 ## check if there is a valid path from the player's current room to the exit room
 ## this utilizes a brute force-y approach and so is relatively computationally expensive
 func _canReachExit() -> bool:
-	# if you're in the exit room you can definitely reach the exit
+	## if you're in the exit room you can definitely reach the exit
 	if currentRoomX == exitX and currentRoomY == exitY:
 		return true
 	
@@ -596,7 +588,7 @@ func _canReachExit() -> bool:
 		var pathHeadY = pathHead[1]
 		var thisRoom = mazeRooms[pathHeadX][pathHeadY]
 		
-		# dictionary for the relative coordinate offsets for the surrounding rooms/directions
+		## dictionary for the relative coordinate offsets for the surrounding rooms/directions
 		var cardinalDirections = [ # for the sake of simplicity, we name all of the keys "door"
 			{"door": "NorthDoor", "dx": 0, "dy": 1}, # north
 			{"door": "SouthDoor", "dx": 0, "dy": -1}, # south
@@ -610,7 +602,7 @@ func _canReachExit() -> bool:
 			var aheadY = pathHeadY + direction.dy
 			var aheadCoords = str(aheadX) + "," + str(aheadY)
 			
-			# skip this room if already visited
+			## skip this room if already visited
 			if visited.has(aheadCoords):
 				continue
 			# skip this door if it's a wall or broken
@@ -620,9 +612,9 @@ func _canReachExit() -> bool:
 			if aheadX == exitX and aheadY == exitY:
 				return true
 			
-			# if the door is locked or unlocked, add the ahead room to the queue and mark it as visited (because it will be visited via the queue)
+			## if the door is locked or unlocked, add the ahead room to the queue and mark it as visited (because it will be visited via the queue)
 			visited[aheadCoords] = true
 			queue.append([aheadX, aheadY])
 	
-	# if the while loop completes, no path exists
+	## if the while loop completes, no path exists
 	return false

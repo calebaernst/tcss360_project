@@ -11,6 +11,17 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_cd274")
 
+[node name="Continue" type="Button" parent="."]
+visible = false
+custom_minimum_size = Vector2(220, 100)
+layout_mode = 0
+offset_left = 463.0
+offset_top = 362.0
+offset_right = 683.0
+offset_bottom = 462.0
+text = "Continue
+"
+
 [node name="Button" type="Button" parent="."]
 layout_mode = 0
 offset_left = 64.0
