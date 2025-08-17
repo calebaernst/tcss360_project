@@ -22,6 +22,10 @@ buses/default_bus_layout="res://scripts/default_bus_layout.tres"
 
 project/assembly_name="Cool Trivia Maze"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot-sqlite/plugin.cfg", "res://addons/gut/plugin.cfg")
+
 [input]
 
 up={

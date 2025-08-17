@@ -44,8 +44,3 @@ func runActive():
 		SPEED = 200.0
 	else:
 		SPEED = 100.0
-
-# Checks if player presses accept
-func interactActive():
-	if Input.is_action_pressed("accept"):
-		pass
