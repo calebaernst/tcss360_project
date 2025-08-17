@@ -462,38 +462,45 @@ func _hideAllQuestionInputs() -> void:
 
 # Show the result message where the question label is, and reveal a Continue button
 func _showResultAndContinue(message: String, isCorrect: bool) -> void:
-	if not questionMenuInstance: return
+	if not questionMenuInstance:
+		return
 
 	# 1) Replace the question text with the result message
 	var questionLabel := questionMenuInstance.get_node("Label") as Label
 	questionLabel.text = message
 	var result_color := Color(0.2, 0.95, 0.2) if isCorrect else Color(0.95, 0.25, 0.25)
 	questionLabel.add_theme_color_override("font_color", result_color)
-	
+
 	# 2) Hide all inputs so only the message and Continue remain
 	_hideAllQuestionInputs()
 
-	# 3) Ensure a Continue button exists, position it, and wire it up
-	var cont := questionMenuInstance.get_node_or_null("Continue") as Button
-	if cont == null:
-		cont = Button.new()
-		cont.name = "Continue"
-		cont.text = "Continue"
-		questionMenuInstance.add_child(cont)
-		# simple layout near bottom; tweak to your UI taste
-		cont.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		cont.anchor_left = 0.5
-		cont.anchor_right = 0.5
-		cont.anchor_top = 1.0
-		cont.anchor_bottom = 1.0
-		cont.position = Vector2(-64, -96)  # centered-ish
-		cont.size = Vector2(128, 48)
+	# 3) Use the pre-made Continue button, center it, and wire it up
+	var cont := questionMenuInstance.get_node("Continue") as Button
+
+	# (optional) size & centering – Godot 4 uses custom_minimum_size
+	cont.custom_minimum_size = Vector2(220, 60)
+	cont.set_anchors_preset(Control.PRESET_CENTER, false)
+	cont.offset_left   = -cont.custom_minimum_size.x * 0.5
+	cont.offset_top    = -cont.custom_minimum_size.y * 0.5
+	cont.offset_right  =  cont.custom_minimum_size.x * 0.5
+	cont.offset_bottom =  cont.custom_minimum_size.y * 0.5
 
 	if not cont.is_connected("pressed", Callable(self, "_onContinuePressed")):
 		cont.connect("pressed", Callable(self, "_onContinuePressed"))
 
 	cont.visible = true
 	cont.disabled = false
+	cont.grab_focus()
+
+## controller for the continue button being presseda
+func _onContinuePressed() -> void:
+	var door_to_move := pendingDoor
+	_closeQuestionMenu()
+	awaitingAnswer = false
+	if lastAnswerCorrect and door_to_move != "":
+		doorsOffCooldown = false
+		call_deferred("moveRooms", door_to_move)
+		get_tree().create_timer(0.25).timeout.connect(_enableDoors)
 
 
 # utility to set both normal and disabled text color on Buttons
