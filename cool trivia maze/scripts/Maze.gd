@@ -255,6 +255,9 @@ func doorTouched(body: Node, doorName: String) -> void:
 	if body != playerNode or not doorsOffCooldown or awaitingAnswer:
 		return
 	
+	# stop the player animation while interacting with a door
+	playerNode.velocity = Vector2.ZERO
+	playerNode.select_animation()
 
 	var room = getCurrentRoom()
 	var door = room[doorName]
