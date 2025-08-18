@@ -15,40 +15,41 @@ func _ready() -> void:
 ## updates save slot buttons to show their current state 
 func updateButtons() -> void:
 	for saveSlot in range(1, 4):
-		var button = get_node("SaveFile" + str(saveSlot))
-		get_node("DeleteFile" + str(saveSlot)).text = ""
-		
+		var slotButton = get_node("Slot" + str(saveSlot) + "/SaveFile" + str(saveSlot))
+		var deleteButton = get_node("Slot" + str(saveSlot) + "/DeleteFile" + str(saveSlot))
+		deleteButton.text = ""
 		if SaveManager.saveExists(saveSlot):
-			button.text = "Save " + str(saveSlot) + ": " + SaveManager.getSlotDisplay(saveSlot)
+			slotButton.text = "Save " + str(saveSlot) + ": " + SaveManager.getSlotDisplay(saveSlot)
 		else:
-			button.text = "Save " + str(saveSlot) + ": Empty"
+			slotButton.text = "Save " + str(saveSlot) + ": Empty"
 
 ##
 func _slotClicked(saveSlot: int) -> void:
-	var button = get_node("SaveFile" + str(saveSlot))
+	var slotButton = get_node("Slot" + str(saveSlot) + "/SaveFile" + str(saveSlot))
 	if not confirmStart[saveSlot]:
 		$VoiceSans.play()
 		_resetConfirms()
 		updateButtons()
 		confirmStart[saveSlot] = true
 		if SaveManager.saveExists(saveSlot):
-			button.text = "Load Game?"
+			slotButton.text = "Load Game?"
 		else:
-			button.text = "New Game?"
+			slotButton.text = "New Game?"
 	else:
 		$VoiceSans.play()
+		await get_tree().create_timer(0.2).timeout
 		SaveManager.currentSlot = saveSlot
 		get_tree().change_scene_to_file("res://scenes/cool_trivia_maze.tscn")
 
 ##
 func _deleteFile(saveSlot: int) -> void:
-	var button = get_node("DeleteFile" + str(saveSlot))
+	var deleteButton = get_node("Slot" + str(saveSlot) + "/DeleteFile" + str(saveSlot))
 	if not confirmDelete[saveSlot]:
 		$VoiceSans.play()
 		_resetConfirms()
 		updateButtons()
 		confirmDelete[saveSlot] = true
-		button.text = "Delete \n Save " + str(saveSlot) + "?"
+		deleteButton.text = "Delete \n Save " + str(saveSlot) + "?"
 	else:
 		$VoiceSans.play()
 		SaveManager.deleteSave(saveSlot)
@@ -81,4 +82,5 @@ func _on_delete_file_3_button_down() -> void:
 
 func _on_instructions_button_down() -> void:
 	$VoiceSans.play()
+	await get_tree().create_timer(0.2).timeout
 	get_tree().change_scene_to_file("res://scenes/instructions.tscn")

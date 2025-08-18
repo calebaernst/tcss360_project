@@ -1,139 +1,152 @@
-[gd_scene load_steps=5 format=3 uid="uid://burexqigsykin"]
+[gd_scene load_steps=7 format=3 uid="uid://burexqigsykin"]
 
 [ext_resource type="Script" uid="uid://w5ens6qkbhmp" path="res://scripts/save_select.gd" id="1_y2yhf"]
 [ext_resource type="PackedScene" uid="uid://tatyyqv1albv" path="res://scenes/volume_slider.tscn" id="2_2pw5h"]
 [ext_resource type="Texture2D" uid="uid://by2ehsh6jhpmi" path="res://assets/delete_icon.png" id="2_q7qjx"]
 [ext_resource type="AudioStream" uid="uid://b5jyu7cftnfmm" path="res://assets/voice_sans.mp3" id="3_nql00"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0mv2v"]
+bg_color = Color(0.470588, 0.470588, 0.54902, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4tenx"]
+bg_color = Color(0.588235, 0, 0, 1)
+
 [node name="SaveSelect" type="Control"]
 layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -640.0
+offset_top = -384.0
+offset_right = 640.0
+offset_bottom = 336.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_y2yhf")
+
+[node name="Background" type="Panel" parent="."]
+z_index = -1
+z_as_relative = false
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_y2yhf")
-
-[node name="SaveFile1" type="Button" parent="."]
-layout_mode = 0
-offset_left = 192.0
-offset_top = 64.0
-offset_right = 1024.0
-offset_bottom = 192.0
-text = "New Save"
-
-[node name="SaveFile2" type="Button" parent="."]
-layout_mode = 0
-offset_left = 192.0
-offset_top = 256.0
-offset_right = 1024.0
-offset_bottom = 384.0
-text = "New Save"
-
-[node name="SaveFile3" type="Button" parent="."]
-layout_mode = 0
-offset_left = 192.0
-offset_top = 448.0
-offset_right = 1024.0
-offset_bottom = 576.0
-text = "New Save"
-
-[node name="DeleteFile1" type="Button" parent="."]
-layout_mode = 0
-offset_left = 128.0
-offset_top = 64.0
-offset_right = 192.0
-offset_bottom = 192.0
-focus_mode = 0
-icon = ExtResource("2_q7qjx")
-expand_icon = true
-
-[node name="DeleteFile2" type="Button" parent="."]
-layout_mode = 0
-offset_left = 128.0
-offset_top = 256.0
-offset_right = 192.0
-offset_bottom = 384.0
-focus_mode = 0
-icon = ExtResource("2_q7qjx")
-expand_icon = true
-
-[node name="DeleteFile3" type="Button" parent="."]
-layout_mode = 0
-offset_left = 128.0
-offset_top = 448.0
-offset_right = 192.0
-offset_bottom = 576.0
-focus_mode = 0
-icon = ExtResource("2_q7qjx")
-expand_icon = true
-
-[node name="Instructions" type="Button" parent="."]
-layout_mode = 0
-offset_top = 584.0
-offset_right = 64.0
-offset_bottom = 648.0
-text = "!"
-
-[node name="MasterLabel" type="Label" parent="."]
-layout_mode = 0
-offset_left = 920.0
-offset_top = 600.0
-offset_right = 1144.0
-offset_bottom = 624.0
-text = "Master Volume"
-horizontal_alignment = 1
-
-[node name="Master" parent="." instance=ExtResource("2_2pw5h")]
-layout_mode = 0
-offset_left = 920.0
-offset_top = 624.0
-offset_right = 1144.0
-offset_bottom = 640.0
-bus_name = "Master"
-
-[node name="musicLabel" type="Label" parent="."]
-layout_mode = 0
-offset_left = 680.0
-offset_top = 600.0
-offset_right = 904.0
-offset_bottom = 624.0
-text = "Music Volume"
-horizontal_alignment = 1
-
-[node name="music" parent="." instance=ExtResource("2_2pw5h")]
-layout_mode = 0
-offset_left = 680.0
-offset_top = 624.0
-offset_right = 904.0
-offset_bottom = 640.0
-bus_name = "music"
-
-[node name="sfxLabel" type="Label" parent="."]
-layout_mode = 0
-offset_left = 440.0
-offset_top = 600.0
-offset_right = 664.0
-offset_bottom = 624.0
-text = "Sound Effects Volume"
-horizontal_alignment = 1
-
-[node name="sfx" parent="." instance=ExtResource("2_2pw5h")]
-layout_mode = 0
-offset_left = 440.0
-offset_top = 624.0
-offset_right = 664.0
-offset_bottom = 640.0
-bus_name = "sfx"
+theme_override_styles/panel = SubResource("StyleBoxFlat_0mv2v")
 
 [node name="VoiceSans" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_nql00")
 bus = &"sfx"
 
-[connection signal="button_down" from="SaveFile1" to="." method="_on_save_file_1_button_down"]
-[connection signal="button_down" from="SaveFile2" to="." method="_on_save_file_2_button_down"]
-[connection signal="button_down" from="SaveFile3" to="." method="_on_save_file_3_button_down"]
-[connection signal="button_down" from="DeleteFile1" to="." method="_on_delete_file_1_button_down"]
-[connection signal="button_down" from="DeleteFile2" to="." method="_on_delete_file_2_button_down"]
-[connection signal="button_down" from="DeleteFile3" to="." method="_on_delete_file_3_button_down"]
+[node name="Instructions" type="Button" parent="."]
+offset_left = 512.0
+offset_top = 528.0
+offset_right = 768.0
+offset_bottom = 592.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_4tenx")
+text = "Instructions"
+
+[node name="VolumeSliders" type="Area2D" parent="."]
+position = Vector2(640, 656)
+metadata/_edit_group_ = true
+
+[node name="MasterLabel" type="Label" parent="VolumeSliders"]
+offset_left = 160.0
+offset_top = -32.0
+offset_right = 384.0
+offset_bottom = -8.0
+text = "Master Volume"
+horizontal_alignment = 1
+
+[node name="Master" parent="VolumeSliders" instance=ExtResource("2_2pw5h")]
+offset_left = 160.0
+offset_right = 384.0
+bus_name = "Master"
+
+[node name="musicLabel" type="Label" parent="VolumeSliders"]
+offset_left = -112.0
+offset_top = -32.0
+offset_right = 112.0
+offset_bottom = -8.0
+text = "Music Volume"
+horizontal_alignment = 1
+
+[node name="music" parent="VolumeSliders" instance=ExtResource("2_2pw5h")]
+offset_left = -112.0
+offset_right = 112.0
+bus_name = "music"
+
+[node name="sfxLabel" type="Label" parent="VolumeSliders"]
+offset_left = -384.0
+offset_top = -32.0
+offset_right = -160.0
+offset_bottom = -8.0
+text = "Sound Effects Volume"
+horizontal_alignment = 1
+
+[node name="sfx" parent="VolumeSliders" instance=ExtResource("2_2pw5h")]
+offset_left = -384.0
+offset_right = -160.0
+bus_name = "sfx"
+
+[node name="Slot1" type="Node2D" parent="."]
+position = Vector2(288, 48)
+metadata/_edit_group_ = true
+
+[node name="SaveFile1" type="Button" parent="Slot1"]
+offset_right = 736.0
+offset_bottom = 128.0
+focus_mode = 0
+text = "New Save"
+
+[node name="DeleteFile1" type="Button" parent="Slot1"]
+offset_left = -64.0
+offset_bottom = 128.0
+focus_mode = 0
+icon = ExtResource("2_q7qjx")
+expand_icon = true
+
+[node name="Slot2" type="Node2D" parent="."]
+position = Vector2(288, 208)
+metadata/_edit_group_ = true
+
+[node name="SaveFile2" type="Button" parent="Slot2"]
+offset_right = 736.0
+offset_bottom = 128.0
+focus_mode = 0
+text = "New Save"
+
+[node name="DeleteFile2" type="Button" parent="Slot2"]
+offset_left = -64.0
+offset_bottom = 128.0
+focus_mode = 0
+icon = ExtResource("2_q7qjx")
+expand_icon = true
+
+[node name="Slot3" type="Node2D" parent="."]
+position = Vector2(288, 368)
+metadata/_edit_group_ = true
+
+[node name="SaveFile3" type="Button" parent="Slot3"]
+offset_right = 736.0
+offset_bottom = 128.0
+focus_mode = 0
+text = "New Save"
+
+[node name="DeleteFile3" type="Button" parent="Slot3"]
+offset_left = -64.0
+offset_bottom = 128.0
+focus_mode = 0
+icon = ExtResource("2_q7qjx")
+expand_icon = true
+
 [connection signal="button_down" from="Instructions" to="." method="_on_instructions_button_down"]
+[connection signal="button_down" from="Slot1/SaveFile1" to="." method="_on_save_file_1_button_down"]
+[connection signal="button_down" from="Slot1/DeleteFile1" to="." method="_on_delete_file_1_button_down"]
+[connection signal="button_down" from="Slot2/SaveFile2" to="." method="_on_save_file_2_button_down"]
+[connection signal="button_down" from="Slot2/DeleteFile2" to="." method="_on_delete_file_2_button_down"]
+[connection signal="button_down" from="Slot3/SaveFile3" to="." method="_on_save_file_3_button_down"]
+[connection signal="button_down" from="Slot3/DeleteFile3" to="." method="_on_delete_file_3_button_down"]

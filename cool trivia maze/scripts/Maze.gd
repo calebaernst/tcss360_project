@@ -3,9 +3,11 @@ class_name Maze
 
 @export var debugInputs: bool = true
 
-## prepare game assets
+## prepare assets and scenes
 var roomScene: PackedScene = preload("res://scenes/RoomScene.tscn")
 var questionMenuScene: PackedScene = preload("res://scenes/question_menu.tscn")
+var saveMenuScene: PackedScene = preload("res://scenes/save_select.tscn")
+var saveMenuInstance: Control = null
 @export var player: NodePath
 @onready var playerNode = get_node(player)
 @onready var BGM = $BGMPlayer
@@ -13,8 +15,6 @@ var questionMenuScene: PackedScene = preload("res://scenes/question_menu.tscn")
 # maze dimensions/coordinates/navigation variables
 @export var mazeWidth: int = 9
 @export var mazeHeight: int = 9
-var playerSelectedAnswer: String = ""  # Store the player's answer
-
 var currentRoomInstance: Node = null
 var mazeRooms: Array = []
 var currentRoomX: int
@@ -30,6 +30,7 @@ var pendingDoor: String = ""
 var awaitingAnswer: bool = false
 var currentQuestion: Question = null
 var lastAnswerCorrect: bool = false   ## remember result until Exit is pressed
+var playerSelectedAnswer: String = ""  # Store the player's answer
 
 ## On start
 func _ready() -> void:
@@ -52,6 +53,15 @@ func _ready() -> void:
 	debugConsole.theMaze = self
 	if debugInputs:
 		debugConsole.debugPrints()
+
+## 
+func _input(event) -> void:
+	if event is InputEventKey and event.pressed and not currentQuestion:
+		if event.keycode == KEY_ESCAPE:
+			if saveMenuInstance == null:
+				return
+			else:
+				return
 
 # gets the current room of the player
 func getCurrentRoom() -> Dictionary:
