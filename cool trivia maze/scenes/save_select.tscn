@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://burexqigsykin"]
+[gd_scene load_steps=11 format=3 uid="uid://burexqigsykin"]
 
 [ext_resource type="Script" uid="uid://w5ens6qkbhmp" path="res://scripts/save_select.gd" id="1_y2yhf"]
 [ext_resource type="PackedScene" uid="uid://tatyyqv1albv" path="res://scenes/volume_slider.tscn" id="2_2pw5h"]
@@ -6,10 +6,34 @@
 [ext_resource type="AudioStream" uid="uid://b5jyu7cftnfmm" path="res://assets/voice_sans.mp3" id="3_nql00"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0mv2v"]
-bg_color = Color(0.470588, 0.470588, 0.54902, 1)
+bg_color = Color(0.784314, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_16g0v"]
+bg_color = Color(0.392157, 0, 0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4tenx"]
 bg_color = Color(0.588235, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rbw6e"]
+bg_color = Color(0.392157, 0.392157, 0.588235, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_awkop"]
+bg_color = Color(0.196078, 0.196078, 0.294118, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_q7qjx"]
+bg_color = Color(0.294118, 0.294118, 0.490196, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [node name="SaveSelect" type="Control"]
 layout_mode = 3
@@ -26,26 +50,18 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_y2yhf")
 
-[node name="Background" type="Panel" parent="."]
-z_index = -1
-z_as_relative = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_0mv2v")
-
 [node name="VoiceSans" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_nql00")
 bus = &"sfx"
 
 [node name="Instructions" type="Button" parent="."]
+layout_mode = 0
 offset_left = 512.0
 offset_top = 528.0
 offset_right = 768.0
 offset_bottom = 592.0
+theme_override_styles/hover = SubResource("StyleBoxFlat_0mv2v")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_16g0v")
 theme_override_styles/normal = SubResource("StyleBoxFlat_4tenx")
 text = "Instructions"
 
@@ -97,15 +113,23 @@ position = Vector2(288, 48)
 metadata/_edit_group_ = true
 
 [node name="SaveFile1" type="Button" parent="Slot1"]
-offset_right = 736.0
+offset_left = 16.0
+offset_right = 732.0
 offset_bottom = 128.0
 focus_mode = 0
+theme_override_styles/hover = SubResource("StyleBoxFlat_rbw6e")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_awkop")
+theme_override_styles/normal = SubResource("StyleBoxFlat_q7qjx")
 text = "New Save"
 
 [node name="DeleteFile1" type="Button" parent="Slot1"]
 offset_left = -64.0
+offset_right = 16.0
 offset_bottom = 128.0
 focus_mode = 0
+theme_override_styles/hover = SubResource("StyleBoxFlat_rbw6e")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_awkop")
+theme_override_styles/normal = SubResource("StyleBoxFlat_q7qjx")
 icon = ExtResource("2_q7qjx")
 expand_icon = true
 
@@ -114,15 +138,23 @@ position = Vector2(288, 208)
 metadata/_edit_group_ = true
 
 [node name="SaveFile2" type="Button" parent="Slot2"]
-offset_right = 736.0
+offset_left = 16.0
+offset_right = 732.0
 offset_bottom = 128.0
 focus_mode = 0
+theme_override_styles/hover = SubResource("StyleBoxFlat_rbw6e")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_awkop")
+theme_override_styles/normal = SubResource("StyleBoxFlat_q7qjx")
 text = "New Save"
 
 [node name="DeleteFile2" type="Button" parent="Slot2"]
 offset_left = -64.0
+offset_right = 16.0
 offset_bottom = 128.0
 focus_mode = 0
+theme_override_styles/hover = SubResource("StyleBoxFlat_rbw6e")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_awkop")
+theme_override_styles/normal = SubResource("StyleBoxFlat_q7qjx")
 icon = ExtResource("2_q7qjx")
 expand_icon = true
 
@@ -131,15 +163,23 @@ position = Vector2(288, 368)
 metadata/_edit_group_ = true
 
 [node name="SaveFile3" type="Button" parent="Slot3"]
-offset_right = 736.0
+offset_left = 16.0
+offset_right = 732.0
 offset_bottom = 128.0
 focus_mode = 0
+theme_override_styles/hover = SubResource("StyleBoxFlat_rbw6e")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_awkop")
+theme_override_styles/normal = SubResource("StyleBoxFlat_q7qjx")
 text = "New Save"
 
 [node name="DeleteFile3" type="Button" parent="Slot3"]
 offset_left = -64.0
+offset_right = 16.0
 offset_bottom = 128.0
 focus_mode = 0
+theme_override_styles/hover = SubResource("StyleBoxFlat_rbw6e")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_awkop")
+theme_override_styles/normal = SubResource("StyleBoxFlat_q7qjx")
 icon = ExtResource("2_q7qjx")
 expand_icon = true
 

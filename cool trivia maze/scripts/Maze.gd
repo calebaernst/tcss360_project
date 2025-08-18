@@ -6,8 +6,8 @@ class_name Maze
 ## prepare assets and scenes
 var roomScene: PackedScene = preload("res://scenes/RoomScene.tscn")
 var questionMenuScene: PackedScene = preload("res://scenes/question_menu.tscn")
-var saveMenuScene: PackedScene = preload("res://scenes/save_select.tscn")
-var saveMenuInstance: Control = null
+var menuScene: PackedScene = preload("res://scenes/save_select.tscn")
+var menuInstance: Control = null
 @export var player: NodePath
 @onready var playerNode = get_node(player)
 @onready var BGM = $BGMPlayer
@@ -34,7 +34,7 @@ var playerSelectedAnswer: String = ""  # Store the player's answer
 
 ## On start
 func _ready() -> void:
-	SaveManager.theMaze = self # connect save manager
+	SaveManager.theMaze = self # connect save manager and initialize game, either from loaded file or new game
 	if SaveManager.saveExists(SaveManager.currentSlot):
 		SaveManager.loadGame(SaveManager.currentSlot)
 	else: 
@@ -54,19 +54,49 @@ func _ready() -> void:
 	if debugInputs:
 		debugConsole.debugPrints()
 
-## 
+## input for game commands (only pause menu)
 func _input(event) -> void:
-	if event is InputEventKey and event.pressed and not currentQuestion:
+	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_ESCAPE:
-			if saveMenuInstance == null:
-				return
-			else:
-				return
+			playerNode.set_physics_process(false)
+			if not awaitingAnswer:
+				toggleMenu()
 
-# gets the current room of the player
+## toggles the game menu
+func toggleMenu() -> void:
+	var root = get_tree().current_scene
+	var ui = root.get_node_or_null("UI")
+	if menuInstance == null:
+		menuScene = preload("res://scenes/save_select.tscn")
+		menuInstance = menuScene.instantiate()
+		if ui == null:
+			ui = CanvasLayer.new()
+			ui.name = "UI"
+			ui.layer = 100
+			root.add_child(ui)
+		var dimmer = ColorRect.new()
+		dimmer.name = "dimmer"
+		dimmer.color = Color(0, 0, 0.1, 0.6)
+		dimmer.set_anchors_preset(Control.PRESET_FULL_RECT)
+		ui.add_child(dimmer)
+		
+		ui.add_child(menuInstance)
+		print("Menu opened")
+	else:
+		if ui != null:
+			var dimmer = ui.get_node_or_null("dimmer")
+			if dimmer != null:
+				dimmer.queue_free()
+		menuInstance.queue_free()
+		menuInstance = null
+		print("Menu closed")
+		playerNode.set_physics_process(true)
+
+## gets the current room of the player
 func getCurrentRoom() -> Dictionary:
 	return mazeRooms[currentRoomX][currentRoomY]
 
+## gets the coordinates of the current room, as a string
 func currentRoomCoords() -> String:
 	return "(" + str(currentRoomX) + "," + str(currentRoomY) + ")"
 

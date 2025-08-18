@@ -200,7 +200,7 @@ sources/0 = SubResource("TileSetAtlasSource_7sa2y")
 sources/1 = SubResource("TileSetAtlasSource_jnjkj")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mym6t"]
-size = Vector2(32, 16)
+size = Vector2(20, 16)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_uhx6y"]
 radius = 6.00521
