@@ -74,7 +74,7 @@ offset_bottom = -192.0
 theme_override_styles/hover = SubResource("StyleBoxFlat_0mv2v")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_16g0v")
 theme_override_styles/normal = SubResource("StyleBoxFlat_4tenx")
-text = "Quit"
+text = "Quit Game"
 
 [node name="VolumeSliders" type="Area2D" parent="."]
 position = Vector2(640, 656)

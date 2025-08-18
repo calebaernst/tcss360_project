@@ -30,7 +30,8 @@ func updateButtons() -> void:
 	if inGame:
 		get_node("Instructions").text = "Return to Main Menu"
 
-##
+## saves/loads a selected file slot, after asking for confirmation
+## can only save while in game; can only load while in menu
 func _slotClicked(saveSlot: int) -> void:
 	var slotButton = get_node("Slot" + str(saveSlot) + "/SaveFile" + str(saveSlot))
 	if not confirmStart[saveSlot]:
@@ -55,7 +56,7 @@ func _slotClicked(saveSlot: int) -> void:
 			SaveManager.currentSlot = saveSlot
 			get_tree().change_scene_to_file("res://scenes/cool_trivia_maze.tscn")
 
-##
+## deletes a selected save file, after asking for confirmation
 func _deleteFile(saveSlot: int) -> void:
 	var deleteButton = get_node("Slot" + str(saveSlot) + "/DeleteFile" + str(saveSlot))
 	if not confirmDelete[saveSlot]:
@@ -70,7 +71,7 @@ func _deleteFile(saveSlot: int) -> void:
 		updateButtons()
 		confirmDelete[saveSlot] = false
 
-##
+## resets confirmations for all buttons
 func _resetConfirms() -> void:
 	for saveSlot in range(1, 4):
 		confirmStart[saveSlot] = false
