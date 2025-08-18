@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://tb7kq0u4gode"]
+[gd_scene load_steps=4 format=3 uid="uid://tb7kq0u4gode"]
 
 [ext_resource type="Script" uid="uid://cuk67x2wxabk6" path="res://scripts/win.gd" id="1_r4oei"]
+[ext_resource type="AudioStream" uid="uid://blrkx2elp72y" path="res://assets/yay.mp3" id="2_iiocm"]
+[ext_resource type="AudioStream" uid="uid://cw0iyqjsrkblw" path="res://assets/ff7fanfare.mp3" id="3_yxbqr"]
 
 [node name="WinScren" type="Control"]
 layout_mode = 3
@@ -35,5 +37,19 @@ offset_top = 704.0
 offset_right = 768.0
 offset_bottom = 768.0
 text = "Return To Menu"
+
+[node name="yayy" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_iiocm")
+bus = &"sfx"
+
+[node name="fanfare" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_yxbqr")
+bus = &"music"
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+loop = true
 
 [connection signal="button_down" from="Return" to="." method="_on_return_button_down"]
