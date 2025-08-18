@@ -40,7 +40,9 @@ func _resetConfirms() -> void:
 	for saveSlot in range(1, 4):
 		confirmStart[saveSlot] = false
 		confirmDelete[saveSlot] = false
-		get_node("Slot" + str(saveSlot) + "/DeleteFile" + str(saveSlot)).text = ""
+		var deleteButton = get_node("Slot" + str(saveSlot) + "/DeleteFile" + str(saveSlot))
+		deleteButton.text = ""
+		deleteButton.icon = load("res://assets/delete_icon.png")
 	confirmReturn = false
 	confirmQuit = false
 	$Quit.text = "Quit Game"
@@ -76,6 +78,7 @@ func _deleteFile(saveSlot: int) -> void:
 		$VoiceSans.play()
 		updateButtons()
 		confirmDelete[saveSlot] = true
+		deleteButton.icon = null
 		deleteButton.text = "Delete \n Save " + str(saveSlot) + "?"
 	else:
 		$VoiceSans.play()

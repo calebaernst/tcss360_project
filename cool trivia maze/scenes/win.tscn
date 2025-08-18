@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://tb7kq0u4gode"]
+[gd_scene load_steps=7 format=3 uid="uid://tb7kq0u4gode"]
 
 [ext_resource type="Script" uid="uid://cuk67x2wxabk6" path="res://scripts/win.gd" id="1_r4oei"]
 [ext_resource type="AudioStream" uid="uid://blrkx2elp72y" path="res://assets/yay.mp3" id="2_iiocm"]
+[ext_resource type="FontFile" uid="uid://dk27cq4ic7twp" path="res://assets/Ldfcomicsans-jj7l.ttf" id="3_tylv2"]
 [ext_resource type="AudioStream" uid="uid://cw0iyqjsrkblw" path="res://assets/ff7fanfare.mp3" id="3_yxbqr"]
 [ext_resource type="VideoStream" uid="uid://dpsjr1korosfy" path="res://assets/happycat.ogv" id="4_yxbqr"]
 
@@ -56,6 +57,8 @@ offset_right = 96.0
 offset_bottom = 288.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_tylv2")
+theme_override_font_sizes/font_size = 32
 text = "You Won!!!"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -73,6 +76,8 @@ offset_right = 128.0
 offset_bottom = 352.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_tylv2")
+theme_override_font_sizes/font_size = 24
 text = "Return To Menu"
 
 [node name="yayy" type="AudioStreamPlayer" parent="."]

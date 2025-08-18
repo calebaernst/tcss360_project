@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://bw5q6cfcmqd0d"]
+[gd_scene load_steps=7 format=3 uid="uid://bw5q6cfcmqd0d"]
 
 [ext_resource type="Script" uid="uid://d0lxqdshduyq2" path="res://scripts/instructions.gd" id="1_7ls63"]
 [ext_resource type="AudioStream" uid="uid://b5jyu7cftnfmm" path="res://assets/voice_sans.mp3" id="2_h8hbf"]
+[ext_resource type="FontFile" uid="uid://dk27cq4ic7twp" path="res://assets/Ldfcomicsans-jj7l.ttf" id="2_njqp3"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nisbi"]
 bg_color = Color(0.784314, 0, 0, 1)
@@ -31,6 +32,7 @@ script = ExtResource("1_7ls63")
 layout_mode = 0
 offset_right = 1280.0
 offset_bottom = 560.0
+theme_override_fonts/font = ExtResource("2_njqp3")
 theme_override_font_sizes/font_size = 32
 text = "uh oh you're trapped in a maze!
 answer questions correctly to unlock doors.
@@ -50,6 +52,7 @@ offset_left = 512.0
 offset_top = 528.0
 offset_right = 768.0
 offset_bottom = 592.0
+theme_override_fonts/font = ExtResource("2_njqp3")
 theme_override_styles/hover = SubResource("StyleBoxFlat_nisbi")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_njqp3")
 theme_override_styles/normal = SubResource("StyleBoxFlat_c00ax")
