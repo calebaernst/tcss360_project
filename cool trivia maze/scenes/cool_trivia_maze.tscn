@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://mjrou6ceuhn5"]
+[gd_scene load_steps=6 format=3 uid="uid://mjrou6ceuhn5"]
 
 [ext_resource type="Script" uid="uid://boer6h4perfw5" path="res://scripts/Maze.gd" id="1_7skvd"]
+[ext_resource type="FontFile" uid="uid://dk27cq4ic7twp" path="res://assets/Ldfcomicsans-jj7l.ttf" id="2_7skvd"]
 [ext_resource type="AudioStream" uid="uid://cxkpdauib4n8j" path="res://assets/BGM.ogg" id="2_kb82o"]
 [ext_resource type="Script" uid="uid://g3s5a4acqj1q" path="res://scripts/console_debug.gd" id="4_kb82o"]
 [ext_resource type="PackedScene" uid="uid://cgd3tfgbf8qsk" path="res://scenes/player.tscn" id="5_11w8b"]
@@ -11,6 +12,21 @@ metadata/_edit_horizontal_guides_ = [48.0]
 [node name="Maze" type="Node2D" parent="."]
 script = ExtResource("1_7skvd")
 player = NodePath("../Entities/Player")
+
+[node name="CoordinateDisplay" type="Label" parent="Maze"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -20.0
+offset_top = -130.0
+offset_right = 20.0
+offset_bottom = -107.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0, 0, 1, 1)
+theme_override_fonts/font = ExtResource("2_7skvd")
+text = "(X, Y)"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="BGMPlayer" type="AudioStreamPlayer" parent="Maze"]
 stream = ExtResource("2_kb82o")

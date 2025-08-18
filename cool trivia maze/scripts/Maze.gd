@@ -47,6 +47,7 @@ func _ready() -> void:
 	loadRoom()
 	
 	playerNode.z_index = 1000 # fix the player to always be visible
+	get_node("CoordinateDisplay").z_index = 999
 	BGM.play()
 	
 	# debug inputs can be enabled/disabled from the inspector menu for the "Maze" node
@@ -231,6 +232,7 @@ func loadRoom() -> void:
 		exitPoint.get_node("PlayerDetector").set_deferred("monitoring", false)
 	
 	updateDoorVisuals()
+	get_node("CoordinateDisplay").text = currentRoomCoords()
 	print("Room Coordinates: ", currentRoomCoords())
 
 ## update the door visuals to reflect their internal state
