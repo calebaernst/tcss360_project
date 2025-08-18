@@ -11,6 +11,7 @@ var inGame = false
 var confirmStart = {1: false, 2: false, 3: false}
 var confirmDelete = {1: false, 2: false, 3: false}
 var confirmReturn = false
+var confirmQuit = false
 
 func _ready() -> void:
 	inGame = SaveManager.theMaze != null
@@ -102,7 +103,15 @@ func _on_instructions_button_down() -> void:
 		if confirmReturn:
 			get_tree().change_scene_to_file("res://scenes/save_select.tscn")
 		else:
-			get_node("Instructions").text = "Are you sure?"
+			$Instructions.text = "Are you sure?"
 			confirmReturn = true
 	else:
 		get_tree().change_scene_to_file("res://scenes/instructions.tscn")
+
+func _on_quit_button_down() -> void:
+	$VoiceSans.play()
+	if confirmQuit:
+			get_tree().quit()
+	else: 
+		$Quit.text = "Are you sure?"
+		confirmQuit = true

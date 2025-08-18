@@ -18,6 +18,11 @@ config/features=PackedStringArray("4.4", "GL Compatibility")
 
 buses/default_bus_layout="res://scripts/default_bus_layout.tres"
 
+[autoload]
+
+TransitionScreenBlack="*res://scenes/transition_screen_black.tscn"
+TransitionScreenWhite="*res://scenes/transition_screen_white.tscn"
+
 [display]
 
 window/size/viewport_width=1280
@@ -26,6 +31,10 @@ window/size/viewport_height=1280
 [dotnet]
 
 project/assembly_name="Cool Trivia Maze"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot-sqlite/plugin.cfg", "res://addons/gut/plugin.cfg")
 
 [input]
 
