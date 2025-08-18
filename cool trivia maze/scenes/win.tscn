@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3 uid="uid://tb7kq0u4gode"]
+
+[ext_resource type="Script" uid="uid://cuk67x2wxabk6" path="res://scripts/win.gd" id="1_r4oei"]
+
+[node name="WinScren" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_r4oei")
+
+[node name="WinMessage" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -128.0
+offset_top = -96.0
+offset_right = 128.0
+offset_bottom = 96.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "You Won!!!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Return" type="Button" parent="."]
+layout_mode = 0
+offset_left = 512.0
+offset_top = 704.0
+offset_right = 768.0
+offset_bottom = 768.0
+text = "Return To Menu"
+
+[connection signal="button_down" from="Return" to="." method="_on_return_button_down"]

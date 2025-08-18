@@ -14,6 +14,7 @@ player = NodePath("../Entities/Player")
 
 [node name="BGMPlayer" type="AudioStreamPlayer" parent="Maze"]
 stream = ExtResource("2_kb82o")
+bus = &"music"
 parameters/looping = true
 
 [node name="Entities" type="Node2D" parent="."]

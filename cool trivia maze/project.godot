@@ -18,6 +18,11 @@ config/features=PackedStringArray("4.4", "GL Compatibility")
 
 buses/default_bus_layout="res://scripts/default_bus_layout.tres"
 
+[autoload]
+
+TransitionScreenBlack="*res://scenes/transition_screen_black.tscn"
+TransitionScreenWhite="*res://scenes/transition_screen_white.tscn"
+
 [display]
 
 window/size/viewport_width=1280

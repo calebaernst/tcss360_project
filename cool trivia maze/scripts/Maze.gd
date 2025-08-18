@@ -265,9 +265,15 @@ func updateWinCon() -> void:
 func victory(body: Node) -> void:
 	if body == playerNode:
 		print("you have reached the exit (congrats)")
+		TransitionScreenWhite.transition_white()
+		await TransitionScreenWhite.on_transition_white_finished 
+		get_tree().change_scene_to_file("res://scenes/win.tscn")
 
 func defeat() -> void:
 	print("you can't make it to the exit any more, so you lose :(")
+	TransitionScreenBlack.transition_black()
+	await TransitionScreenBlack.on_transition_black_finished 
+	get_tree().change_scene_to_file("res://scenes/lose.tscn")
 
 ## creates a simple dictionary of the door states in the current room, based on the exists/interactable/locked values
 func getDoorStates() -> Dictionary:
