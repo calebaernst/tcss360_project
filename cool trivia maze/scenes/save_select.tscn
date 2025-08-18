@@ -1,10 +1,16 @@
-[gd_scene load_steps=12 format=3 uid="uid://burexqigsykin"]
+[gd_scene load_steps=13 format=3 uid="uid://burexqigsykin"]
 
 [ext_resource type="Script" uid="uid://w5ens6qkbhmp" path="res://scripts/save_select.gd" id="1_y2yhf"]
 [ext_resource type="PackedScene" uid="uid://tatyyqv1albv" path="res://scenes/volume_slider.tscn" id="2_2pw5h"]
 [ext_resource type="Texture2D" uid="uid://by2ehsh6jhpmi" path="res://assets/delete_icon.png" id="2_q7qjx"]
 [ext_resource type="AudioStream" uid="uid://cvbpnlk4m8rdd" path="res://assets/dog.mp3" id="3_4tenx"]
 [ext_resource type="AudioStream" uid="uid://b5jyu7cftnfmm" path="res://assets/voice_sans.mp3" id="3_nql00"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_61f7f"]
+bg_color = Color(0.594823, 0.272092, 0.316558, 1)
+corner_radius_top_left = 100
+corner_radius_bottom_right = 100
+corner_radius_bottom_left = 100
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0mv2v"]
 bg_color = Color(0.784314, 0, 0, 1)
@@ -44,12 +50,21 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -640.0
-offset_top = -384.0
+offset_top = -640.0
 offset_right = 640.0
-offset_bottom = 336.0
+offset_bottom = 640.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_y2yhf")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_61f7f")
 
 [node name="VoiceSans" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_nql00")
@@ -63,9 +78,9 @@ parameters/looping = true
 [node name="Instructions" type="Button" parent="."]
 layout_mode = 0
 offset_left = 512.0
-offset_top = 528.0
+offset_top = 784.0
 offset_right = 768.0
-offset_bottom = 592.0
+offset_bottom = 848.0
 theme_override_styles/hover = SubResource("StyleBoxFlat_0mv2v")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_16g0v")
 theme_override_styles/normal = SubResource("StyleBoxFlat_4tenx")
@@ -74,16 +89,16 @@ text = "Instructions"
 [node name="Quit" type="Button" parent="."]
 layout_mode = 0
 offset_left = 1152.0
-offset_top = -256.0
 offset_right = 1280.0
-offset_bottom = -192.0
+offset_bottom = 64.0
+focus_mode = 0
 theme_override_styles/hover = SubResource("StyleBoxFlat_0mv2v")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_16g0v")
 theme_override_styles/normal = SubResource("StyleBoxFlat_4tenx")
 text = "Quit Game"
 
 [node name="VolumeSliders" type="Area2D" parent="."]
-position = Vector2(640, 656)
+position = Vector2(640, 912)
 metadata/_edit_group_ = true
 
 [node name="MasterLabel" type="Label" parent="VolumeSliders"]
@@ -126,7 +141,7 @@ offset_right = -160.0
 bus_name = "sfx"
 
 [node name="Slot1" type="Node2D" parent="."]
-position = Vector2(288, 48)
+position = Vector2(288, 304)
 metadata/_edit_group_ = true
 
 [node name="SaveFile1" type="Button" parent="Slot1"]
@@ -151,7 +166,7 @@ icon = ExtResource("2_q7qjx")
 expand_icon = true
 
 [node name="Slot2" type="Node2D" parent="."]
-position = Vector2(288, 208)
+position = Vector2(288, 464)
 metadata/_edit_group_ = true
 
 [node name="SaveFile2" type="Button" parent="Slot2"]
@@ -176,7 +191,7 @@ icon = ExtResource("2_q7qjx")
 expand_icon = true
 
 [node name="Slot3" type="Node2D" parent="."]
-position = Vector2(288, 368)
+position = Vector2(288, 624)
 metadata/_edit_group_ = true
 
 [node name="SaveFile3" type="Button" parent="Slot3"]

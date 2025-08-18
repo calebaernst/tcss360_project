@@ -24,16 +24,26 @@ func _ready() -> void:
 
 ## updates save slot buttons to show their current state 
 func updateButtons() -> void:
+	_resetConfirms()
 	for saveSlot in range(1, 4):
 		var slotButton = get_node("Slot" + str(saveSlot) + "/SaveFile" + str(saveSlot))
-		var deleteButton = get_node("Slot" + str(saveSlot) + "/DeleteFile" + str(saveSlot))
-		deleteButton.text = ""
 		if SaveManager.saveExists(saveSlot):
 			slotButton.text = "Save " + str(saveSlot) + ": " + SaveManager.getSlotDisplay(saveSlot)
 		else:
 			slotButton.text = "Save " + str(saveSlot) + ": Empty"
+	
 	if inGame:
 		get_node("Instructions").text = "Return to Main Menu"
+
+## resets all buttons
+func _resetConfirms() -> void:
+	for saveSlot in range(1, 4):
+		confirmStart[saveSlot] = false
+		confirmDelete[saveSlot] = false
+		get_node("Slot" + str(saveSlot) + "/DeleteFile" + str(saveSlot)).text = ""
+	confirmReturn = false
+	confirmQuit = false
+	$Quit.text = "Quit Game"
 
 ## saves/loads a selected file slot, after asking for confirmation
 ## can only save while in game; can only load while in menu
@@ -41,7 +51,6 @@ func _slotClicked(saveSlot: int) -> void:
 	var slotButton = get_node("Slot" + str(saveSlot) + "/SaveFile" + str(saveSlot))
 	if not confirmStart[saveSlot]:
 		$VoiceSans.play()
-		_resetConfirms()
 		updateButtons()
 		confirmStart[saveSlot] = true
 		if inGame:
@@ -55,7 +64,6 @@ func _slotClicked(saveSlot: int) -> void:
 		await get_tree().create_timer(0.2).timeout
 		if inGame:
 			SaveManager.saveGame(saveSlot)
-			_resetConfirms()
 			updateButtons()
 		else:
 			SaveManager.currentSlot = saveSlot
@@ -66,7 +74,6 @@ func _deleteFile(saveSlot: int) -> void:
 	var deleteButton = get_node("Slot" + str(saveSlot) + "/DeleteFile" + str(saveSlot))
 	if not confirmDelete[saveSlot]:
 		$VoiceSans.play()
-		_resetConfirms()
 		updateButtons()
 		confirmDelete[saveSlot] = true
 		deleteButton.text = "Delete \n Save " + str(saveSlot) + "?"
@@ -74,15 +81,6 @@ func _deleteFile(saveSlot: int) -> void:
 		$VoiceSans.play()
 		SaveManager.deleteSave(saveSlot)
 		updateButtons()
-		confirmDelete[saveSlot] = false
-
-## resets confirmations for all buttons
-func _resetConfirms() -> void:
-	for saveSlot in range(1, 4):
-		confirmStart[saveSlot] = false
-		confirmDelete[saveSlot] = false
-	confirmReturn = false
-	confirmQuit = false
 
 func _on_save_file_1_button_down() -> void:
 	_slotClicked(1)
@@ -120,5 +118,6 @@ func _on_quit_button_down() -> void:
 	if confirmQuit:
 			get_tree().quit()
 	else: 
+		updateButtons()
 		$Quit.text = "Are you sure?"
 		confirmQuit = true
