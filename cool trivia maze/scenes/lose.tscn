@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://b43habmd3hi7c"]
+[gd_scene load_steps=4 format=3 uid="uid://b43habmd3hi7c"]
 
 [ext_resource type="Script" uid="uid://dlcaqoa2d7mid" path="res://scripts/lose.gd" id="1_vjdtf"]
+[ext_resource type="Texture2D" uid="uid://cnuw8b445tmw0" path="res://assets/laughingcat.png" id="2_10rtl"]
 [ext_resource type="FontFile" uid="uid://dk27cq4ic7twp" path="res://assets/Ldfcomicsans-jj7l.ttf" id="2_r6nsb"]
 
 [node name="LoseScreen" type="Control"]
@@ -11,6 +12,21 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_vjdtf")
+
+[node name="lol" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -576.0
+offset_right = 320.0
+offset_bottom = 64.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_10rtl")
 
 [node name="LoseMessage" type="Label" parent="."]
 layout_mode = 1
@@ -47,5 +63,7 @@ grow_vertical = 2
 theme_override_fonts/font = ExtResource("2_r6nsb")
 theme_override_font_sizes/font_size = 24
 text = "Return To Menu"
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 
 [connection signal="button_down" from="Return" to="." method="_on_return_button_down"]
