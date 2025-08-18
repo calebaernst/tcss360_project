@@ -38,18 +38,18 @@ func _slotClicked(saveSlot: int) -> void:
 		_resetConfirms()
 		updateButtons()
 		confirmStart[saveSlot] = true
-		if SaveManager.saveExists(saveSlot):
+		if inGame:
+			slotButton.text = "Save Game?"
+		elif SaveManager.saveExists(saveSlot):
 			slotButton.text = "Load Game?"
 		else:
-			if inGame:
-				slotButton.text = "Save Game?"
-			else:
-				slotButton.text = "New Game?"
+			slotButton.text = "New Game?"
 	else:
 		$VoiceSans.play()
 		await get_tree().create_timer(0.2).timeout
 		if inGame:
 			SaveManager.saveGame(saveSlot)
+			_resetConfirms()
 			updateButtons()
 		else:
 			SaveManager.currentSlot = saveSlot
@@ -75,7 +75,8 @@ func _resetConfirms() -> void:
 	for saveSlot in range(1, 4):
 		confirmStart[saveSlot] = false
 		confirmDelete[saveSlot] = false
-		confirmReturn = false
+	confirmReturn = false
+	confirmQuit = false
 
 func _on_save_file_1_button_down() -> void:
 	_slotClicked(1)

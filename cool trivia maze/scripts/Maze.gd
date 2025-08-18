@@ -59,15 +59,16 @@ func _ready() -> void:
 func _input(event) -> void:
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_ESCAPE:
-			playerNode.set_physics_process(false)
 			if not awaitingAnswer:
-				toggleMenu()
+				playerNode.set_physics_process(false)
+				_toggleMenu()
 
 ## toggles the game menu
-func toggleMenu() -> void:
+func _toggleMenu() -> void:
 	var root = get_tree().current_scene
 	var ui = root.get_node_or_null("UI")
 	if menuInstance == null:
+		playerNode.set_physics_process(false)
 		menuScene = preload("res://scenes/save_select.tscn")
 		menuInstance = menuScene.instantiate()
 		if ui == null:
