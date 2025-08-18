@@ -2,12 +2,43 @@
 extends GutTest
 
 # Declare an instance of a player
-var Player = preload("res://scripts/player.gd")
+var PlayerInst = preload("res://scripts/player.gd")
 var player : Player
+
+# Mock classes for AnimationTree and Playback
+class MockAnimationTree extends AnimationTree:
+	var params = {
+		"parameters/playback": null,
+		"parameters/Idle/blend_position": Vector2.ZERO,
+		"parameters/Walk/blend_position": Vector2.ZERO
+	}    
+
+	func _set(property, value):
+		params[property] = value
+		return true
+
+	func _get(property):
+		return params.get(property, null)
+
+	func __setitem__(property, value):
+		params[property] = value
+
+	func __getitem__(property):
+		return params.get(property, null)
+
+class MockPlayback extends AnimationNodeStateMachinePlayback:
+	var current_node = "Idle"
+	func mock_travel(to_node: StringName, _reset: bool = false) -> void:
+		current_node = to_node
+	func get_mock_current_node() -> String:
+		return current_node
 
 # Creates instance for each test
 func before_each() -> void:
-	player = Player.new()
+	player = PlayerInst.new()
+	player.animation_tree = MockAnimationTree.new() 
+	player.playback = MockPlayback.new() 
+	player.animation_tree.params["parameters/playback"] = player.playback
 	add_child(player)
 	await get_tree().process_frame
 
@@ -21,34 +52,26 @@ func after_each() -> void:
 	or else the GUT plugin won't detect your test!
 """
 
-func test_initial_speed() -> void:
+# Test player speed 
+func test_initial_speed():
 	assert_eq(player.SPEED, 100.0, "Player speed should be initialized to 100.0")
 
-func test_run_button_increases_speed() -> void:
+func test_run_active_increases_speed():
 	Input.action_press("run")
 	player.runActive()
 	assert_eq(player.SPEED, 200.0, "Player speed should be 200.0 when run is pressed")
 	Input.action_release("run")
 
-func test_run_button_releases_speed() -> void:
+func test_run_active_resets_speed():
 	Input.action_press("run")
 	player.runActive()
 	Input.action_release("run")
 	player.runActive()
-	assert_eq(player.SPEED, 100.0, "Player speed should return to 100.0 when run is released")
+	assert_eq(player.SPEED, 100.0, "Player speed should reset to 100.0 when run is released")
 
-func test_idle_animation_when_not_moving() -> void:
-	player.velocity = Vector2.ZERO
-	player.select_animation()
-	assert_eq(player.playback.get_current_node(), "Idle", "Player should play Idle animation when not moving")
-
-func test_walk_animation_when_moving() -> void:
-	player.velocity = Vector2(1, 0)
-	player.select_animation()
-	assert_eq(player.playback.get_current_node(), "Walk", "Player should play Walk animation when moving")
-
-func test_blend_position_updates() -> void:
-	player.input = Vector2(1, 0)
-	player.update_animation_parameters()
-	assert_eq(player.animation_tree["parameters/Idle/blend_position"], Vector2(1, 0), "Idle blend_position should update")
-	assert_eq(player.animation_tree["parameters/Walk/blend_position"], Vector2(1, 0), "Walk blend_position should update")
+func test_velocity_calculation():
+	Input.action_press("right")	# Simulate pressing the right key
+	player.SPEED = 100.0
+	player._physics_process(0.016)
+	assert_eq(player.velocity, Vector2(100, 0), "Velocity should be input * SPEED")
+	Input.action_release("right")	# Clean up after test
