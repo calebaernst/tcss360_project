@@ -57,6 +57,7 @@ bus = &"sfx"
 
 [node name="MenuBGM" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_4tenx")
+bus = &"music"
 parameters/looping = true
 
 [node name="Instructions" type="Button" parent="."]
