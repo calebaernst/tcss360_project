@@ -1,4 +1,5 @@
 extends Control
+class_name MenuScreen
 
 """ When hooking up the save functionality, when a save is detected in the 
 	proper slot, then change the button names to "Save Slot X" where X is the 
@@ -6,49 +7,62 @@ extends Control
 	i.e. have $SaveFile1 = Save Slot 1 when a save exists
 """
 
+var inGame = false
 var confirmStart = {1: false, 2: false, 3: false}
 var confirmDelete = {1: false, 2: false, 3: false}
+var confirmReturn = false
 
 func _ready() -> void:
+	inGame = SaveManager.theMaze != null
 	updateButtons()
 
 ## updates save slot buttons to show their current state 
 func updateButtons() -> void:
 	for saveSlot in range(1, 4):
-		var button = get_node("SaveFile" + str(saveSlot))
-		get_node("DeleteFile" + str(saveSlot)).text = ""
-		
+		var slotButton = get_node("Slot" + str(saveSlot) + "/SaveFile" + str(saveSlot))
+		var deleteButton = get_node("Slot" + str(saveSlot) + "/DeleteFile" + str(saveSlot))
+		deleteButton.text = ""
 		if SaveManager.saveExists(saveSlot):
-			button.text = "Save " + str(saveSlot) + ": " + SaveManager.getSlotDisplay(saveSlot)
+			slotButton.text = "Save " + str(saveSlot) + ": " + SaveManager.getSlotDisplay(saveSlot)
 		else:
-			button.text = "Save " + str(saveSlot) + ": Empty"
+			slotButton.text = "Save " + str(saveSlot) + ": Empty"
+	if inGame:
+		get_node("Instructions").text = "Return to Main Menu"
 
 ##
 func _slotClicked(saveSlot: int) -> void:
-	var button = get_node("SaveFile" + str(saveSlot))
+	var slotButton = get_node("Slot" + str(saveSlot) + "/SaveFile" + str(saveSlot))
 	if not confirmStart[saveSlot]:
 		$VoiceSans.play()
 		_resetConfirms()
 		updateButtons()
 		confirmStart[saveSlot] = true
 		if SaveManager.saveExists(saveSlot):
-			button.text = "Load Game?"
+			slotButton.text = "Load Game?"
 		else:
-			button.text = "New Game?"
+			if inGame:
+				slotButton.text = "Save Game?"
+			else:
+				slotButton.text = "New Game?"
 	else:
 		$VoiceSans.play()
-		SaveManager.currentSlot = saveSlot
-		get_tree().change_scene_to_file("res://scenes/cool_trivia_maze.tscn")
+		await get_tree().create_timer(0.2).timeout
+		if inGame:
+			SaveManager.saveGame(saveSlot)
+			updateButtons()
+		else:
+			SaveManager.currentSlot = saveSlot
+			get_tree().change_scene_to_file("res://scenes/cool_trivia_maze.tscn")
 
 ##
 func _deleteFile(saveSlot: int) -> void:
-	var button = get_node("DeleteFile" + str(saveSlot))
+	var deleteButton = get_node("Slot" + str(saveSlot) + "/DeleteFile" + str(saveSlot))
 	if not confirmDelete[saveSlot]:
 		$VoiceSans.play()
 		_resetConfirms()
 		updateButtons()
 		confirmDelete[saveSlot] = true
-		button.text = "Delete \n Save " + str(saveSlot) + "?"
+		deleteButton.text = "Delete \n Save " + str(saveSlot) + "?"
 	else:
 		$VoiceSans.play()
 		SaveManager.deleteSave(saveSlot)
@@ -60,6 +74,7 @@ func _resetConfirms() -> void:
 	for saveSlot in range(1, 4):
 		confirmStart[saveSlot] = false
 		confirmDelete[saveSlot] = false
+		confirmReturn = false
 
 func _on_save_file_1_button_down() -> void:
 	_slotClicked(1)
@@ -81,4 +96,13 @@ func _on_delete_file_3_button_down() -> void:
 
 func _on_instructions_button_down() -> void:
 	$VoiceSans.play()
-	get_tree().change_scene_to_file("res://scenes/instructions.tscn")
+	await get_tree().create_timer(0.2).timeout
+	
+	if inGame:
+		if confirmReturn:
+			get_tree().change_scene_to_file("res://scenes/save_select.tscn")
+		else:
+			get_node("Instructions").text = "Are you sure?"
+			confirmReturn = true
+	else:
+		get_tree().change_scene_to_file("res://scenes/instructions.tscn")
