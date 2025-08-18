@@ -7,6 +7,8 @@ class_name MenuScreen
 	i.e. have $SaveFile1 = Save Slot 1 when a save exists
 """
 
+@onready var MenuBGM = $MenuBGM
+
 var inGame = false
 var confirmStart = {1: false, 2: false, 3: false}
 var confirmDelete = {1: false, 2: false, 3: false}
@@ -16,6 +18,9 @@ var confirmQuit = false
 func _ready() -> void:
 	inGame = SaveManager.theMaze != null
 	updateButtons()
+	
+	if not inGame:
+		MenuBGM.play()
 
 ## updates save slot buttons to show their current state 
 func updateButtons() -> void:
