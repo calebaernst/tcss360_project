@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://burexqigsykin"]
+[gd_scene load_steps=15 format=3 uid="uid://burexqigsykin"]
 
 [ext_resource type="Script" uid="uid://w5ens6qkbhmp" path="res://scripts/save_select.gd" id="1_y2yhf"]
 [ext_resource type="PackedScene" uid="uid://tatyyqv1albv" path="res://scenes/volume_slider.tscn" id="2_2pw5h"]
@@ -6,6 +6,7 @@
 [ext_resource type="AudioStream" uid="uid://cvbpnlk4m8rdd" path="res://assets/dog.mp3" id="3_4tenx"]
 [ext_resource type="AudioStream" uid="uid://b5jyu7cftnfmm" path="res://assets/voice_sans.mp3" id="3_nql00"]
 [ext_resource type="FontFile" uid="uid://dk27cq4ic7twp" path="res://assets/Ldfcomicsans-jj7l.ttf" id="5_0mv2v"]
+[ext_resource type="Texture2D" uid="uid://cmyaqul7p88x7" path="res://assets/logo.png" id="7_16g0v"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_61f7f"]
 bg_color = Color(0.594823, 0.272092, 0.316558, 1)
@@ -67,6 +68,15 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_61f7f")
 
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 384.0
+offset_top = 64.0
+offset_right = 896.0
+offset_bottom = 320.0
+texture = ExtResource("7_16g0v")
+expand_mode = 1
+
 [node name="VoiceSans" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_nql00")
 bus = &"sfx"
@@ -79,9 +89,9 @@ parameters/looping = true
 [node name="Instructions" type="Button" parent="."]
 layout_mode = 0
 offset_left = 512.0
-offset_top = 784.0
+offset_top = 864.0
 offset_right = 768.0
-offset_bottom = 848.0
+offset_bottom = 928.0
 theme_override_fonts/font = ExtResource("5_0mv2v")
 theme_override_font_sizes/font_size = 24
 theme_override_styles/hover = SubResource("StyleBoxFlat_0mv2v")
@@ -103,7 +113,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_4tenx")
 text = "Quit Game"
 
 [node name="VolumeSliders" type="Area2D" parent="."]
-position = Vector2(640, 936)
+position = Vector2(640, 1016)
 metadata/_edit_group_ = true
 
 [node name="MasterLabel" type="Label" parent="VolumeSliders"]
@@ -152,12 +162,12 @@ offset_right = -160.0
 bus_name = "sfx"
 
 [node name="Slot1" type="Node2D" parent="."]
-position = Vector2(288, 304)
+position = Vector2(288, 384)
 metadata/_edit_group_ = true
 
 [node name="SaveFile1" type="Button" parent="Slot1"]
 offset_left = 32.0
-offset_right = 732.0
+offset_right = 736.0
 offset_bottom = 128.0
 focus_mode = 0
 theme_override_fonts/font = ExtResource("5_0mv2v")
@@ -182,12 +192,12 @@ icon = ExtResource("2_q7qjx")
 expand_icon = true
 
 [node name="Slot2" type="Node2D" parent="."]
-position = Vector2(288, 464)
+position = Vector2(288, 544)
 metadata/_edit_group_ = true
 
 [node name="SaveFile2" type="Button" parent="Slot2"]
 offset_left = 32.0
-offset_right = 732.0
+offset_right = 736.0
 offset_bottom = 128.0
 focus_mode = 0
 theme_override_fonts/font = ExtResource("5_0mv2v")
@@ -212,12 +222,12 @@ icon = ExtResource("2_q7qjx")
 expand_icon = true
 
 [node name="Slot3" type="Node2D" parent="."]
-position = Vector2(288, 624)
+position = Vector2(288, 704)
 metadata/_edit_group_ = true
 
 [node name="SaveFile3" type="Button" parent="Slot3"]
 offset_left = 32.0
-offset_right = 732.0
+offset_right = 736.0
 offset_bottom = 128.0
 focus_mode = 0
 theme_override_fonts/font = ExtResource("5_0mv2v")

@@ -59,7 +59,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("3_tylv2")
 theme_override_font_sizes/font_size = 32
-text = "You Won!!!"
+text = "You Won (yay)!!!"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -83,11 +83,13 @@ text = "Return To Menu"
 [node name="yayy" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("2_iiocm")
 volume_db = -3.0
+autoplay = true
 bus = &"sfx"
 
 [node name="fanfare" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_yxbqr")
 volume_db = -3.0
+autoplay = true
 bus = &"music"
 
 [connection signal="button_down" from="Return" to="." method="_on_return_button_down"]
