@@ -68,5 +68,6 @@ text = "Return To Menu"
 [node name="determination" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("4_h0cgr")
 autoplay = true
+bus = &"music"
 
 [connection signal="button_down" from="Return" to="." method="_on_return_button_down"]
