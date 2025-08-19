@@ -1,41 +1,38 @@
 extends RefCounted
 class_name QuestionFactory
 
-# set to false if not enough questions in database to fill maze; cannot be marked with @export
-static var preventDuplicates: bool = false
-
 static var db: SQLite 
-static var questionsArray: Array = []
+static var shuffledQuestionsQueue: Array = []
+static var backupArray: Array = []
 
-# this basically is to be treated as _init, but _init functions are automatically called on instantiation while this script/node is never instantiated
-## runs the functions to load in the question data (should only ever run once per game)
-static func _initialize() -> void:
-	_openDatabase()
-	_loadQuestions()
-
-## gets a random question, and removes it from the array if preventDuplicates is true
+## gets a question from the shuffled factory queue
+## because the queue is shuffled, the question is always randomly selected
 static func getRandomQuestion() -> Question:
-	if not questionsArray: # load in data if not already
-		_initialize()
+	if backupArray.is_empty(): # load in data if not already
+		_loadQuestions()
+	if shuffledQuestionsQueue.is_empty(): # if the question queue has run out, reset it
+		_resetFactory()
 	
-	# select random row and grab its data
-	var selectedIndex = randi_range(0, questionsArray.size() - 1)
-	var selectedData = questionsArray[selectedIndex]
-	var incorrectAnswers = selectedData["incorrect answer(s)"].split(";")
+	var selectedData = shuffledQuestionsQueue.pop_front()
 	# construct question
-	var question = Question.new(selectedData["id"], selectedData["question type"], selectedData["question"], selectedData["correct answer"], incorrectAnswers, selectedData["correct message"], selectedData["incorrect message"])
-	
-	# remove the question data from the array if we want to prevent duplicates
-	if preventDuplicates:
-		questionsArray.remove_at(selectedIndex)
+	var question = Question.new(selectedData["id"], selectedData["question type"], selectedData["question"], selectedData["correct answer"], selectedData["incorrect answer(s)"].split(";"), selectedData["correct message"], selectedData["incorrect message"])
 	
 	return question
 
-static func _openDatabase() -> void:
+## loads in the database and saves its contents to an array
+## this should only ever be run once per game
+static func _loadQuestions() -> void:
 	db = SQLite.new()
 	db.path="res://assets/TriviaQuestions.db"
 	db.open_db()
+	
+	backupArray = db.select_rows("Questions", "", ["*"])
+	_resetFactory()
+	print("Loaded ", shuffledQuestionsQueue.size(), " questions.")
+	
+	db.close_db()
 
-static func _loadQuestions():
-	questionsArray = db.select_rows("Questions", "", ["*"])
-	print("Loaded ", questionsArray.size(), " questions.")
+## resets and reshuffles the question queue to ensure the factory can always output Questions and that the order of output questions is random
+static func _resetFactory() -> void:
+	shuffledQuestionsQueue = backupArray.duplicate(true)
+	shuffledQuestionsQueue.shuffle()
