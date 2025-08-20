@@ -15,21 +15,40 @@ static func _initialize() -> void:
 
 ## gets a random question, and removes it from the array if preventDuplicates is true
 static func getRandomQuestion() -> Question:
-	if not questionsArray: # load in data if not already
+	if questionsArray.is_empty():
 		_initialize()
-	
-	# select random row and grab its data
-	var selectedIndex = randi_range(0, questionsArray.size() - 1)
-	var selectedData = questionsArray[selectedIndex]
-	var incorrectAnswers = selectedData["incorrect answer(s)"].split(";")
-	# construct question
-	var question = Question.new(selectedData["id"], selectedData["question type"], selectedData["question"], selectedData["correct answer"], incorrectAnswers, selectedData["correct message"], selectedData["incorrect message"])
-	
-	# remove the question data from the array if we want to prevent duplicates
+	if questionsArray.is_empty():
+		# Fallback if DB is empty
+		return Question.new(-1, "multiple choice", "", "", [], "", "")
+
+	var selectedIndex: int = randi_range(0, questionsArray.size() - 1)
+	var selectedData: Dictionary = questionsArray[selectedIndex]
+
+	var incorrect_raw = selectedData.get("incorrect answer(s)", [])
+	var incorrectAnswers: Array = []
+	match typeof(incorrect_raw):
+		TYPE_STRING:
+			incorrectAnswers = (incorrect_raw as String).split(";")
+		TYPE_ARRAY, TYPE_PACKED_STRING_ARRAY:
+			incorrectAnswers = incorrect_raw
+		_:
+			incorrectAnswers = []
+
+	var question := Question.new(
+		selectedData.get("id", -1),
+		selectedData.get("question type", "multiple choice"),
+		selectedData.get("question", ""),
+		selectedData.get("correct answer", ""),
+		incorrectAnswers,
+		selectedData.get("correct message", ""),   # <— safe
+		selectedData.get("incorrect message", "")  # <— safe
+	)
+
 	if preventDuplicates:
 		questionsArray.remove_at(selectedIndex)
-	
+
 	return question
+
 
 static func _openDatabase() -> void:
 	db = SQLite.new()
