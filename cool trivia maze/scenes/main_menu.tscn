@@ -46,3 +46,4 @@ autowrap_mode = 3
 stream = ExtResource("4_8ln24")
 autoplay = true
 bus = &"music"
+parameters/looping = true

@@ -89,5 +89,6 @@ bus = &"sfx"
 stream = ExtResource("6_5vxan")
 autoplay = true
 bus = &"music"
+parameters/looping = true
 
 [connection signal="button_down" from="Return" to="." method="_on_return_button_down"]
