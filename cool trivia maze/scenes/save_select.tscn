@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://w5ens6qkbhmp" path="res://scripts/save_select.gd" id="1_y2yhf"]
 [ext_resource type="PackedScene" uid="uid://tatyyqv1albv" path="res://scenes/volume_slider.tscn" id="2_2pw5h"]
 [ext_resource type="Texture2D" uid="uid://by2ehsh6jhpmi" path="res://assets/delete_icon.png" id="2_q7qjx"]
-[ext_resource type="AudioStream" uid="uid://cvbpnlk4m8rdd" path="res://assets/dog.mp3" id="3_4tenx"]
 [ext_resource type="AudioStream" uid="uid://b5jyu7cftnfmm" path="res://assets/voice_sans.mp3" id="3_nql00"]
+[ext_resource type="AudioStream" uid="uid://d3o6xqeflqtlo" path="res://assets/CTMSaveSelect.mp3" id="4_16g0v"]
 [ext_resource type="FontFile" uid="uid://dk27cq4ic7twp" path="res://assets/Ldfcomicsans-jj7l.ttf" id="5_0mv2v"]
 [ext_resource type="Texture2D" uid="uid://cmyaqul7p88x7" path="res://assets/logo.png" id="7_16g0v"]
 
@@ -82,7 +82,7 @@ stream = ExtResource("3_nql00")
 bus = &"sfx"
 
 [node name="MenuBGM" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("3_4tenx")
+stream = ExtResource("4_16g0v")
 bus = &"music"
 parameters/looping = true
 
