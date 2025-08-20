@@ -1,13 +1,11 @@
 [gd_scene load_steps=7 format=3 uid="uid://tb7kq0u4gode"]
 
 [ext_resource type="Script" uid="uid://cuk67x2wxabk6" path="res://scripts/win.gd" id="1_r4oei"]
+[ext_resource type="Texture2D" uid="uid://dgqoxl50v8omc" path="res://assets/CTM_WinScene.png" id="2_5vxan"]
 [ext_resource type="AudioStream" uid="uid://blrkx2elp72y" path="res://assets/yay.mp3" id="2_iiocm"]
 [ext_resource type="FontFile" uid="uid://dk27cq4ic7twp" path="res://assets/Ldfcomicsans-jj7l.ttf" id="3_tylv2"]
-[ext_resource type="AudioStream" uid="uid://cw0iyqjsrkblw" path="res://assets/ff7fanfare.mp3" id="3_yxbqr"]
 [ext_resource type="VideoStream" uid="uid://dpsjr1korosfy" path="res://assets/happycat.ogv" id="4_yxbqr"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yxbqr"]
-bg_color = Color(1, 0, 1, 1)
+[ext_resource type="AudioStream" uid="uid://cinbmnnjm3chj" path="res://assets/CTM_Victory.mp3" id="6_5vxan"]
 
 [node name="WinScren" type="Control"]
 layout_mode = 3
@@ -18,30 +16,31 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_r4oei")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="WinArt" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_yxbqr")
+texture = ExtResource("2_5vxan")
 
-[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="."]
+[node name="HappyCar" type="VideoStreamPlayer" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -262.0
-offset_top = -448.0
-offset_right = 262.0
-offset_bottom = 192.0
+offset_left = 392.0
+offset_top = 368.0
+offset_right = 596.0
+offset_bottom = 616.0
 grow_horizontal = 2
 grow_vertical = 2
 stream = ExtResource("4_yxbqr")
 autoplay = true
+expand = true
 loop = true
 
 [node name="WinMessage" type="Label" parent="."]
@@ -51,10 +50,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -96.0
-offset_top = 224.0
-offset_right = 96.0
-offset_bottom = 288.0
+offset_left = -592.0
+offset_top = -256.0
+offset_right = -365.0
+offset_bottom = -192.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("3_tylv2")
@@ -70,10 +69,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -128.0
-offset_top = 288.0
-offset_right = 128.0
-offset_bottom = 352.0
+offset_left = -608.0
+offset_top = -192.0
+offset_right = -352.0
+offset_bottom = -128.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("3_tylv2")
@@ -82,13 +81,12 @@ text = "Return To Menu"
 
 [node name="yayy" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("2_iiocm")
-volume_db = -3.0
+volume_db = -10.0
 autoplay = true
 bus = &"sfx"
 
-[node name="fanfare" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("3_yxbqr")
-volume_db = -3.0
+[node name="Victory" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_5vxan")
 autoplay = true
 bus = &"music"
 
