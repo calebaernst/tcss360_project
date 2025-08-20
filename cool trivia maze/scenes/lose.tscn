@@ -78,13 +78,14 @@ text = "Return To Menu"
 
 [node name="Defeat" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_alj87")
+volume_db = 6.0
 autoplay = true
 bus = &"music"
 
 [node name="LaughComp" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("6_alj87")
+volume_db = 3.0
 autoplay = true
 bus = &"sfx"
-parameters/looping = true
 
 [connection signal="button_down" from="Return" to="." method="_on_return_button_down"]
