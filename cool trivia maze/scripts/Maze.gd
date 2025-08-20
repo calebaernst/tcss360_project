@@ -501,12 +501,14 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 			msg = "Correct!"
 		room[door_to_move]["locked"] = false
 		room[door_to_move]["interactable"] = false
+		$Correct.play()
 	else:
 		var base := str(currentQuestion.incorrectMessage)
 		if base.strip_edges() == "":
 			base = "Incorrect."
 		msg = base + "\n\nCorrect Answer: " + str(currentQuestion.correctAnswer)
 		room[door_to_move]["interactable"] = false
+		$Incorrect.play()
 		updateWinCon()
 
 	updateDoorVisuals()
