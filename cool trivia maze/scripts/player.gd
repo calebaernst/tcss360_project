@@ -1,4 +1,4 @@
-# This is the Player class
+# Player Object
 class_name Player extends CharacterBody2D
 
 # Fields
@@ -24,21 +24,21 @@ func _physics_process(_delta: float) -> void:
 	update_animation_parameters()
 	runActive()
 	
-# Handles animation of player
+## Handles animation of player
 func select_animation():
 	if velocity == Vector2.ZERO:
 		playback.travel("Idle")
 	else:
 		playback.travel("Walk")
 
-# Updates animations
+## Updates animations
 func update_animation_parameters():
 	if input == Vector2.ZERO:
 		return
 	animation_tree["parameters/Idle/blend_position"] = input
 	animation_tree["parameters/Walk/blend_position"] = input
 
-# Checks if player is holding down the run button
+## Checks if player is holding down the run button
 func runActive():
 	if Input.is_action_pressed("run"):
 		SPEED = 200.0
