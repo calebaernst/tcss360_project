@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  cool-trivia-maze:
+    build: .
+    container_name: cool-trivia-maze
+    volumes:
+      - ./exports:/app/exports
+      - ./cool\ trivia\ maze:/app:ro
+    ports:
+      - "8060:8060"  # For web export
+    environment:
+      - DISPLAY=:0
+    stdin_open: true
+    tty: true
+    
+  # Service for building different platform exports
+  game-builder:
+    build: .
+    container_name: cool-trivia-maze-builder
+    volumes:
+      - ./exports:/app/exports
+      - ./cool\ trivia\ maze:/app:ro
+    profiles:
+      - build
+    command: linux  # Change to 'windows', 'web', or 'run' as needed
+
+  # Web server for the exported game
+  web-server:
+    build: .
+    container_name: cool-trivia-maze-web
+    volumes:
+      - ./exports:/app/exports
+      - ./cool\ trivia\ maze:/app:ro
+    ports:
+      - "8060:8060"
+    profiles:
+      - web
+    command: web
