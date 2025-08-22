@@ -1,4 +1,3 @@
-@ -1,71 +0,0 @@
 # Dockerfile for Cool Trivia Maze - Godot 4.4 Game
 FROM ubuntu:22.04
 
@@ -25,48 +24,46 @@ RUN apt-get update && apt-get install -y \
     libxss1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create godot user
+# deps + zip for packaging
+RUN apt-get update && apt-get install -y \
+    ca-certificates wget unzip zip \
+    xvfb \
+    libasound2-dev libpulse-dev pulseaudio \
+    libudev-dev libgl1-mesa-dev libglu1-mesa-dev \
+    libxrandr2 libxinerama1 libxcursor1 libxi6 libxss1 \
+ && rm -rf /var/lib/apt/lists/*
+
+# non-root user
 RUN useradd -m -s /bin/bash godot
 
-# Download and install Godot
+# Godot headless editor
 WORKDIR /opt
 RUN wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip \
-    && unzip Godot_v${GODOT_VERSION}_linux.x86_64.zip \
-    && mv Godot_v${GODOT_VERSION}_linux.x86_64 /usr/local/bin/godot \
-    && chmod +x /usr/local/bin/godot \
-    && rm Godot_v${GODOT_VERSION}_linux.x86_64.zip
+ && unzip Godot_v${GODOT_VERSION}_linux.x86_64.zip \
+ && mv Godot_v${GODOT_VERSION}_linux.x86_64 /usr/local/bin/godot \
+ && chmod +x /usr/local/bin/godot \
+ && rm Godot_v${GODOT_VERSION}_linux.x86_64.zip
 
-# Download export templates
+# Export templates
 RUN wget -q https://github.com/godotengine/godot/releases/download/4.4-stable/Godot_v4.4-stable_export_templates.tpz \
-    && unzip Godot_v4.4-stable_export_templates.tpz \
-    && mkdir -p /home/godot/.local/share/godot/export_templates/4.4.stable \
-    && cp -r templates/* /home/godot/.local/share/godot/export_templates/4.4.stable/ \
-    && chown -R godot:godot /home/godot/.local \
-    && rm -rf templates Godot_v4.4-stable_export_templates.tpz
-    
-# Set working directory for the game
+ && unzip Godot_v4.4-stable_export_templates.tpz \
+ && mkdir -p /home/godot/.local/share/godot/export_templates/4.4.stable \
+ && cp -r templates/* /home/godot/.local/share/godot/export_templates/4.4.stable/ \
+ && chown -R godot:godot /home/godot/.local \
+ && rm -rf templates Godot_v4.4-stable_export_templates.tpz
+
+# app workspace
 WORKDIR /app
-
-# Copy game files
+# copy only your project folder (space is OK here)
 COPY ["./cool trivia maze/", "./"]
+# start script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh && chown -R godot:godot /app /start.sh /home/godot
 
-# Change ownership to godot user
-RUN chown -R godot:godot /app
-
-# Switch to godot user
 USER godot
-
-# Create exports directory
 RUN mkdir -p /app/exports
 
-# Expose the default Godot port for web exports
+# optional for web debug servers
 EXPOSE 8060
-
-# Start script that can handle different export types
-COPY start.sh /start.sh
-USER root
-RUN chmod +x /start.sh
-
-USER godot
 
 CMD ["/start.sh"]

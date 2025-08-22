@@ -1,0 +1,10 @@
+.git
+.gitignore
+.github
+dist
+exports
+CoolTriviaMaze_Windows.zip
+*.exe
+*.dll
+*.pck
+*.zip
