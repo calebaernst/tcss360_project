@@ -8,7 +8,7 @@ class MockPlayer:
 	var velocity: Vector2 = Vector2.ZERO
 	var physics_enabled := true
 	func select_animation() -> void: pass
-	func set_physics_process(on: bool) -> void: physics_enabled = on
+	
 
 class MockQuestion:
 	var questionText := "2+2?"
