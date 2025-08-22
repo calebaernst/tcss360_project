@@ -9,3 +9,17 @@ tcss360_project/
 addons/godot-sqlite/bin/
 temp-assets/
 cool trivia maze/addons/godot-sqlite/bin/~libgdsqlite.windows.template_debug.x86_64.dll
+
+# build outputs
+/dist/
+*.exe
+*.dll
+*.pck
+*.zip
+
+# build outputs
+/dist/
+*.exe
+*.dll
+*.pck
+*.zip
