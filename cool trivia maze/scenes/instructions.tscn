@@ -45,6 +45,7 @@ if you can't reach the exit you have a skill issue and now you're
 trapped forever and will die.
 
 WASD to move
+SHIFT to sprint
 ESC to open/close menu"
 horizontal_alignment = 1
 vertical_alignment = 1
