@@ -1,3 +1,4 @@
+## Debug Mode
 extends Node
 class_name debugConsole
 
@@ -58,7 +59,7 @@ func _input(event):
 			KEY_9:
 				SaveManager.deleteSave(3)
 
-# unlocks all doors in the current room
+## unlocks all doors in the current room
 static func unlockAllDoors() -> void:
 	if not theMaze or theMaze.mazeRooms.is_empty():
 		return
