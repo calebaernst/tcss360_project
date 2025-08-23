@@ -1,7 +1,7 @@
 # tcss360_project
 Team 1
 
-Repository for our TCSS 360 group project: Cool Trivia Maze!
+This is the repository for our TCSS 360 group project: Cool Trivia Maze!
 
 This game is similar to a typical maze, in that you must navigate through tile-shaped passages to reach an exit. 
 The difference here is that to unlock passages (or "doors") between tiles (or "rooms"), you must correctly answer a trivia question in order to open the door. 
@@ -11,3 +11,6 @@ Trivia questions are randomly selected from a local database, primarily consisti
 
 Our unit tests can be found in the tests directory within the cool trivia maze directory.
 All of our code for the game can be found in the scripts directory within the cool trivia maze directory as well.
+
+You can install the game by going to the installer/artifacts directory. From there, you should see the CoolTriviaMaze_Setup.exe file. 
+Once you run the file, follow its steps and the game should be installed in your device!
