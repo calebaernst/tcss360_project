@@ -1,3 +1,4 @@
+## Maze Object
 extends Node2D
 class_name Maze
 
@@ -12,7 +13,7 @@ var menuInstance: Control = null
 @onready var playerNode = get_node(player)
 @onready var BGM = $BGMPlayer
 
-# maze dimensions/coordinates/navigation variables
+## maze dimensions/coordinates/navigation variables
 @export var mazeWidth: int = 9
 @export var mazeHeight: int = 9
 var currentRoomInstance: Node = null
@@ -501,12 +502,14 @@ func _onQuestionAnswered(selectedAnswer: String) -> void:
 			msg = "Correct!"
 		room[door_to_move]["locked"] = false
 		room[door_to_move]["interactable"] = false
+		$Correct.play()
 	else:
 		var base := str(currentQuestion.incorrectMessage)
 		if base.strip_edges() == "":
 			base = "Incorrect."
 		msg = base + "\n\nCorrect Answer: " + str(currentQuestion.correctAnswer)
 		room[door_to_move]["interactable"] = false
+		$Incorrect.play()
 		updateWinCon()
 
 	updateDoorVisuals()

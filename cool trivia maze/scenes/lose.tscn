@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://b43habmd3hi7c"]
+[gd_scene load_steps=7 format=3 uid="uid://b43habmd3hi7c"]
 
 [ext_resource type="Script" uid="uid://dlcaqoa2d7mid" path="res://scripts/lose.gd" id="1_vjdtf"]
 [ext_resource type="Texture2D" uid="uid://cnuw8b445tmw0" path="res://assets/laughingcat.png" id="2_10rtl"]
+[ext_resource type="Texture2D" uid="uid://88pc6n7e2gx8" path="res://assets/CTM_LoseScene.png" id="2_a5bqv"]
 [ext_resource type="FontFile" uid="uid://dk27cq4ic7twp" path="res://assets/Ldfcomicsans-jj7l.ttf" id="2_r6nsb"]
-[ext_resource type="AudioStream" uid="uid://bjkpdobaprit" path="res://assets/determination.mp3" id="4_h0cgr"]
+[ext_resource type="AudioStream" uid="uid://c5xgsue4nouqk" path="res://assets/CTM_Defeat.mp3" id="5_alj87"]
+[ext_resource type="AudioStream" uid="uid://bogf8ds1bw53c" path="res://assets/LaughComp.mp3" id="6_alj87"]
 
 [node name="LoseScreen" type="Control"]
 layout_mode = 3
@@ -14,6 +16,15 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_vjdtf")
 
+[node name="LoseArt" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_a5bqv")
+
 [node name="lol" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 8
@@ -21,13 +32,14 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -320.0
-offset_top = -576.0
-offset_right = 320.0
-offset_bottom = 64.0
+offset_left = -576.0
+offset_top = -504.0
+offset_right = -304.0
+offset_bottom = -240.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_10rtl")
+expand_mode = 1
 
 [node name="LoseMessage" type="Label" parent="."]
 layout_mode = 1
@@ -36,10 +48,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -96.0
-offset_top = 224.0
-offset_right = 96.0
-offset_bottom = 288.0
+offset_left = -544.0
+offset_top = -128.0
+offset_right = -352.0
+offset_bottom = -64.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("2_r6nsb")
@@ -55,19 +67,25 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -128.0
-offset_top = 288.0
-offset_right = 128.0
-offset_bottom = 352.0
+offset_left = -576.0
+offset_top = -64.0
+offset_right = -320.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("2_r6nsb")
 theme_override_font_sizes/font_size = 24
 text = "Return To Menu"
 
-[node name="determination" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("4_h0cgr")
+[node name="Defeat" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_alj87")
+volume_db = 6.0
 autoplay = true
 bus = &"music"
+
+[node name="LaughComp" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_alj87")
+volume_db = 3.0
+autoplay = true
+bus = &"sfx"
 
 [connection signal="button_down" from="Return" to="." method="_on_return_button_down"]

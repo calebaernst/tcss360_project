@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://w5ens6qkbhmp" path="res://scripts/save_select.gd" id="1_y2yhf"]
 [ext_resource type="PackedScene" uid="uid://tatyyqv1albv" path="res://scenes/volume_slider.tscn" id="2_2pw5h"]
 [ext_resource type="Texture2D" uid="uid://by2ehsh6jhpmi" path="res://assets/delete_icon.png" id="2_q7qjx"]
-[ext_resource type="AudioStream" uid="uid://cvbpnlk4m8rdd" path="res://assets/dog.mp3" id="3_4tenx"]
 [ext_resource type="AudioStream" uid="uid://b5jyu7cftnfmm" path="res://assets/voice_sans.mp3" id="3_nql00"]
+[ext_resource type="AudioStream" uid="uid://b20njq77qvpqg" path="res://assets/CTM_SaveSelect.mp3" id="4_16g0v"]
 [ext_resource type="FontFile" uid="uid://dk27cq4ic7twp" path="res://assets/Ldfcomicsans-jj7l.ttf" id="5_0mv2v"]
 [ext_resource type="Texture2D" uid="uid://cmyaqul7p88x7" path="res://assets/logo.png" id="7_16g0v"]
 
@@ -82,7 +82,8 @@ stream = ExtResource("3_nql00")
 bus = &"sfx"
 
 [node name="MenuBGM" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("3_4tenx")
+stream = ExtResource("4_16g0v")
+volume_db = 4.0
 bus = &"music"
 parameters/looping = true
 
@@ -97,7 +98,7 @@ theme_override_font_sizes/font_size = 24
 theme_override_styles/hover = SubResource("StyleBoxFlat_0mv2v")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_16g0v")
 theme_override_styles/normal = SubResource("StyleBoxFlat_4tenx")
-text = "Instructions"
+text = "Instructions/About"
 
 [node name="Quit" type="Button" parent="."]
 layout_mode = 0
@@ -129,6 +130,8 @@ horizontal_alignment = 1
 [node name="Master" parent="VolumeSliders" instance=ExtResource("2_2pw5h")]
 offset_left = 160.0
 offset_right = 384.0
+max_value = 1.5
+step = 0.15
 bus_name = "Master"
 
 [node name="musicLabel" type="Label" parent="VolumeSliders"]
@@ -144,6 +147,7 @@ horizontal_alignment = 1
 [node name="music" parent="VolumeSliders" instance=ExtResource("2_2pw5h")]
 offset_left = -112.0
 offset_right = 112.0
+step = 0.1
 bus_name = "music"
 
 [node name="sfxLabel" type="Label" parent="VolumeSliders"]
@@ -159,6 +163,7 @@ horizontal_alignment = 1
 [node name="sfx" parent="VolumeSliders" instance=ExtResource("2_2pw5h")]
 offset_left = -384.0
 offset_right = -160.0
+step = 0.1
 bus_name = "sfx"
 
 [node name="Slot1" type="Node2D" parent="."]

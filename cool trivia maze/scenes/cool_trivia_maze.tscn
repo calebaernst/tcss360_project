@@ -1,16 +1,19 @@
-[gd_scene load_steps=6 format=3 uid="uid://mjrou6ceuhn5"]
+[gd_scene load_steps=8 format=3 uid="uid://mjrou6ceuhn5"]
 
 [ext_resource type="Script" uid="uid://boer6h4perfw5" path="res://scripts/Maze.gd" id="1_7skvd"]
 [ext_resource type="FontFile" uid="uid://dk27cq4ic7twp" path="res://assets/Ldfcomicsans-jj7l.ttf" id="2_7skvd"]
-[ext_resource type="AudioStream" uid="uid://cxkpdauib4n8j" path="res://assets/BGM.ogg" id="2_kb82o"]
+[ext_resource type="AudioStream" uid="uid://bw1fqdfwwmy85" path="res://assets/CTM_Maze.mp3" id="3_7skvd"]
+[ext_resource type="AudioStream" uid="uid://bjbpejl34u8f0" path="res://assets/answer-correct.mp3" id="4_11w8b"]
 [ext_resource type="Script" uid="uid://g3s5a4acqj1q" path="res://scripts/console_debug.gd" id="4_kb82o"]
 [ext_resource type="PackedScene" uid="uid://cgd3tfgbf8qsk" path="res://scenes/player.tscn" id="5_11w8b"]
+[ext_resource type="AudioStream" uid="uid://cx5csaf5dd5rg" path="res://assets/huh.mp3" id="5_81tse"]
 
 [node name="Game" type="Node2D"]
 metadata/_edit_horizontal_guides_ = [48.0]
 
 [node name="Maze" type="Node2D" parent="."]
 script = ExtResource("1_7skvd")
+debugInputs = false
 player = NodePath("../Entities/Player")
 
 [node name="CoordinateDisplay" type="Label" parent="Maze"]
@@ -29,9 +32,19 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="BGMPlayer" type="AudioStreamPlayer" parent="Maze"]
-stream = ExtResource("2_kb82o")
+stream = ExtResource("3_7skvd")
 bus = &"music"
 parameters/looping = true
+
+[node name="Correct" type="AudioStreamPlayer" parent="Maze"]
+stream = ExtResource("4_11w8b")
+volume_db = 4.0
+bus = &"sfx"
+
+[node name="Incorrect" type="AudioStreamPlayer" parent="Maze"]
+stream = ExtResource("5_81tse")
+volume_db = 4.0
+bus = &"sfx"
 
 [node name="Entities" type="Node2D" parent="."]
 
