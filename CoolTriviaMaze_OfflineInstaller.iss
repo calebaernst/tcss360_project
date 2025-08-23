@@ -1,37 +1,48 @@
-; === Cool Trivia Maze – Offline installer ===
-#define MyAppName "Cool Trivia Maze"
-#define MyAppVersion "1.0"
-#define MyExeName "cool_trivia_maze_windows.exe"
-#define MySrcDir SourcePath   ; folder where this .iss file lives
+; ---- CoolTriviaMaze_OfflineInstaller.iss ----
+#define MyAppName    "Cool Trivia Maze"
+#define MyAppVersion "1.0.0"
+#define MyCompany    "Your Team"
+#define DistDir      SourcePath + "\dist"
 
 [Setup]
-AppId={{E206A3A7-49D0-40CC-9C2B-CNT-123456789ABC}
+AppId={{E206A73F-79DD-40CC-92B2-C13A54E96789}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-DefaultDirName={autopf}\{#MyAppName}   ; Program Files\Cool Trivia Maze
+AppPublisher={#MyCompany}
+DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
-OutputDir=installer
 OutputBaseFilename=CoolTriviaMaze_Setup
-Compression=lzma2
+OutputDir=installer\artifacts
+Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 ArchitecturesInstallIn64BitMode=x64
-PrivilegesRequired=admin               ; users get UAC prompt (typical for Program Files)
+
+; Show the “Choose Install Location” page
+DisableDirPage=no
+
+; If you want per-user install (no UAC), uncomment the next line.
+; If your compiler still complains, leave it commented (default is admin).
+;PrivilegesRequired=lowest
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
+Name: "desktopicon"; Description: "Create a &Desktop shortcut"; Flags: unchecked
 
 [Files]
-; Game + required DLL(s) – make sure these exist in .\dist\
-Source: "{#MySrcDir}\dist\{#MyExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MySrcDir}\dist\libgdsqlite.windows.template_release.x86_64.dll"; DestDir: "{app}"; Flags: ignoreversion
+; Core game files (EXE and PCK names must match!)
+Source: "{#DistDir}\cool_trivia_maze_windows.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#DistDir}\cool_trivia_maze_windows.pck";  DestDir: "{app}"; Flags: ignoreversion
+Source: "{#DistDir}\libgdsqlite.windows.template_release.x86_64.dll"; DestDir: "{app}"; Flags: ignoreversion
+
+; Create assets directory and place SQLite DB there
+Source: "{#DistDir}\TriviaQuestions.db"; DestDir: "{app}\assets"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyExeName}"; Tasks: desktopicon
+Name: "{group}\{#MyAppName}";       Filename: "{app}\cool_trivia_maze_windows.exe"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\cool_trivia_maze_windows.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#MyExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: postinstall skipifsilent
+Filename: "{app}\cool_trivia_maze_windows.exe"; Description: "Launch {#MyAppName}"; Flags: postinstall skipifsilent
